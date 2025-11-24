@@ -1,0 +1,416 @@
+/* Enhanced Animations */
+
+/* Fade In Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Slide Up Animation */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Slide In From Left */
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Slide In From Right */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Scale In Animation */
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Bounce Animation */
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Pulse Animation */
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Shake Animation */
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    75% {
+        transform: translateX(5px);
+    }
+}
+
+/* Shimmer Animation for Loading */
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+/* Rotate Animation */
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Float Animation */
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Glow Animation */
+@keyframes glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 5px var(--color-primary);
+    }
+
+    50% {
+        box-shadow: 0 0 20px var(--color-primary);
+    }
+}
+
+/* Utility Classes for Animations */
+.animate-fade-in {
+    animation: fadeIn 0.5s ease;
+}
+
+.animate-slide-up {
+    animation: slideUp 0.6s ease;
+}
+
+.animate-slide-in-left {
+    animation: slideInLeft 0.6s ease;
+}
+
+.animate-slide-in-right {
+    animation: slideInRight 0.6s ease;
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.4s ease;
+}
+
+.animate-bounce {
+    animation: bounce 1s ease;
+}
+
+.animate-bounce-hover:hover {
+    animation: bounce 1s ease;
+}
+
+.animate-pulse {
+    animation: pulse 2s ease;
+}
+
+.animate-pulse-hover:hover {
+    animation: pulse 2s ease;
+}
+
+.animate-float {
+    animation: float 3s ease;
+}
+
+.animate-float-hover:hover {
+    animation: float 3s ease;
+}
+
+/* Stagger Animation Delays */
+.stagger-1 {
+    animation-delay: 0.1s;
+}
+
+.stagger-2 {
+    animation-delay: 0.2s;
+}
+
+.stagger-3 {
+    animation-delay: 0.3s;
+}
+
+.stagger-4 {
+    animation-delay: 0.4s;
+}
+
+.stagger-5 {
+    animation-delay: 0.5s;
+}
+
+/* Hover Effects */
+.hover-lift {
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+}
+
+.hover-scale {
+    transition: transform var(--transition-base);
+}
+
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+
+.hover-glow {
+    transition: box-shadow var(--transition-base);
+}
+
+.hover-glow:hover {
+    box-shadow: 0 0 20px rgba(var(--color-primary-rgb), 0.3);
+}
+
+/* Loading Shimmer Effect */
+.shimmer {
+    background: linear-gradient(90deg,
+            var(--color-divider) 0%,
+            #f0f0f0 50%,
+            var(--color-divider) 100%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+}
+
+/* Success Checkmark Animation */
+@keyframes checkmark {
+    0% {
+        stroke-dashoffset: 100;
+    }
+
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+.checkmark-animation {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    animation: checkmark 0.6s ease forwards;
+}
+
+/* Number Counter Animation */
+@keyframes countUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.count-up {
+    animation: countUp 0.8s ease;
+}
+
+/* Scroll Reveal Animations */
+.scroll-reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.scroll-reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Card Flip Animation */
+.flip-card {
+    perspective: 1000px;
+}
+
+.flip-card-inner {
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+}
+
+.flip-card:hover .flip-card-inner {
+    transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+    backface-visibility: hidden;
+}
+
+.flip-card-back {
+    transform: rotateY(180deg);
+}
+
+/* Progress Bar Animation */
+@keyframes progressBar {
+    from {
+        width: 0%;
+    }
+}
+
+.progress-bar-animated {
+    animation: progressBar 1s ease;
+}
+
+/* Typing Animation */
+@keyframes typing {
+    from {
+        width: 0;
+    }
+
+    to {
+        width: 100%;
+    }
+}
+
+.typing-animation {
+    overflow: hidden;
+    white-space: nowrap;
+    animation: typing 3s steps(40) forwards;
+}
+
+/* Gradient Animation */
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.gradient-animated {
+    background-size: 200% 200%;
+    animation: gradientShift 3s ease;
+}
+
+.gradient-animated-hover:hover {
+    animation: gradientShift 3s ease infinite;
+}
+
+/* Ripple Effect */
+@keyframes ripple {
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+.ripple-effect {
+    position: relative;
+    overflow: hidden;
+}
+
+.ripple-effect::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    animation: ripple 0.6s ease;
+}
+
+/* Accessibility - Respect user preferences */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

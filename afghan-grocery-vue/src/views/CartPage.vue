@@ -1,0 +1,163 @@
+<template>
+  <div class="cart-page">
+    <AppHeader />
+    
+    <div class="container py-4 py-md-5">
+      <h1 class="mb-4 mb-md-5">Shopping Cart</h1>
+
+      <!-- Empty Cart State -->
+      <div v-if="cartStore.items.length === 0" class="text-center py-5">
+        <div style="font-size: 5rem;" class="mb-4">🛒</div>
+        <h2 class="mb-3">Your cart is empty</h2>
+        <p class="text-muted mb-4">Add some delicious products to get started!</p>
+        <router-link to="/shop" class="btn btn-primary btn-lg">Start Shopping</router-link>
+      </div>
+
+      <!-- Cart with Items -->
+      <div v-else class="row g-4">
+        <!-- Cart Items -->
+        <div class="col-lg-8 col-12">
+          <!-- Cart Header with Clear All -->
+          <div class="alert alert-light d-flex justify-content-between align-items-center mb-3">
+            <span class="fw-semibold">
+              <i class="bi bi-cart3 me-2"></i>
+              {{ cartStore.itemCount }} {{ cartStore.itemCount === 1 ? 'item' : 'items' }} in your cart
+            </span>
+            <button @click="handleClearCart" class="btn btn-outline-danger btn-sm">
+              <i class="bi bi-trash me-1"></i>Clear All
+            </button>
+          </div>
+
+          <div class="d-flex flex-column gap-3">
+            <div
+              v-for="item in cartStore.items"
+              :key="item.id"
+              class="card border-0 shadow-sm"
+            >
+              <div class="card-body">
+                <div class="row g-3 align-items-center">
+                  <!-- Product Image -->
+                  <div class="col-auto">
+                    <img :src="item.image" :alt="item.name" class="rounded" style="width: 100px; height: 100px; object-fit: cover;" />
+                  </div>
+                  
+                  <!-- Product Details -->
+                  <div class="col">
+                    <h5 class="card-title mb-2">{{ item.name }}</h5>
+                    <p class="text-muted small mb-2">{{ item.size }}</p>
+                    <p class="text-primary fw-bold mb-0">{{ formatPrice(item.price) }} AFN</p>
+                  </div>
+                  
+                  <!-- Quantity & Actions (Desktop) -->
+                  <div class="col-auto d-none d-md-flex flex-column align-items-center gap-2">
+                    <div class="btn-group" role="group">
+                      <button @click="cartStore.updateQuantity(item.id, item.quantity - 1)" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-dash"></i>
+                      </button>
+                      <button class="btn btn-outline-secondary btn-sm" disabled>{{ item.quantity }}</button>
+                      <button @click="cartStore.updateQuantity(item.id, item.quantity + 1)" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-plus"></i>
+                      </button>
+                    </div>
+                    <button class="btn btn-link btn-sm text-danger p-0" @click="removeItem(item)">
+                      <i class="bi bi-trash me-1"></i>Remove
+                    </button>
+                  </div>
+                  
+                  <!-- Item Total (Desktop) -->
+                  <div class="col-auto d-none d-md-block">
+                    <h5 class="text-primary mb-0">{{ formatPrice(item.price * item.quantity) }} AFN</h5>
+                  </div>
+                  
+                  <!-- Mobile Actions -->
+                  <div class="col-12 d-md-none">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div class="btn-group" role="group">
+                        <button @click="cartStore.updateQuantity(item.id, item.quantity - 1)" class="btn btn-outline-secondary">
+                          <i class="bi bi-dash"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary" disabled>{{ item.quantity }}</button>
+                        <button @click="cartStore.updateQuantity(item.id, item.quantity + 1)" class="btn btn-outline-secondary">
+                          <i class="bi bi-plus"></i>
+                        </button>
+                      </div>
+                      <button class="btn btn-link text-danger" @click="removeItem(item)">
+                        <i class="bi bi-trash me-1"></i>Remove
+                      </button>
+                      <h5 class="text-primary mb-0">{{ formatPrice(item.price * item.quantity) }} AFN</h5>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-lg-4 col-12">
+          <div class="card border-0 shadow-sm position-sticky" style="top: 100px; z-index: 10;">
+            <div class="card-body">
+              <h5 class="card-title mb-4 pb-3 border-bottom">Order Summary</h5>
+              
+              <div class="d-flex justify-content-between mb-3">
+                <span>Subtotal</span>
+                <span class="fw-semibold">{{ formatPrice(cartStore.subtotal) }} AFN</span>
+              </div>
+              
+              <div class="d-flex justify-content-between mb-3">
+                <span>Delivery Fee</span>
+                <span class="fw-semibold">{{ formatPrice(cartStore.deliveryFee) }} AFN</span>
+              </div>
+              
+              <hr class="my-3">
+              
+              <div class="d-flex justify-content-between mb-4">
+                <span class="fs-5 fw-bold">Total</span>
+                <span class="fs-5 fw-bold text-primary">{{ formatPrice(cartStore.total) }} AFN</span>
+              </div>
+              
+              <div class="d-grid gap-2">
+                <router-link to="/checkout" class="btn btn-primary">
+                  <i class="bi bi-credit-card me-2"></i>Proceed to Checkout
+                </router-link>
+                <router-link to="/shop" class="btn btn-outline-secondary">
+                  <i class="bi bi-arrow-left me-2"></i>Continue Shopping
+                </router-link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <AppFooter />
+  </div>
+</template>
+
+<script setup>
+import { useCartStore } from '@/stores/cart'
+import AppHeader from '@/components/common/AppHeader.vue'
+import AppFooter from '@/components/common/AppFooter.vue'
+
+const cartStore = useCartStore()
+
+function formatPrice(price) {
+  return price?.toLocaleString() || '0'
+}
+
+function removeItem(item) {
+  cartStore.removeFromCart(item.id)
+  window.showToast(`${item.name} removed from cart`, 'success')
+}
+
+function handleClearCart() {
+  if (confirm('Are you sure you want to clear your entire cart?')) {
+    cartStore.clearCart()
+    window.showToast('Cart cleared successfully', 'success')
+  }
+}
+</script>
+
+<style scoped>
+/* Bootstrap handles all responsive layout */
+</style>

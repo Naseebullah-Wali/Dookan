@@ -1,0 +1,152 @@
+<template>
+  <div class="testimonials-section py-5 bg-light overflow-hidden">
+    <div class="container-fluid p-0">
+      <div class="container mb-5">
+        <h2 class="text-center mb-2">What Our Customers Say</h2>
+        <p class="text-center text-muted">Trusted by thousands of Afghan families worldwide</p>
+      </div>
+
+      <div class="marquee-wrapper">
+        <div class="marquee-track d-flex gap-4" :style="{ animationDuration: '40s' }">
+          <!-- Original Testimonials -->
+          <div
+            v-for="testimonial in testimonials"
+            :key="`orig-${testimonial.id}`"
+            class="card border-0 shadow-sm flex-shrink-0 testimonial-card"
+            style="width: 350px;"
+          >
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold" 
+                     style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--bs-primary), var(--bs-secondary)); font-size: 1.5rem;">
+                  {{ testimonial.userName.charAt(0) }}
+                </div>
+                <div>
+                  <h5 class="mb-0">{{ testimonial.userName }}</h5>
+                  <p class="text-muted small mb-0">{{ testimonial.location }}</p>
+                </div>
+              </div>
+              <div class="mb-3">
+                <i v-for="star in 5" :key="star" :class="['bi', star <= testimonial.rating ? 'bi-star-fill' : 'bi-star', 'text-warning']"></i>
+              </div>
+              <p class="fst-italic text-secondary mb-3">"{{ testimonial.comment }}"</p>
+              <div class="text-muted small">{{ formatDate(testimonial.createdAt) }}</div>
+            </div>
+          </div>
+
+          <!-- Duplicated Testimonials for Loop -->
+          <div
+            v-for="testimonial in testimonials"
+            :key="`dup-${testimonial.id}`"
+            class="card border-0 shadow-sm flex-shrink-0 testimonial-card"
+            style="width: 350px;"
+          >
+            <div class="card-body p-4">
+              <div class="d-flex align-items-center gap-3 mb-3">
+                <div class="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold" 
+                     style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--bs-primary), var(--bs-secondary)); font-size: 1.5rem;">
+                  {{ testimonial.userName.charAt(0) }}
+                </div>
+                <div>
+                  <h5 class="mb-0">{{ testimonial.userName }}</h5>
+                  <p class="text-muted small mb-0">{{ testimonial.location }}</p>
+                </div>
+              </div>
+              <div class="mb-3">
+                <i v-for="star in 5" :key="star" :class="['bi', star <= testimonial.rating ? 'bi-star-fill' : 'bi-star', 'text-warning']"></i>
+              </div>
+              <p class="fst-italic text-secondary mb-3">"{{ testimonial.comment }}"</p>
+              <div class="text-muted small">{{ formatDate(testimonial.createdAt) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+defineProps({
+  testimonials: {
+    type: Array,
+    default: () => [
+      {
+        id: 1,
+        userName: 'Ahmad Khalil',
+        location: 'Kabul, Afghanistan',
+        rating: 5,
+        comment: 'Excellent service! The quality of products is outstanding and delivery is always on time. Highly recommended for Afghan groceries.',
+        createdAt: '2025-01-15T10:00:00Z'
+      },
+      {
+        id: 2,
+        userName: 'Fatima Rahman',
+        location: 'London, UK',
+        rating: 5,
+        comment: 'Finally found authentic Afghan products in the UK! The basmati rice and spices are exactly like back home. Thank you!',
+        createdAt: '2025-01-10T14:30:00Z'
+      },
+      {
+        id: 3,
+        userName: 'Mohammed Aziz',
+        location: 'Dubai, UAE',
+        rating: 5,
+        comment: 'Best Afghan grocery store online. Fresh products, reasonable prices, and excellent customer service. Will order again!',
+        createdAt: '2025-01-08T09:15:00Z'
+      },
+      {
+        id: 4,
+        userName: 'Zainab Hussain',
+        location: 'Toronto, Canada',
+        rating: 5,
+        comment: 'Amazing quality and fast shipping to Canada! My family loves all the products. The flour makes perfect naan bread.',
+        createdAt: '2025-01-05T16:45:00Z'
+      },
+      {
+        id: 5,
+        userName: 'Rashid Ali',
+        location: 'Herat, Afghanistan',
+        rating: 5,
+        comment: 'Very reliable service. Products are always fresh and well-packaged. Great prices too!',
+        createdAt: '2025-01-03T11:20:00Z'
+      }
+    ]
+  }
+})
+
+function formatDate(dateString) {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+}
+</script>
+
+<style scoped>
+.marquee-wrapper {
+  width: 100%;
+  overflow: hidden;
+}
+
+.marquee-track {
+  width: max-content;
+  animation: scroll linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 640px) {
+  .testimonial-card {
+    width: 280px !important;
+  }
+}
+</style>

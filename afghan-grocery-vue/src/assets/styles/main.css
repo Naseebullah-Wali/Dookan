@@ -1,0 +1,156 @@
+/* Dookan Branding & Bootstrap Overrides */
+
+:root {
+    /* Brand Colors */
+    --color-primary: rgb(255, 71, 111);
+    --color-primary-dark: rgb(229, 50, 90);
+    --color-primary-pale: rgb(255, 235, 240);
+
+    --color-secondary: #00D9A3;
+    --color-secondary-dark: #00B386;
+    --color-secondary-pale: #D6F9F0;
+
+    --color-accent: #FF8C00;
+    --color-accent-dark: #E67E00;
+
+    --color-bg: #F8F9FA;
+    --color-surface: #F1F3F5;
+    --color-white: #FFFFFF;
+
+    --color-text-primary: #2D3436;
+    --color-text-secondary: #636E72;
+    --color-text-muted: #B2BEC3;
+
+    --color-border: #DFE6E9;
+    --color-divider: #F1F2F6;
+
+    --color-success: #28A745;
+    --color-warning: #FFC107;
+    --color-error: rgb(255, 71, 111);
+    --color-info: #17A2B8;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+
+    /* Bootstrap Overrides */
+    --bs-primary: var(--color-primary);
+    --bs-secondary: var(--color-secondary);
+    --bs-success: var(--color-success);
+    --bs-info: var(--color-info);
+    --bs-warning: var(--color-warning);
+    --bs-danger: var(--color-error);
+    --bs-body-bg: var(--color-bg);
+    --bs-body-color: var(--color-text-primary);
+    --bs-border-radius: 0.75rem;
+    --bs-border-radius-lg: 1rem;
+    --bs-border-radius-sm: 0.5rem;
+    --bs-font-sans-serif: 'Inter', 'Avenir', 'Helvetica', 'Arial', sans-serif;
+}
+
+/* Global Styles */
+body {
+    font-family: var(--bs-font-sans-serif);
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Inter', 'Avenir', 'Helvetica', 'Arial', sans-serif;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+/* Custom Utilities (that Bootstrap doesn't perfectly match) */
+.text-gradient {
+    color: var(--color-primary);
+}
+
+.bg-gradient-primary {
+    background-color: var(--color-primary);
+}
+
+.hover-scale {
+    transition: transform 0.2s ease;
+}
+
+.hover-scale:hover {
+    transform: translateY(-2px);
+}
+
+/* Bootstrap Button Overrides */
+.btn {
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--bs-border-radius);
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--color-primary);
+    border: none;
+    box-shadow: 0 4px 12px rgba(255, 71, 111, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(255, 71, 111, 0.4);
+    background-color: var(--color-primary-dark);
+}
+
+.btn-outline-primary {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-white);
+}
+
+/* Card Overrides */
+.card {
+    border: 1px solid transparent;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-primary-pale);
+}
+
+/* Form Overrides */
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 0.25rem rgba(255, 71, 111, 0.25);
+}
+
+/* Override text-primary for better readability - use dark color for prices and numbers */
+.text-primary {
+    color: var(--color-text-primary) !important;
+}
+
+/* List Group Active State Override */
+.list-group-item-action.active {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+}
+
+.list-group-item-action:hover {
+    background-color: var(--color-primary-pale);
+}
+
+/* Animation Utilities */
+@import './animations.css';
