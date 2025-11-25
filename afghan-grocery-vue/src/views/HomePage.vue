@@ -28,10 +28,13 @@
 
     <NewsTicker />
 
-    <!-- Categories -->
-    <section class="py-5">
+    <!-- Categories Section -->
+    <section class="categories-section py-5 bg-white">
       <div class="container">
-        <h2 class="text-center mb-5">Shop by Category</h2>
+        <div class="text-center mb-5">
+          <h2 class="mb-2">Shop by Category</h2>
+          <div class="section-divider mx-auto"></div>
+        </div>
         <div class="row g-4">
           <div
             v-for="category in categories"
@@ -53,11 +56,17 @@
       </div>
     </section>
 
-    <!-- Featured Products -->
-    <section class="py-5 bg-light">
+    <!-- Section Divider -->
+    <div class="section-separator"></div>
+
+    <!-- Featured Products Section -->
+    <section class="featured-section py-5 bg-light">
       <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-5">
-          <h2 class="mb-0">Featured Products</h2>
+          <div>
+            <h2 class="mb-2">Featured Products</h2>
+            <div class="section-divider"></div>
+          </div>
           <router-link to="/shop" class="btn btn-outline-primary">
             View All <i class="bi bi-arrow-right ms-2"></i>
           </router-link>
@@ -86,6 +95,9 @@
         </div>
       </div>
     </section>
+
+    <!-- Section Divider -->
+    <div class="section-separator"></div>
 
     <!-- Testimonials Section -->
     <TestimonialsSection />
@@ -122,6 +134,28 @@ onMounted(async () => {
 <style scoped>
 .hero {
   background: linear-gradient(135deg, rgba(231, 111, 26, 0.1) 0%, rgba(47, 157, 82, 0.1) 100%);
+}
+
+.categories-section {
+  position: relative;
+}
+
+.featured-section {
+  position: relative;
+}
+
+.section-divider {
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--bs-primary), var(--bs-secondary));
+  border-radius: 2px;
+  margin-top: 0.5rem;
+}
+
+.section-separator {
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(231, 111, 26, 0.2) 20%, rgba(47, 157, 82, 0.2) 80%, transparent 100%);
+  margin: 0;
 }
 
 .category-card {

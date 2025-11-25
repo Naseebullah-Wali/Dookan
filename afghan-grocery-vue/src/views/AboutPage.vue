@@ -3,9 +3,10 @@
     <AppHeader />
     
     <!-- Hero Section -->
-    <section class="py-5 text-center" style="background: linear-gradient(135deg, rgba(231, 111, 26, 0.1) 0%, rgba(47, 157, 82, 0.1) 100%);">
+    <section class="hero-section py-5 text-center">
       <div class="container">
         <h1 class="display-4 fw-bold mb-3">About Dookan</h1>
+        <div class="section-divider mx-auto mb-3"></div>
         <p class="lead text-muted">Connecting families through quality food delivery across Afghanistan</p>
       </div>
     </section>
@@ -31,6 +32,9 @@
         </div>
       </section>
 
+      <!-- Section Divider -->
+      <div class="section-separator my-5"></div>
+
       <!-- Story Section -->
       <section class="mb-5">
         <div class="card border-0 shadow-sm">
@@ -50,9 +54,15 @@
         </div>
       </section>
 
+      <!-- Section Divider -->
+      <div class="section-separator my-5"></div>
+
       <!-- Values Section -->
-      <section class="mb-5">
-        <h2 class="text-center mb-5">Our Values</h2>
+      <section class="values-section mb-5 py-5">
+        <div class="text-center mb-5">
+          <h2 class="mb-2">Our Values</h2>
+          <div class="section-divider mx-auto"></div>
+        </div>
         <div class="row g-4">
           <div class="col-lg-3 col-md-6 col-sm-6 col-12">
             <div class="card border-0 shadow-sm h-100 text-center">
@@ -93,6 +103,9 @@
         </div>
       </section>
 
+      <!-- Section Divider -->
+      <div class="section-separator my-5"></div>
+
       <!-- Impact Section -->
       <section class="mb-5">
         <div class="rounded-3 p-5" style="background-color: rgba(231, 111, 26, 0.1);">
@@ -117,6 +130,9 @@
           </div>
         </div>
       </section>
+
+      <!-- Section Divider -->
+      <div class="section-separator my-5"></div>
 
       <!-- Coverage Section -->
       <section class="mb-5">
@@ -148,6 +164,9 @@
         </div>
       </section>
 
+      <!-- Section Divider -->
+      <div class="section-separator my-5"></div>
+
       <!-- CTA Section -->
       <section class="my-5">
         <div class="card border-0 shadow-sm text-center" style="background: linear-gradient(135deg, rgba(231, 111, 26, 0.1) 0%, rgba(47, 157, 82, 0.1) 100%);">
@@ -177,5 +196,27 @@ import AppFooter from '@/components/common/AppFooter.vue'
 </script>
 
 <style scoped>
-/* Bootstrap handles all styling */
+.hero-section {
+  background: linear-gradient(135deg, rgba(231, 111, 26, 0.1) 0%, rgba(47, 157, 82, 0.1) 100%);
+  border-bottom: 2px solid rgba(231, 111, 26, 0.1);
+}
+
+.section-divider {
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--bs-primary), var(--bs-secondary));
+  border-radius: 2px;
+  margin-top: 0.5rem;
+}
+
+.section-separator {
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(231, 111, 26, 0.2) 20%, rgba(47, 157, 82, 0.2) 80%, transparent 100%);
+  margin: 0;
+}
+
+.values-section {
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 0.5rem;
+}
 </style>

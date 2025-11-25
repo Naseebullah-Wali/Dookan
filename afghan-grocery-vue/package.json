@@ -13,8 +13,10 @@
     "@popperjs/core": "^2.11.8",
     "@vueuse/core": "^10.7.0",
     "axios": "^1.6.2",
+    "bcryptjs": "^3.0.3",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
+    "jsonwebtoken": "^9.0.2",
     "pinia": "^2.1.7",
     "vue": "^3.4.0",
     "vue-router": "^4.2.5"

@@ -12,7 +12,10 @@ server.use('/images', jsonServer.defaults.static(path.join(__dirname, '../public
 // Use default middlewares (logger, static, cors and no-cache)
 server.use(middlewares);
 
-// Use auth middleware
+// Add JSON body parser (required for auth middleware)
+server.use(jsonServer.bodyParser);
+
+// Use custom auth middleware
 server.use(auth);
 
 // Use router
@@ -22,4 +25,5 @@ const PORT = 3001;
 server.listen(PORT, () => {
     console.log(`JSON Server is running on http://localhost:${PORT}`);
     console.log(`Serving static images from public/images`);
+    console.log(`Custom authentication enabled (plain text passwords)`);
 });

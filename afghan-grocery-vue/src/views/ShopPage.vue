@@ -2,47 +2,52 @@
   <div class="shop-page">
     <AppHeader />
     
-    <div class="container py-4">
-      <!-- Page Header -->
-      <div class="row mb-4">
-        <div class="col-12">
-          <h1 class="mb-4">Shop All Products</h1>
-          <div class="row g-3">
-            <div class="col-lg-8 col-md-7 col-12">
-              <div class="input-group">
-                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                <input
-                  v-model="searchQuery"
-                  type="text"
-                  placeholder="Search products..."
-                  class="form-control"
-                  @input="handleSearch"
-                />
-              </div>
+    <!-- Page Header -->
+    <section class="page-header py-4 bg-light border-bottom">
+      <div class="container">
+        <div class="row mb-3">
+          <div class="col-12">
+            <h1 class="mb-2">Shop All Products</h1>
+            <div class="section-divider"></div>
+          </div>
+        </div>
+        <div class="row g-3">
+          <div class="col-lg-8 col-md-7 col-12">
+            <div class="input-group shadow-sm">
+              <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+              <input
+                v-model="searchQuery"
+                type="text"
+                placeholder="Search products..."
+                class="form-control border-start-0"
+                @input="handleSearch"
+              />
             </div>
-            <div class="col-lg-3 col-md-4 col-sm-8 col-9">
-              <select v-model="sortBy" class="form-select">
-                <option value="">Sort By</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="rating">Highest Rated</option>
-                <option value="newest">Newest First</option>
-              </select>
-            </div>
-            <div class="col-lg-1 col-md-1 col-sm-4 col-3 d-lg-none">
-              <button class="btn btn-outline-primary w-100" type="button" data-bs-toggle="offcanvas" data-bs-target="#filtersOffcanvas">
-                <i class="bi bi-funnel"></i>
-              </button>
-            </div>
+          </div>
+          <div class="col-lg-3 col-md-4 col-sm-8 col-9">
+            <select v-model="sortBy" class="form-select shadow-sm">
+              <option value="">Sort By</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+              <option value="rating">Highest Rated</option>
+              <option value="newest">Newest First</option>
+            </select>
+          </div>
+          <div class="col-lg-1 col-md-1 col-sm-4 col-3 d-lg-none">
+            <button class="btn btn-outline-primary w-100 shadow-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#filtersOffcanvas">
+              <i class="bi bi-funnel"></i>
+            </button>
           </div>
         </div>
       </div>
+    </section>
 
+    <div class="container py-4">
       <!-- Main Layout -->
       <div class="row g-4">
         <!-- Desktop Filters Sidebar -->
         <aside class="col-lg-3 d-none d-lg-block">
-          <div class="card border-0 shadow-sm sticky-top" style="top: 88px;">
+          <div class="card border-0 shadow-sm filters-sidebar">
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
                 <h5 class="mb-0 fw-bold">Filters</h5>
@@ -333,5 +338,51 @@ watch([selectedCategory, searchQuery, sortBy, priceRange, minRating, inStockOnly
 </script>
 
 <style scoped>
-/* Minimal custom styles - Bootstrap handles most of the layout */
+.page-header {
+  background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.section-divider {
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--bs-primary), var(--bs-secondary));
+  border-radius: 2px;
+  margin-top: 0.5rem;
+}
+
+.input-group {
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+
+.input-group .form-control:focus {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 0.25rem rgba(231, 111, 26, 0.15);
+}
+
+.filters-sidebar {
+  position: sticky;
+  top: 20px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+
+/* Custom scrollbar for filters */
+.filters-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.filters-sidebar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.filters-sidebar::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.filters-sidebar::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
 </style>

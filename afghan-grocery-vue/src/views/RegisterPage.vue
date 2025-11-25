@@ -2,69 +2,69 @@
   <div class="register-page">
     <AppHeader />
     
-    <div class="container py-5">
+    <div class="container py-3 py-md-5">
       <div class="row justify-content-center">
-        <div class="col-lg-6 col-md-8 col-sm-10 col-12">
+        <div class="col-lg-6 col-md-8 col-sm-10 col-11">
           <div class="card border-0 shadow-lg">
-            <div class="card-body p-4 p-md-5">
-              <h1 class="text-center mb-2">Create Account</h1>
-              <p class="text-center text-muted mb-4">Join Dookan today</p>
+            <div class="card-body p-3 p-sm-4 p-md-5">
+              <h1 class="text-center mb-2 fs-3 fs-md-1">Create Account</h1>
+              <p class="text-center text-muted mb-3 mb-md-4 small">Join Dookan today</p>
 
               <form @submit.prevent="handleRegister">
-                <div class="row g-3 mb-3">
+                <div class="row g-2 g-md-3 mb-3">
                   <div class="col-md-6">
-                    <label class="form-label fw-semibold">First Name</label>
+                    <label class="form-label fw-semibold small">First Name</label>
                     <input
                       v-model="formData.firstName"
                       type="text"
-                      class="form-control form-control-lg"
+                      class="form-control"
                       required
                     />
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label fw-semibold">Last Name</label>
+                    <label class="form-label fw-semibold small">Last Name</label>
                     <input
                       v-model="formData.lastName"
                       type="text"
-                      class="form-control form-control-lg"
+                      class="form-control"
                       required
                     />
                   </div>
                 </div>
 
                 <div class="mb-3">
-                  <label class="form-label fw-semibold">Email</label>
+                  <label class="form-label fw-semibold small">Email</label>
                   <input
                     v-model="formData.email"
                     type="email"
-                    class="form-control form-control-lg"
+                    class="form-control"
                     required
                   />
                 </div>
 
                 <div class="mb-3">
-                  <label class="form-label fw-semibold">Phone</label>
+                  <label class="form-label fw-semibold small">Phone</label>
                   <input
                     v-model="formData.phone"
                     type="tel"
-                    class="form-control form-control-lg"
+                    class="form-control"
                     placeholder="+93 700 123 456"
                   />
                 </div>
 
                 <div class="mb-3">
-                  <label class="form-label fw-semibold">Password</label>
+                  <label class="form-label fw-semibold small">Password</label>
                   <input
                     v-model="formData.password"
                     type="password"
-                    class="form-control form-control-lg"
+                    class="form-control"
                     required
                     minlength="6"
                   />
-                  <div class="form-text">Password must be at least 6 characters</div>
+                  <div class="form-text small">Password must be at least 6 characters</div>
                 </div>
 
-                <div v-if="error" class="alert alert-danger" role="alert">
+                <div v-if="error" class="alert alert-danger py-2 small" role="alert">
                   <i class="bi bi-exclamation-triangle me-2"></i>{{ error }}
                 </div>
 
@@ -74,9 +74,9 @@
                 </button>
               </form>
 
-              <div class="text-center mt-4">
-                <span class="text-muted">Already have an account? </span>
-                <router-link to="/login" class="text-decoration-none fw-semibold">Login here</router-link>
+              <div class="text-center mt-3 mt-md-4">
+                <span class="text-muted small">Already have an account? </span>
+                <router-link to="/login" class="text-decoration-none fw-semibold small">Login here</router-link>
               </div>
             </div>
           </div>
@@ -127,5 +127,30 @@ async function handleRegister() {
 </script>
 
 <style scoped>
-/* Bootstrap handles all styling */
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  flex: 1;
+}
+
+/* Responsive form controls */
+@media (max-width: 576px) {
+  .form-control {
+    font-size: 0.95rem;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .btn-lg {
+    font-size: 1rem;
+    padding: 0.6rem 1rem;
+  }
+  
+  .card {
+    margin: 0 0.5rem;
+  }
+}
 </style>

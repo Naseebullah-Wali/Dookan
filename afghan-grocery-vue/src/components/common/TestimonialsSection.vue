@@ -1,5 +1,5 @@
 <template>
-  <div class="testimonials-section py-5 bg-light overflow-hidden">
+  <div class="testimonials-section py-5 overflow-hidden">
     <div class="container-fluid p-0">
       <div class="container mb-5">
         <h2 class="text-center mb-2">What Our Customers Say</h2>
@@ -12,7 +12,7 @@
           <div
             v-for="testimonial in testimonials"
             :key="`orig-${testimonial.id}`"
-            class="card border-0 shadow-sm flex-shrink-0 testimonial-card"
+            class="card shadow-sm flex-shrink-0 testimonial-card"
             style="width: 350px;"
           >
             <div class="card-body p-4">
@@ -38,7 +38,7 @@
           <div
             v-for="testimonial in testimonials"
             :key="`dup-${testimonial.id}`"
-            class="card border-0 shadow-sm flex-shrink-0 testimonial-card"
+            class="card shadow-sm flex-shrink-0 testimonial-card"
             style="width: 350px;"
           >
             <div class="card-body p-4">
@@ -121,6 +121,21 @@ function formatDate(dateString) {
 </script>
 
 <style scoped>
+.testimonials-section {
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+  position: relative;
+}
+
+.testimonials-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(231, 111, 26, 0.3) 50%, transparent 100%);
+}
+
 .marquee-wrapper {
   width: 100%;
   overflow: hidden;
@@ -133,6 +148,20 @@ function formatDate(dateString) {
 
 .marquee-track:hover {
   animation-play-state: paused;
+}
+
+.testimonial-card {
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-top: 3px solid var(--bs-primary) !important;
+  background: #ffffff;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
+  border-top-color: var(--bs-secondary) !important;
 }
 
 @keyframes scroll {

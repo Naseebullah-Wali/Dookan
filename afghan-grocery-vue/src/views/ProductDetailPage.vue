@@ -94,15 +94,21 @@
           </div>
         </div>
 
+        <!-- Section Divider -->
+        <div class="section-separator my-5"></div>
+
         <!-- Reviews Section -->
-        <div class="mt-5 pt-5 border-top">
-          <h2 class="mb-4">Customer Reviews</h2>
+        <section class="reviews-section py-5">
+          <div class="mb-4">
+            <h2 class="mb-2">Customer Reviews</h2>
+            <div class="section-divider"></div>
+          </div>
           
           <ReviewForm :productId="product.id" @review-submitted="handleReviewSubmitted" />
           
           <div v-if="reviews.length > 0" class="row g-3 mt-4">
             <div v-for="review in reviews" :key="review.id" class="col-12">
-              <div class="card border-0 shadow-sm">
+              <div class="card shadow-sm review-card">
                 <div class="card-body">
                   <div class="d-flex justify-content-between align-items-start mb-2">
                     <div>
@@ -117,7 +123,7 @@
             </div>
           </div>
           <p v-else class="text-center text-muted py-5">No reviews yet. Be the first to review!</p>
-        </div>
+        </section>
 
         <!-- Related Products -->
         <RelatedProducts 
@@ -207,5 +213,36 @@ function handleReviewSubmitted(newReview) {
 </script>
 
 <style scoped>
-/* Bootstrap handles all styling */
+.section-separator {
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(231, 111, 26, 0.2) 20%, rgba(47, 157, 82, 0.2) 80%, transparent 100%);
+  margin: 0;
+}
+
+.section-divider {
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--bs-primary), var(--bs-secondary));
+  border-radius: 2px;
+  margin-top: 0.5rem;
+}
+
+.reviews-section {
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 0.5rem;
+  padding: 2rem;
+}
+
+.review-card {
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-left: 3px solid var(--bs-primary) !important;
+  background: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.review-card:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  border-left-color: var(--bs-secondary) !important;
+}
 </style>

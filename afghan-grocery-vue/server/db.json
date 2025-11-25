@@ -3,7 +3,7 @@
     {
       "id": 1,
       "email": "demo@afghangrocery.com",
-      "password": "$2a$10$8K1p/a0dL3.ksN7xVwqgNOi1lXRzYvNelP7VWXhkUNzKMXnCbU5Gy",
+      "password": "demo123",
       "firstName": "Demo",
       "lastName": "User",
       "phone": "+93 700 123 456",
@@ -23,7 +23,7 @@
     },
     {
       "email": "test@gmail.com",
-      "password": "$2a$10$7Mv7/UAVEeHifVhhj6zaJe8oVlrtHknhJP4WoHIvHnInTIWQYI1Du",
+      "password": "test123",
       "firstName": "Test",
       "lastName": "Teste",
       "phone": "",
@@ -31,8 +31,8 @@
       "id": 2,
       "addresses": [
         {
-          "name": "test",
-          "fullName": "test",
+          "name": "Test",
+          "fullName": "Teste",
           "phone": "34939483",
           "city": "kabul",
           "address": "test",
@@ -315,5 +315,20 @@
       "id": 3
     }
   ],
-  "wishlist": []
+  "wishlist": [
+    {
+      "userId": 2,
+      "productId": 2,
+      "product": {
+        "id": 2,
+        "name": "Pure Cooking Oil",
+        "price": 1800,
+        "image": "/images/products/olive-oil.png",
+        "size": "2L",
+        "rating": 4.6
+      },
+      "addedAt": "2025-11-25T21:24:35.801Z",
+      "id": 1
+    }
+  ]
 }

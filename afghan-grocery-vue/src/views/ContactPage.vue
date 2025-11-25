@@ -2,9 +2,16 @@
   <div class="contact-page">
     <AppHeader />
     
+    <!-- Hero Section -->
+    <section class="hero-section py-5 text-center border-bottom">
+      <div class="container">
+        <h1 class="mb-2">Contact Us</h1>
+        <div class="section-divider mx-auto mb-3"></div>
+        <p class="text-muted lead">We're here to help! Get in touch with us.</p>
+      </div>
+    </section>
+
     <div class="container py-5">
-      <h1 class="text-center mb-2">Contact Us</h1>
-      <p class="text-center text-muted mb-5 lead">We're here to help! Get in touch with us.</p>
 
       <div class="row g-4 mb-5">
         <!-- Contact Form -->
@@ -125,6 +132,9 @@
         </div>
       </div>
 
+      <!-- Section Divider -->
+      <div class="section-separator my-5"></div>
+
       <!-- Social Media Section -->
       <section class="mb-5">
         <div class="card border-0 shadow-sm text-center">
@@ -183,5 +193,21 @@ async function handleSubmit() {
 </script>
 
 <style scoped>
-/* Bootstrap handles all styling */
+.hero-section {
+  background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.section-divider {
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--bs-primary), var(--bs-secondary));
+  border-radius: 2px;
+  margin-top: 0.5rem;
+}
+
+.section-separator {
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(231, 111, 26, 0.2) 20%, rgba(47, 157, 82, 0.2) 80%, transparent 100%);
+  margin: 0;
+}
 </style>
