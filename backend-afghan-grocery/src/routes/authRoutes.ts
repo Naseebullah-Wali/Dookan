@@ -1,0 +1,44 @@
+import { Router } from 'express';
+import { body } from 'express-validator';
+import * as authController from '../controllers/authController';
+import { authenticate } from '../middleware/auth';
+import { validate } from '../middleware/validator';
+
+const router = Router();
+
+// Validation rules
+const registerValidation = [
+    body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
+    body('password')
+        .isLength({ min: 6 })
+        .withMessage('Password must be at least 6 characters long'),
+    body('name').trim().notEmpty().withMessage('Name is required'),
+    body('phone').optional().trim(),
+];
+
+const loginValidation = [
+    body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
+    body('password').notEmpty().withMessage('Password is required'),
+];
+
+const updateProfileValidation = [
+    body('name').optional().trim().notEmpty().withMessage('Name cannot be empty'),
+    body('email').optional().isEmail().normalizeEmail().withMessage('Valid email is required'),
+    body('phone').optional().trim(),
+];
+
+const changePasswordValidation = [
+    body('currentPassword').notEmpty().withMessage('Current password is required'),
+    body('newPassword')
+        .isLength({ min: 6 })
+        .withMessage('New password must be at least 6 characters long'),
+];
+
+// Routes
+router.post('/register', validate(registerValidation), authController.register);
+router.post('/login', validate(loginValidation), authController.login);
+router.get('/profile', authenticate, authController.getProfile);
+router.put('/profile', authenticate, validate(updateProfileValidation), authController.updateProfile);
+router.post('/change-password', authenticate, validate(changePasswordValidation), authController.changePassword);
+
+export default router;
