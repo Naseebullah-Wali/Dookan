@@ -139,11 +139,12 @@ import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
-import api from '@/services/api'
+import { useOrdersStore } from '@/stores/orders'
 
 const router = useRouter()
 const cartStore = useCartStore()
 const authStore = useAuthStore()
+const ordersStore = useOrdersStore()
 
 const formData = ref({
   recipientName: '',
@@ -174,7 +175,7 @@ onMounted(() => {
   
   // Pre-fill with user data if available
   if (authStore.user) {
-    formData.value.recipientName = `${authStore.user.firstName} ${authStore.user.lastName}`
+    formData.value.recipientName = authStore.user.name || `${authStore.user.firstName || ''} ${authStore.user.lastName || ''}`.trim()
     formData.value.phone = authStore.user.phone || ''
   }
 })
@@ -188,24 +189,44 @@ function formatPrice(price) {
 }
 
 async function handleCheckout() {
+  if (!authStore.user) {
+    window.showToast('Please login to place an order', 'error')
+    router.push('/login?redirect=/checkout')
+    return
+  }
+
   const orderData = {
-    userId: authStore.user?.id,
-    items: cartStore.items,
-    delivery: formData.value,
+    user_id: authStore.user.id,
+    items: cartStore.items.map(item => ({
+        product_id: item.id,
+        product_name: item.name,
+        product_image: item.image,
+        quantity: item.quantity,
+        price: item.price
+    })),
+    address: {
+        recipient_name: formData.value.recipientName,
+        phone: formData.value.phone,
+        province: formData.value.city, // Using city as province for simplicity
+        city: formData.value.city,
+        street: formData.value.address,
+        is_default: true
+    },
     subtotal: cartStore.subtotal,
-    deliveryFee: deliveryFee.value,
-    total: total.value,
-    paymentMethod: formData.value.paymentMethod,
-    status: 'pending',
-    createdAt: new Date().toISOString()
+    shipping_fee: deliveryFee.value,
+    tax: 0,
+    discount: 0,
+    payment_method: formData.value.paymentMethod,
+    notes: formData.value.notes
   }
 
   try {
-    const response = await api.post('/orders', orderData)
+    const order = await ordersStore.createOrder(orderData)
     cartStore.clearCart()
-    router.push(`/confirmation/${response.data.id}`)
+    router.push(`/confirmation/${order.id}`)
     window.showToast('Order placed successfully!', 'success')
   } catch (error) {
+    console.error('Checkout error:', error)
     window.showToast('Failed to place order. Please try again.', 'error')
   }
 }

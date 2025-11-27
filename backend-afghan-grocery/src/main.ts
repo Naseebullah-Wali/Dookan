@@ -23,14 +23,14 @@ async function initializeApp() {
 initializeApp();
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
     console.log('SIGTERM signal received: closing HTTP server');
-    DatabaseConnection.close();
+    await DatabaseConnection.close();
     process.exit(0);
 });
 
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
     console.log('SIGINT signal received: closing HTTP server');
-    DatabaseConnection.close();
+    await DatabaseConnection.close();
     process.exit(0);
 });

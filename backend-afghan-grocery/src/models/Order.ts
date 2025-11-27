@@ -33,9 +33,21 @@ export interface OrderItem {
     created_at: string;
 }
 
+export interface AddressData {
+    recipient_name: string;
+    phone: string;
+    province: string;
+    city: string;
+    district?: string;
+    street: string;
+    postal_code?: string;
+    is_default?: boolean;
+}
+
 export interface CreateOrderData {
     user_id: number;
-    address_id: number;
+    address_id?: number;
+    address?: AddressData;
     payment_method: 'cod' | 'card' | 'bank_transfer';
     items: {
         product_id: number;
@@ -71,6 +83,33 @@ class OrderModel {
         try {
             await db.run('BEGIN TRANSACTION');
 
+            let addressId = data.address_id;
+
+            // Create address if provided
+            if (data.address) {
+                const addressResult = await db.run(`
+                    INSERT INTO addresses (
+                        user_id, recipient_name, phone, province, city,
+                        district, street, postal_code, is_default
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                `,
+                    data.user_id,
+                    data.address.recipient_name,
+                    data.address.phone,
+                    data.address.province,
+                    data.address.city,
+                    data.address.district || null,
+                    data.address.street,
+                    data.address.postal_code || null,
+                    data.address.is_default ? 1 : 0
+                );
+                addressId = addressResult.lastID!;
+            }
+
+            if (!addressId) {
+                throw new Error('Address ID or Address Data is required');
+            }
+
             const result = await db.run(`
         INSERT INTO orders (
           order_number, user_id, address_id, payment_method,
@@ -80,7 +119,7 @@ class OrderModel {
       `,
                 orderNumber,
                 data.user_id,
-                data.address_id,
+                addressId,
                 data.payment_method,
                 data.subtotal,
                 data.shipping_fee || 0,

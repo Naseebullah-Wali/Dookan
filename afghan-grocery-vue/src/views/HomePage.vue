@@ -122,12 +122,25 @@ const categories = ref([])
 const loading = ref(true)
 
 onMounted(async () => {
-  await productsStore.fetchCategories()
-  categories.value = productsStore.categories
-  
-  await productsStore.fetchProducts()
-  featuredProducts.value = productsStore.products.filter(p => p.featured).slice(0, 4)
-  loading.value = false
+  try {
+    // Fetch categories with counts
+    await productsStore.fetchCategoriesWithCounts()
+    categories.value = productsStore.categories.map(cat => ({
+      ...cat,
+      count: cat.product_count || 0
+    }))
+    
+    // Fetch featured products
+    await productsStore.fetchFeaturedProducts(4)
+    featuredProducts.value = productsStore.featuredProducts
+  } catch (error) {
+    console.error('Error loading homepage data:', error)
+    // Set empty arrays on error so page still renders
+    categories.value = []
+    featuredProducts.value = []
+  } finally {
+    loading.value = false
+  }
 })
 </script>
 

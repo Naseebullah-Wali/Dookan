@@ -50,8 +50,8 @@
 
               <div class="alert alert-info py-2 py-md-3">
                 <p class="mb-2 small"><strong><i class="bi bi-info-circle me-2"></i>Demo Account:</strong></p>
-                <p class="mb-1 small" style="font-size: 0.85rem;">Email: demo@afghangrocery.com</p>
-                <p class="mb-2 mb-md-3 small" style="font-size: 0.85rem;">Password: demo123</p>
+                <p class="mb-1 small" style="font-size: 0.85rem;">Email: customer@test.com</p>
+                <p class="mb-2 mb-md-3 small" style="font-size: 0.85rem;">Password: customer123</p>
                 <button @click="useDemoAccount" class="btn btn-outline-primary btn-sm w-100">
                   <i class="bi bi-person-check me-2"></i>Use Demo Account
                 </button>
@@ -103,8 +103,8 @@ async function handleLogin() {
 }
 
 function useDemoAccount() {
-  email.value = 'demo@afghangrocery.com'
-  password.value = 'demo123'
+  email.value = 'customer@test.com'
+  password.value = 'customer123'
   handleLogin()
 }
 </script>

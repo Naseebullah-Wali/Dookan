@@ -168,16 +168,28 @@ const loading = ref(true)
 
 onMounted(async () => {
   const productId = route.params.id
+  
+  // Ensure categories are loaded for getCategoryName
+  if (productsStore.categories.length === 0) {
+    await productsStore.fetchCategories()
+  }
+
   product.value = await productsStore.fetchProductById(productId)
   
   if (product.value) {
-    // Fetch reviews
+    // Reviews endpoint not yet implemented in backend
+    // Setting empty array for now to avoid 404s
+    reviews.value = []
+    
+    // TODO: Implement reviews endpoint in backend
+    /*
     try {
       const response = await api.get(`/reviews?productId=${productId}`)
       reviews.value = response.data
     } catch (error) {
-      console.error('Failed to load reviews:', error)
+      console.warn('Failed to load reviews:', error)
     }
+    */
   }
   
   loading.value = false

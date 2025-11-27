@@ -113,7 +113,14 @@ async function handleRegister() {
   loading.value = true
   error.value = ''
   
-  const success = await authStore.register(formData.value)
+  const userData = {
+    name: `${formData.value.firstName} ${formData.value.lastName}`.trim(),
+    email: formData.value.email,
+    phone: formData.value.phone,
+    password: formData.value.password
+  }
+  
+  const success = await authStore.register(userData)
   
   if (success) {
     window.showToast('Account created successfully!', 'success')
