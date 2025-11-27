@@ -313,22 +313,17 @@
       "helpful": 0,
       "createdAt": "2025-11-23T19:57:05.567Z",
       "id": 3
+    },
+    {
+      "productId": 1,
+      "userId": 2,
+      "userName": "Test Teste",
+      "rating": 4,
+      "comment": "test_2222",
+      "helpful": 0,
+      "createdAt": "2025-11-26T16:09:46.456Z",
+      "id": 4
     }
   ],
-  "wishlist": [
-    {
-      "userId": 2,
-      "productId": 2,
-      "product": {
-        "id": 2,
-        "name": "Pure Cooking Oil",
-        "price": 1800,
-        "image": "/images/products/olive-oil.png",
-        "size": "2L",
-        "rating": 4.6
-      },
-      "addedAt": "2025-11-25T21:24:35.801Z",
-      "id": 1
-    }
-  ]
+  "wishlist": []
 }
