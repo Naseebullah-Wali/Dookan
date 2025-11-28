@@ -6,23 +6,24 @@
         <p class="text-center text-muted">Trusted by thousands of Afghan families worldwide</p>
       </div>
 
-      <div class="marquee-wrapper">
+      <div v-if="!loading" class="marquee-wrapper">
         <div class="marquee-track d-flex gap-4" :style="{ animationDuration: '40s' }">
           <!-- Original Testimonials -->
-          <div
-            v-for="testimonial in testimonials"
+          <div 
+            v-for="(testimonial, index) in testimonials"
             :key="`orig-${testimonial.id}`"
             class="card shadow-sm flex-shrink-0 testimonial-card"
-            style="width: 350px;"
-          >
+            style="width: 350px;">
             <div class="card-body p-4">
               <div class="d-flex align-items-center gap-3 mb-3">
-                <div class="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold" 
-                     style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--bs-primary), var(--bs-secondary)); font-size: 1.5rem;">
-                  {{ testimonial.userName.charAt(0) }}
-                </div>
+                <img 
+                  :src="getTestimonialAvatar(testimonial, index)" 
+                  :alt="testimonial.user_name"
+                  class="rounded-circle"
+                  style="width: 50px; height: 50px; object-fit: cover;"
+                />
                 <div>
-                  <h5 class="mb-0">{{ testimonial.userName }}</h5>
+                  <h5 class="mb-0">{{ testimonial.user_name }}</h5>
                   <p class="text-muted small mb-0">{{ testimonial.location }}</p>
                 </div>
               </div>
@@ -30,25 +31,26 @@
                 <i v-for="star in 5" :key="star" :class="['bi', star <= testimonial.rating ? 'bi-star-fill' : 'bi-star', 'text-warning']"></i>
               </div>
               <p class="fst-italic text-secondary mb-3">"{{ testimonial.comment }}"</p>
-              <div class="text-muted small">{{ formatDate(testimonial.createdAt) }}</div>
+              <div class="text-muted small">{{ formatDate(testimonial.created_at) }}</div>
             </div>
           </div>
 
           <!-- Duplicated Testimonials for Loop -->
-          <div
-            v-for="testimonial in testimonials"
+          <div 
+            v-for="(testimonial, index) in testimonials"
             :key="`dup-${testimonial.id}`"
             class="card shadow-sm flex-shrink-0 testimonial-card"
-            style="width: 350px;"
-          >
+            style="width: 350px;">
             <div class="card-body p-4">
               <div class="d-flex align-items-center gap-3 mb-3">
-                <div class="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold" 
-                     style="width: 50px; height: 50px; background: linear-gradient(135deg, var(--bs-primary), var(--bs-secondary)); font-size: 1.5rem;">
-                  {{ testimonial.userName.charAt(0) }}
-                </div>
+                <img 
+                  :src="getTestimonialAvatar(testimonial, index)" 
+                  :alt="testimonial.user_name"
+                  class="rounded-circle"
+                  style="width: 50px; height: 50px; object-fit: cover;"
+                />
                 <div>
-                  <h5 class="mb-0">{{ testimonial.userName }}</h5>
+                  <h5 class="mb-0">{{ testimonial.user_name }}</h5>
                   <p class="text-muted small mb-0">{{ testimonial.location }}</p>
                 </div>
               </div>
@@ -56,7 +58,7 @@
                 <i v-for="star in 5" :key="star" :class="['bi', star <= testimonial.rating ? 'bi-star-fill' : 'bi-star', 'text-warning']"></i>
               </div>
               <p class="fst-italic text-secondary mb-3">"{{ testimonial.comment }}"</p>
-              <div class="text-muted small">{{ formatDate(testimonial.createdAt) }}</div>
+              <div class="text-muted small">{{ formatDate(testimonial.created_at) }}</div>
             </div>
           </div>
         </div>
@@ -66,53 +68,79 @@
 </template>
 
 <script setup>
-defineProps({
-  testimonials: {
-    type: Array,
-    default: () => [
+import { ref, onMounted } from 'vue'
+import api from '@/services/api'
+import { getAvatarUrl } from '@/services/imageService'
+
+const testimonials = ref([])
+const loading = ref(true)
+
+onMounted(async () => {
+  try {
+    const response = await api.get('/testimonials')
+    testimonials.value = response.data || []
+  } catch (error) {
+    console.error('Failed to load testimonials:', error)
+    // Fallback to default testimonials if API fails
+    testimonials.value = [
       {
         id: 1,
-        userName: 'Ahmad Khalil',
+        user_name: 'Ahmad Khalil',
         location: 'Kabul, Afghanistan',
         rating: 5,
         comment: 'Excellent service! The quality of products is outstanding and delivery is always on time. Highly recommended for Afghan groceries.',
-        createdAt: '2025-01-15T10:00:00Z'
+        gender: 'male',
+        created_at: '2025-01-15T10:00:00Z'
       },
       {
         id: 2,
-        userName: 'Fatima Rahman',
+        user_name: 'Fatima Rahman',
         location: 'London, UK',
         rating: 5,
         comment: 'Finally found authentic Afghan products in the UK! The basmati rice and spices are exactly like back home. Thank you!',
-        createdAt: '2025-01-10T14:30:00Z'
+        gender: 'female',
+        created_at: '2025-01-10T14:30:00Z'
       },
       {
         id: 3,
-        userName: 'Mohammed Aziz',
+        user_name: 'Mohammed Aziz',
         location: 'Dubai, UAE',
         rating: 5,
         comment: 'Best Afghan grocery store online. Fresh products, reasonable prices, and excellent customer service. Will order again!',
-        createdAt: '2025-01-08T09:15:00Z'
+        gender: 'male',
+        created_at: '2025-01-08T09:15:00Z'
       },
       {
         id: 4,
-        userName: 'Zainab Hussain',
+        user_name: 'Zainab Hussain',
         location: 'Toronto, Canada',
         rating: 5,
         comment: 'Amazing quality and fast shipping to Canada! My family loves all the products. The flour makes perfect naan bread.',
-        createdAt: '2025-01-05T16:45:00Z'
+        gender: 'female',
+        created_at: '2025-01-05T16:45:00Z'
       },
       {
         id: 5,
-        userName: 'Rashid Ali',
+        user_name: 'Rashid Ali',
         location: 'Herat, Afghanistan',
         rating: 5,
         comment: 'Very reliable service. Products are always fresh and well-packaged. Great prices too!',
-        createdAt: '2025-01-03T11:20:00Z'
+        gender: 'male',
+        created_at: '2025-01-03T11:20:00Z'
       }
     ]
+  } finally {
+    loading.value = false
   }
 })
+
+// Get avatar URL for each testimonial
+const getTestimonialAvatar = (testimonial, index) => {
+  if (testimonial.avatar) {
+    return testimonial.avatar
+  }
+  return getAvatarUrl(testimonial.gender || 'male', index + 1)
+}
 
 function formatDate(dateString) {
   const date = new Date(dateString)

@@ -14,6 +14,9 @@ import orderRoutes from '../routes/orderRoutes';
 import wishlistRoutes from '../routes/wishlistRoutes';
 import reviewRoutes from '../routes/reviewRoutes';
 import uploadRoutes from '../routes/uploadRoutes';
+import addressRoutes from '../routes/addressRoutes';
+import testimonialRoutes from '../routes/testimonialRoutes';
+import newsItemRoutes from '../routes/newsItemRoutes';
 import path from 'path';
 
 class App {
@@ -82,6 +85,9 @@ class App {
         this.app.use(`/api/${apiVersion}/wishlist`, wishlistRoutes);
         this.app.use(`/api/${apiVersion}/reviews`, reviewRoutes);
         this.app.use(`/api/${apiVersion}/upload`, uploadRoutes);
+        this.app.use(`/api/${apiVersion}/addresses`, addressRoutes);
+        this.app.use(`/api/${apiVersion}/testimonials`, testimonialRoutes);
+        this.app.use(`/api/${apiVersion}/news`, newsItemRoutes);
 
         // Welcome route
         this.app.get('/', (_req, res) => {

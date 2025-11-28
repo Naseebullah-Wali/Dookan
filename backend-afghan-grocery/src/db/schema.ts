@@ -59,6 +59,10 @@ export const initializeDatabase = async (): Promise<void> => {
       images TEXT,
       unit TEXT DEFAULT 'piece',
       weight REAL,
+      size TEXT,
+      verified INTEGER DEFAULT 0,
+      seller TEXT,
+      supplier TEXT,
       is_featured INTEGER DEFAULT 0,
       is_active INTEGER DEFAULT 1,
       rating REAL DEFAULT 0,
@@ -185,6 +189,51 @@ export const initializeDatabase = async (): Promise<void> => {
       expires_at DATETIME NOT NULL,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    )
+  `);
+
+  // Testimonials table
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS testimonials (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_name TEXT NOT NULL,
+      location TEXT,
+      rating INTEGER NOT NULL CHECK(rating >= 1 AND rating <= 5),
+      comment TEXT NOT NULL,
+      avatar TEXT,
+      gender TEXT CHECK(gender IN ('male', 'female')),
+      is_active INTEGER DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // News items table
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS news_items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      title_ps TEXT,
+      title_fa TEXT,
+      title_de TEXT,
+      title_fr TEXT,
+      subtitle TEXT,
+      subtitle_ps TEXT,
+      subtitle_fa TEXT,
+      subtitle_de TEXT,
+      subtitle_fr TEXT,
+      description TEXT,
+      description_ps TEXT,
+      description_fa TEXT,
+      description_de TEXT,
+      description_fr TEXT,
+      tag TEXT,
+      image TEXT,
+      bg_class TEXT,
+      is_active INTEGER DEFAULT 1,
+      display_order INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
 

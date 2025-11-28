@@ -150,39 +150,70 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import { useWishlistStore } from '@/stores/wishlist'
-import SearchAutocomplete from '@/components/common/SearchAutocomplete.vue'
-
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const wishlistStore = useWishlistStore()
 
 const isScrolled = ref(false)
+let offcanvasInstance = null
 
 function handleScroll() {
   isScrolled.value = window.scrollY > 20
 }
 
 function handleLogout() {
+  // Close mobile menu if open
+  closeMobileMenu()
+  
   authStore.logout()
   router.push('/')
   window.showToast('Logged out successfully', 'success')
 }
+
+function closeMobileMenu() {
+  if (offcanvasInstance) {
+    offcanvasInstance.hide()
+  }
+}
+
+// Watch for route changes and close mobile menu
+watch(() => route.path, () => {
+  closeMobileMenu()
+})
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
   if (authStore.isAuthenticated) {
     wishlistStore.fetchWishlist()
   }
+  
+  // Initialize Bootstrap dropdowns and offcanvas
+  if (typeof window !== 'undefined' && window.bootstrap) {
+    const dropdowns = document.querySelectorAll('[data-bs-toggle="dropdown"]')
+    dropdowns.forEach(dropdown => {
+      new window.bootstrap.Dropdown(dropdown)
+    })
+    
+    // Initialize offcanvas
+    const offcanvasElement = document.getElementById('mobileMenu')
+    if (offcanvasElement) {
+      offcanvasInstance = new window.bootstrap.Offcanvas(offcanvasElement)
+    }
+  }
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
+  if (offcanvasInstance) {
+    offcanvasInstance.dispose()
+  }
 })
 </script>
 

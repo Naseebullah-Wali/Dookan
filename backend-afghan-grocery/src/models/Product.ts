@@ -21,6 +21,10 @@ export interface Product {
     images?: string;
     unit: string;
     weight?: number;
+    size?: string;
+    verified: number;
+    seller?: string;
+    supplier?: string;
     is_featured: number;
     is_active: number;
     rating: number;
@@ -48,6 +52,10 @@ export interface CreateProductData {
     images?: string[];
     unit?: string;
     weight?: number;
+    size?: string;
+    verified?: boolean;
+    seller?: string;
+    supplier?: string;
     is_featured?: boolean;
 }
 
@@ -75,9 +83,9 @@ class ProductModel {
         name, name_ps, name_fa, name_de, name_fr,
         description, description_ps, description_fa, description_de, description_fr,
         price, original_price, stock, category_id, image, images,
-        unit, weight, is_featured
+        unit, weight, size, verified, seller, supplier, is_featured
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
             data.name,
             data.name_ps || null,
@@ -97,6 +105,10 @@ class ProductModel {
             data.images ? JSON.stringify(data.images) : null,
             data.unit || 'piece',
             data.weight || null,
+            data.size || null,
+            data.verified ? 1 : 0,
+            data.seller || null,
+            data.supplier || null,
             data.is_featured ? 1 : 0
         );
 
@@ -122,7 +134,7 @@ class ProductModel {
             'name', 'name_ps', 'name_fa', 'name_de', 'name_fr',
             'description', 'description_ps', 'description_fa', 'description_de', 'description_fr',
             'price', 'original_price', 'stock', 'category_id', 'image',
-            'unit', 'weight'
+            'unit', 'weight', 'size', 'seller', 'supplier'
         ];
 
         fields.forEach((field) => {
@@ -135,6 +147,11 @@ class ProductModel {
         if (data.images !== undefined) {
             updates.push('images = ?');
             values.push(JSON.stringify(data.images));
+        }
+
+        if (data.verified !== undefined) {
+            updates.push('verified = ?');
+            values.push(data.verified ? 1 : 0);
         }
 
         if (data.is_featured !== undefined) {

@@ -74,12 +74,7 @@ const routes = [
         component: () => import('@/views/ContactPage.vue'),
         meta: { title: 'Contact Us - Afghan Grocery' }
     },
-    {
-        path: '/blog',
-        name: 'Blog',
-        component: () => import('@/views/BlogPage.vue'),
-        meta: { title: 'Blog - Afghan Grocery' }
-    },
+
     {
         path: '/referral',
         name: 'Referral',

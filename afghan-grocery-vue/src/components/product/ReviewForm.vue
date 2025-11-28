@@ -59,6 +59,11 @@ const formData = ref({
 const loading = ref(false)
 
 async function handleSubmit() {
+  // Prevent duplicate submissions
+  if (loading.value) {
+    return
+  }
+
   if (!formData.value.rating || !formData.value.comment.trim()) {
     window.showToast('Please provide a rating and comment', 'error')
     return

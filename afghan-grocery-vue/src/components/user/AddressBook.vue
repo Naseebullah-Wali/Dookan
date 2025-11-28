@@ -90,9 +90,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useAuthStore } from '@/stores/auth'
-
-const authStore = useAuthStore()
+import addressService from '@/services/addressService'
 
 const addresses = ref([])
 const showAddForm = ref(false)
@@ -100,11 +98,12 @@ const editingAddress = ref(null)
 const loading = ref(false)
 
 const formData = ref({
-  name: '',
-  fullName: '',
+  recipient_name: '',
+  fullName: '', // Kept for compatibility if needed, but recipient_name is the backend field
   phone: '',
   city: 'kabul',
-  address: '',
+  street: '', // Backend expects 'street', frontend was 'address'
+  address: '', // Kept for binding, will map to street
   isDefault: false
 })
 
@@ -121,9 +120,11 @@ onMounted(() => {
   loadAddresses()
 })
 
-function loadAddresses() {
-  if (authStore.user && authStore.user.addresses) {
-    addresses.value = authStore.user.addresses
+async function loadAddresses() {
+  try {
+    addresses.value = await addressService.getAll()
+  } catch (error) {
+    console.error('Failed to load addresses:', error)
   }
 }
 
@@ -135,32 +136,28 @@ async function handleSaveAddress() {
   loading.value = true
 
   try {
-    const newAddress = {
-      ...formData.value,
-      id: editingAddress.value?.id || Date.now()
+    // Map frontend fields to backend expected fields
+    const addressData = {
+      recipient_name: formData.value.fullName || formData.value.recipient_name, // Use fullName as recipient_name
+      phone: formData.value.phone,
+      province: 'Kabul', // Default province as it's required by backend but not in form
+      city: formData.value.city,
+      street: formData.value.address, // Map address to street
+      is_default: formData.value.isDefault
     }
 
     if (editingAddress.value) {
-      // Update existing
-      const index = addresses.value.findIndex(a => a.id === editingAddress.value.id)
-      addresses.value[index] = newAddress
+      await addressService.update(editingAddress.value.id, addressData)
+      window.showToast('Address updated successfully!', 'success')
     } else {
-      // Add new
-      if (newAddress.isDefault) {
-        addresses.value.forEach(a => a.isDefault = false)
-      }
-      addresses.value.push(newAddress)
+      await addressService.create(addressData)
+      window.showToast('Address created successfully!', 'success')
     }
 
-    // Update user profile
-    await authStore.updateProfile({
-      ...authStore.user,
-      addresses: addresses.value
-    })
-
-    window.showToast('Address saved successfully!', 'success')
+    await loadAddresses()
     cancelForm()
   } catch (error) {
+    console.error('Failed to save address:', error)
     window.showToast('Failed to save address', 'error')
   } finally {
     loading.value = false
@@ -169,43 +166,49 @@ async function handleSaveAddress() {
 
 function handleEdit(address) {
   editingAddress.value = address
-  formData.value = { ...address }
-  showAddForm.value = false
+  formData.value = {
+    fullName: address.recipient_name,
+    phone: address.phone,
+    city: address.city,
+    address: address.street,
+    isDefault: !!address.is_default
+  }
+  showAddForm.value = true
 }
 
 async function handleSetDefault(address) {
-  addresses.value.forEach(a => a.isDefault = false)
-  address.isDefault = true
-
-  await authStore.updateProfile({
-    ...authStore.user,
-    addresses: addresses.value
-  })
-
-  window.showToast('Default address updated', 'success')
+  try {
+    await addressService.update(address.id, { is_default: true })
+    await loadAddresses()
+    window.showToast('Default address updated', 'success')
+  } catch (error) {
+    console.error('Failed to set default address:', error)
+    window.showToast('Failed to set default address', 'error')
+  }
 }
 
 async function handleDelete(address) {
   if (!confirm('Are you sure you want to delete this address?')) return
 
-  addresses.value = addresses.value.filter(a => a.id !== address.id)
-
-  await authStore.updateProfile({
-    ...authStore.user,
-    addresses: addresses.value
-  })
-
-  window.showToast('Address deleted', 'info')
+  try {
+    await addressService.delete(address.id)
+    addresses.value = addresses.value.filter(a => a.id !== address.id)
+    window.showToast('Address deleted', 'info')
+  } catch (error) {
+    console.error('Failed to delete address:', error)
+    window.showToast('Failed to delete address', 'error')
+  }
 }
 
 function cancelForm() {
   showAddForm.value = false
   editingAddress.value = null
   formData.value = {
-    name: '',
+    recipient_name: '',
     fullName: '',
     phone: '',
     city: 'kabul',
+    street: '',
     address: '',
     isDefault: false
   }

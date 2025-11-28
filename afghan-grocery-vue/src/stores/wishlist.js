@@ -12,7 +12,8 @@ export const useWishlistStore = defineStore('wishlist', () => {
     const itemCount = computed(() => items.value.length)
 
     const isInWishlist = (productId) => {
-        return items.value.some(item => item.product_id === productId)
+        console.log('Checking wishlist for:', productId, 'Items:', items.value)
+        return items.value.some(item => item.productId == productId || item.product_id == productId)
     }
 
     async function fetchWishlist() {
@@ -24,8 +25,25 @@ export const useWishlistStore = defineStore('wishlist', () => {
         loading.value = true
         error.value = null
         try {
-            const response = await api.get('/wishlist')
-            items.value = response.data.data || []
+            const response = await api.get(`/wishlist?_=${new Date().getTime()}`)
+            const rawItems = response.data.data || []
+
+            // Transform backend response to consistent format
+            items.value = rawItems.map(item => ({
+                id: item.id,
+                productId: item.product_id,
+                product_id: item.product_id,
+                created_at: item.created_at,
+                product: {
+                    id: item.product_id,
+                    name: item.name,
+                    price: item.price,
+                    image: item.image,
+                    stock: item.stock,
+                    rating: item.rating,
+                    category_id: item.category_id
+                }
+            }))
         } catch (err) {
             error.value = err.message
             console.error('Failed to fetch wishlist:', err)
@@ -48,10 +66,11 @@ export const useWishlistStore = defineStore('wishlist', () => {
         loading.value = true
         error.value = null
         try {
-            const response = await api.post('/wishlist', {
+            await api.post('/wishlist', {
                 product_id: product.id
             })
-            items.value.push(response.data.data)
+            // Refetch to get complete data with product details
+            await fetchWishlist()
             window.showToast('Added to wishlist!', 'success')
             return true
         } catch (err) {
@@ -67,10 +86,10 @@ export const useWishlistStore = defineStore('wishlist', () => {
         loading.value = true
         error.value = null
         try {
-            const item = items.value.find(i => i.product_id === productId)
+            const item = items.value.find(i => i.productId == productId || i.product_id == productId)
             if (item) {
                 await api.delete(`/wishlist/${item.id}`)
-                items.value = items.value.filter(i => i.product_id !== productId)
+                items.value = items.value.filter(i => (i.productId != productId && i.product_id != productId))
                 window.showToast('Removed from wishlist', 'info')
             }
             return true

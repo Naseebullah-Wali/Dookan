@@ -44,7 +44,7 @@ const props = defineProps({
     required: true
   },
   category: {
-    type: String,
+    type: [String, Number],
     required: true
   },
   maxItems: {
@@ -62,9 +62,12 @@ const relatedProducts = computed(() => {
   const allProducts = productsStore.products
   
   // Filter products in same category, excluding current product
-  let related = allProducts.filter(p => 
-    p.category === props.category && p.id !== props.currentProductId
-  )
+  // Handle both category and category_id fields
+  let related = allProducts.filter(p => {
+    const productCategory = p.category_id || p.category
+    const targetCategory = props.category
+    return productCategory == targetCategory && p.id !== props.currentProductId
+  })
 
   // Limit to maxItems
   return related.slice(0, props.maxItems)

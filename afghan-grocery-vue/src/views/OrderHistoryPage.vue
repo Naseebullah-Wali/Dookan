@@ -79,7 +79,7 @@ const orders = ref([])
 const loading = ref(true)
 
 onMounted(async () => {
-  orders.value = await ordersStore.fetchUserOrders()
+  orders.value = await ordersStore.fetchMyOrders()
   loading.value = false
 })
 

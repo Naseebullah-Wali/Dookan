@@ -24,7 +24,7 @@
         <div class="row g-4 mb-5">
           <div class="col-lg-6 col-12">
             <div class="position-relative">
-              <img :src="product.image" :alt="product.name" class="img-fluid rounded shadow-lg" />
+              <img :src="productImageUrl" :alt="product.name" class="img-fluid rounded shadow-lg" />
               <span v-if="product.verified" class="badge bg-success position-absolute top-0 start-0 m-3">
                 <i class="bi bi-check-circle me-1"></i>Verified Supplier
               </span>
@@ -36,7 +36,7 @@
             
             <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
               <div class="d-flex gap-2 align-items-center">
-                <span class="text-warning fw-semibold"><i class="bi bi-star-fill"></i> {{ product.rating }}</span>
+                <span class="text-warning fw-semibold"><i class="bi bi-star-fill"></i> {{ formattedRating }}</span>
                 <span class="text-muted small">({{ product.review_count }} reviews)</span>
               </div>
               <span class="fw-semibold" :class="product.stock > 0 ? 'text-success' : 'text-danger'">
@@ -145,11 +145,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useProductsStore } from '@/stores/products'
 import { useReviewsStore } from '@/stores/reviews'
+import { getImageUrl } from '@/services/imageService'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import WishlistButton from '@/components/common/WishlistButton.vue'
@@ -165,6 +166,16 @@ const reviewsStore = useReviewsStore()
 const product = ref(null)
 const quantity = ref(1)
 const loading = ref(true)
+
+const productImageUrl = computed(() => {
+  if (!product.value) return ''
+  return getImageUrl(product.value.image)
+})
+
+const formattedRating = computed(() => {
+  if (!product.value || !product.value.rating) return '0.0'
+  return Number(product.value.rating).toFixed(1)
+})
 
 onMounted(async () => {
   const productId = route.params.id
@@ -203,10 +214,10 @@ function handleAddToCart() {
 }
 
 function handleReviewSubmitted(newReview) {
-  reviewsStore.reviews.unshift(newReview)
-  // Update product rating (simple average)
+  // Review is already added to store by createReview action
+  // Just update local product stats
   const totalRating = reviewsStore.reviews.reduce((sum, r) => sum + r.rating, 0)
-  product.value.rating = (totalRating / reviewsStore.reviews.length).toFixed(1)
+  product.value.rating = (totalRating / reviewsStore.reviews.length)
   product.value.review_count = reviewsStore.reviews.length
 }
 

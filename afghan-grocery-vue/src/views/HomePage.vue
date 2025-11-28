@@ -1,6 +1,5 @@
 <template>
   <div class="home-page">
-    <PromoBanner />
     <AppHeader />
     
     <!-- Hero Section -->
@@ -111,7 +110,6 @@ import { ref, onMounted } from 'vue'
 import { useProductsStore } from '@/stores/products'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
-import PromoBanner from '@/components/common/PromoBanner.vue'
 import NewsTicker from '@/components/common/NewsTicker.vue'
 import TestimonialsSection from '@/components/common/TestimonialsSection.vue'
 import ProductCard from '@/components/product/ProductCard.vue'

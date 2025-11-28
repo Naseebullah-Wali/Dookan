@@ -1,7 +1,7 @@
 <template>
   <div class="card h-100 border-0 shadow-sm product-card">
     <div class="position-relative product-image-wrapper">
-      <img :src="product.image" :alt="product.name" class="card-img-top product-image" />
+      <img :src="productImageUrl" :alt="product.name" class="card-img-top product-image" />
       <span v-if="product.verified" class="position-absolute top-0 end-0 m-3 badge bg-success">
         <i class="bi bi-check-circle me-1"></i>Verified
       </span>
@@ -13,7 +13,7 @@
       </router-link>
       <p class="card-text text-muted small mb-2">{{ product.size }} • {{ product.supplier }}</p>
       <div class="d-flex align-items-center gap-2 mb-2">
-        <span class="text-warning"><i class="bi bi-star-fill"></i> {{ product.rating }}</span>
+        <span class="text-warning"><i class="bi bi-star-fill"></i> {{ formattedRating }}</span>
         <span class="text-muted small">({{ product.reviewCount }})</span>
       </div>
       <div class="d-flex align-items-center gap-2 mb-3">
@@ -30,8 +30,10 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import WishlistButton from '@/components/common/WishlistButton.vue'
+import { getImageUrl } from '@/services/imageService'
 
 const props = defineProps({
   product: {
@@ -41,6 +43,15 @@ const props = defineProps({
 })
 
 const cartStore = useCartStore()
+
+// Computed property for product image URL
+const productImageUrl = computed(() => getImageUrl(props.product.image))
+
+// Computed property for formatted rating (1 decimal place)
+const formattedRating = computed(() => {
+  const rating = props.product.rating || 0
+  return rating.toFixed(1)
+})
 
 function formatPrice(price) {
   return price.toLocaleString()
