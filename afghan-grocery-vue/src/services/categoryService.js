@@ -17,21 +17,21 @@ export const categoryService = {
     },
 
     /**
-     * Get categories with product counts
-     * @returns {Promise<Array>} Categories with product counts
-     */
-    async getWithCounts() {
-        const response = await api.get('/categories/with-counts')
-        return response.data
-    },
-
-    /**
      * Get category by ID
      * @param {number} id - Category ID
      * @returns {Promise<Object>} Category data
      */
     async getById(id) {
         const response = await api.get(`/categories/${id}`)
+        return response.data
+    },
+
+    /**
+     * Get categories with product counts
+     * @returns {Promise<Array>} Categories with counts
+     */
+    async getWithCounts() {
+        const response = await api.get('/categories?with_counts=true')
         return response.data
     },
 

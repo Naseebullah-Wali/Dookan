@@ -111,6 +111,102 @@ export const useProductsStore = defineStore('products', () => {
         }
     }
 
+    async function createProduct(productData) {
+        loading.value = true
+        error.value = null
+        try {
+            const newProduct = await productService.create(productData)
+            products.value.unshift(newProduct)
+            return newProduct
+        } catch (err) {
+            error.value = err.message
+            throw err
+        } finally {
+            loading.value = false
+        }
+    }
+
+    async function updateProduct(id, productData) {
+        loading.value = true
+        error.value = null
+        try {
+            const updatedProduct = await productService.update(id, productData)
+            const index = products.value.findIndex(p => p.id === id)
+            if (index !== -1) {
+                products.value[index] = updatedProduct
+            }
+            return updatedProduct
+        } catch (err) {
+            error.value = err.message
+            throw err
+        } finally {
+            loading.value = false
+        }
+    }
+
+    async function deleteProduct(id) {
+        loading.value = true
+        error.value = null
+        try {
+            await productService.delete(id)
+            products.value = products.value.filter(p => p.id !== id)
+            return true
+        } catch (err) {
+            error.value = err.message
+            throw err
+        } finally {
+            loading.value = false
+        }
+    }
+
+    async function createCategory(categoryData) {
+        loading.value = true
+        error.value = null
+        try {
+            const newCategory = await categoryService.create(categoryData)
+            categories.value.push(newCategory)
+            return newCategory
+        } catch (err) {
+            error.value = err.message
+            throw err
+        } finally {
+            loading.value = false
+        }
+    }
+
+    async function updateCategory(id, categoryData) {
+        loading.value = true
+        error.value = null
+        try {
+            const updatedCategory = await categoryService.update(id, categoryData)
+            const index = categories.value.findIndex(c => c.id === id)
+            if (index !== -1) {
+                categories.value[index] = updatedCategory
+            }
+            return updatedCategory
+        } catch (err) {
+            error.value = err.message
+            throw err
+        } finally {
+            loading.value = false
+        }
+    }
+
+    async function deleteCategory(id) {
+        loading.value = true
+        error.value = null
+        try {
+            await categoryService.delete(id)
+            categories.value = categories.value.filter(c => c.id !== id)
+            return true
+        } catch (err) {
+            error.value = err.message
+            throw err
+        } finally {
+            loading.value = false
+        }
+    }
+
     return {
         products,
         categories,
@@ -124,6 +220,12 @@ export const useProductsStore = defineStore('products', () => {
         fetchCategories,
         fetchCategoriesWithCounts,
         searchProducts,
+        createProduct,
+        updateProduct,
+        deleteProduct,
+        createCategory,
+        updateCategory,
+        deleteCategory,
         clearProducts
     }
 })

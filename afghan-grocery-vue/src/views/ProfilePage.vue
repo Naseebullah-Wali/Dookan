@@ -95,13 +95,24 @@ const formData = ref({
 
 onMounted(() => {
   if (authStore.user) {
-    formData.value = { ...authStore.user }
+    const names = (authStore.user.name || '').split(' ')
+    formData.value = {
+      firstName: names[0] || '',
+      lastName: names.slice(1).join(' ') || '',
+      email: authStore.user.email,
+      phone: authStore.user.phone || ''
+    }
   }
 })
 
 async function handleUpdate() {
   loading.value = true
-  const success = await authStore.updateProfile(formData.value)
+  const updateData = {
+    name: `${formData.value.firstName} ${formData.value.lastName}`.trim(),
+    phone: formData.value.phone
+  }
+  
+  const success = await authStore.updateProfile(updateData)
   if (success) {
     window.showToast('Profile updated successfully!', 'success')
   } else {

@@ -185,3 +185,56 @@ export const changePassword = async (
         next(error);
     }
 };
+
+export const getAllUsers = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        // Only admin can list users
+        if (!req.user || req.user.role !== 'admin') {
+            throw new UnauthorizedError('Admin access required');
+        }
+
+        const users = await UserModel.getAll();
+
+        // Remove passwords
+        const safeUsers = users.map(user => {
+            const { password: _, ...userWithoutPassword } = user;
+            return userWithoutPassword;
+        });
+
+        sendSuccess(res, safeUsers);
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const adminUpdateUser = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        // Only admin can update other users
+        if (!req.user || req.user.role !== 'admin') {
+            throw new UnauthorizedError('Admin access required');
+        }
+
+        const userId = parseInt(req.params.id);
+        const { name, email, role, phone } = req.body;
+
+        const updatedUser = await UserModel.update(userId, {
+            name,
+            email,
+            role,
+            phone
+        } as any);
+
+        const { password: _, ...userWithoutPassword } = updatedUser;
+        sendSuccess(res, userWithoutPassword, 'User updated successfully');
+    } catch (error) {
+        next(error);
+    }
+};

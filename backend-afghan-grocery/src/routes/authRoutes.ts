@@ -35,10 +35,13 @@ const changePasswordValidation = [
 ];
 
 // Routes
+// Routes
 router.post('/register', validate(registerValidation), authController.register);
 router.post('/login', validate(loginValidation), authController.login);
 router.get('/profile', authenticate, authController.getProfile);
 router.put('/profile', authenticate, validate(updateProfileValidation), authController.updateProfile);
 router.post('/change-password', authenticate, validate(changePasswordValidation), authController.changePassword);
+router.get('/users', authenticate, authController.getAllUsers);
+router.put('/users/:id', authenticate, authController.adminUpdateUser);
 
 export default router;

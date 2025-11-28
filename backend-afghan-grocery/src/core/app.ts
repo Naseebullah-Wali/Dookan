@@ -11,6 +11,10 @@ import authRoutes from '../routes/authRoutes';
 import productRoutes from '../routes/productRoutes';
 import categoryRoutes from '../routes/categoryRoutes';
 import orderRoutes from '../routes/orderRoutes';
+import wishlistRoutes from '../routes/wishlistRoutes';
+import reviewRoutes from '../routes/reviewRoutes';
+import uploadRoutes from '../routes/uploadRoutes';
+import path from 'path';
 
 class App {
     public app: Application;
@@ -47,6 +51,9 @@ class App {
         // Compression
         this.app.use(compression());
 
+        // Serve static files from uploads directory
+        this.app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
         // Logging
         if (config.env === 'development') {
             this.app.use(morgan('dev'));
@@ -72,6 +79,9 @@ class App {
         this.app.use(`/api/${apiVersion}/products`, productRoutes);
         this.app.use(`/api/${apiVersion}/categories`, categoryRoutes);
         this.app.use(`/api/${apiVersion}/orders`, orderRoutes);
+        this.app.use(`/api/${apiVersion}/wishlist`, wishlistRoutes);
+        this.app.use(`/api/${apiVersion}/reviews`, reviewRoutes);
+        this.app.use(`/api/${apiVersion}/upload`, uploadRoutes);
 
         // Welcome route
         this.app.get('/', (_req, res) => {

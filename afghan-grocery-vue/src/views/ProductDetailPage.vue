@@ -37,7 +37,7 @@
             <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
               <div class="d-flex gap-2 align-items-center">
                 <span class="text-warning fw-semibold"><i class="bi bi-star-fill"></i> {{ product.rating }}</span>
-                <span class="text-muted small">({{ product.reviewCount }} reviews)</span>
+                <span class="text-muted small">({{ product.review_count }} reviews)</span>
               </div>
               <span class="fw-semibold" :class="product.stock > 0 ? 'text-success' : 'text-danger'">
                 {{ product.stock > 0 ? `In Stock (${product.stock})` : 'Out of Stock' }}
@@ -59,15 +59,15 @@
             <div class="bg-light p-4 rounded mb-4">
               <div class="d-flex justify-content-between py-2 border-bottom">
                 <span class="fw-semibold">Size:</span>
-                <span>{{ product.size }}</span>
+                <span>{{ product.size || 'Standard' }}</span>
               </div>
               <div class="d-flex justify-content-between py-2 border-bottom">
                 <span class="fw-semibold">Supplier:</span>
-                <span>{{ product.supplier }}</span>
+                <span>{{ product.supplier || 'Afghan Grocery' }}</span>
               </div>
               <div class="d-flex justify-content-between py-2">
                 <span class="fw-semibold">Category:</span>
-                <span>{{ getCategoryName(product.category) }}</span>
+                <span>{{ getCategoryName(product.category_id) }}</span>
               </div>
             </div>
 
@@ -106,16 +106,16 @@
           
           <ReviewForm :productId="product.id" @review-submitted="handleReviewSubmitted" />
           
-          <div v-if="reviews.length > 0" class="row g-3 mt-4">
-            <div v-for="review in reviews" :key="review.id" class="col-12">
+          <div v-if="reviewsStore.reviews.length > 0" class="row g-3 mt-4">
+            <div v-for="review in reviewsStore.reviews" :key="review.id" class="col-12">
               <div class="card shadow-sm review-card">
                 <div class="card-body">
                   <div class="d-flex justify-content-between align-items-start mb-2">
                     <div>
-                      <span class="fw-semibold d-block">{{ review.userName }}</span>
+                      <span class="fw-semibold d-block">{{ review.user_name }}</span>
                       <StarRating :modelValue="review.rating" :showValue="false" />
                     </div>
-                    <span class="text-muted small">{{ formatDate(review.createdAt) }}</span>
+                    <span class="text-muted small">{{ formatDate(review.created_at) }}</span>
                   </div>
                   <p class="mb-0">{{ review.comment }}</p>
                 </div>
@@ -129,7 +129,7 @@
         <RelatedProducts 
           v-if="product"
           :currentProductId="product.id"
-          :category="product.category"
+          :category="product.category_id"
           :maxItems="8"
         />
       </div>
@@ -149,20 +149,20 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useProductsStore } from '@/stores/products'
+import { useReviewsStore } from '@/stores/reviews'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import WishlistButton from '@/components/common/WishlistButton.vue'
 import StarRating from '@/components/common/StarRating.vue'
 import ReviewForm from '@/components/product/ReviewForm.vue'
 import RelatedProducts from '@/components/product/RelatedProducts.vue'
-import api from '@/services/api'
 
 const route = useRoute()
 const cartStore = useCartStore()
 const productsStore = useProductsStore()
+const reviewsStore = useReviewsStore()
 
 const product = ref(null)
-const reviews = ref([])
 const quantity = ref(1)
 const loading = ref(true)
 
@@ -177,26 +177,14 @@ onMounted(async () => {
   product.value = await productsStore.fetchProductById(productId)
   
   if (product.value) {
-    // Reviews endpoint not yet implemented in backend
-    // Setting empty array for now to avoid 404s
-    reviews.value = []
-    
-    // TODO: Implement reviews endpoint in backend
-    /*
-    try {
-      const response = await api.get(`/reviews?productId=${productId}`)
-      reviews.value = response.data
-    } catch (error) {
-      console.warn('Failed to load reviews:', error)
-    }
-    */
+    await reviewsStore.fetchProductReviews(productId)
   }
   
   loading.value = false
 })
 
 function formatPrice(price) {
-  return price.toLocaleString()
+  return price?.toLocaleString() || '0'
 }
 
 function formatDate(date) {
@@ -215,11 +203,11 @@ function handleAddToCart() {
 }
 
 function handleReviewSubmitted(newReview) {
-  reviews.value.unshift(newReview)
+  reviewsStore.reviews.unshift(newReview)
   // Update product rating (simple average)
-  const totalRating = reviews.value.reduce((sum, r) => sum + r.rating, 0)
-  product.value.rating = (totalRating / reviews.value.length).toFixed(1)
-  product.value.reviewCount = reviews.value.length
+  const totalRating = reviewsStore.reviews.reduce((sum, r) => sum + r.rating, 0)
+  product.value.rating = (totalRating / reviewsStore.reviews.length).toFixed(1)
+  product.value.review_count = reviewsStore.reviews.length
 }
 
 </script>

@@ -14,8 +14,8 @@
           <h3 class="h4 fw-bold mb-4 border-bottom pb-3">Order Details</h3>
           
           <div class="d-flex justify-content-between py-2 border-bottom">
-            <span class="text-muted">Order ID:</span>
-            <span class="fw-bold">#{{ order.id }}</span>
+            <span class="text-muted">Order Number:</span>
+            <span class="fw-bold">{{ order.order_number }}</span>
           </div>
           
           <div class="d-flex justify-content-between py-2 border-bottom align-items-center">
@@ -23,24 +23,22 @@
             <span class="badge bg-primary rounded-pill">{{ order.status }}</span>
           </div>
           
-          <div class="d-flex justify-content-between py-2 border-bottom">
-            <span class="text-muted">Recipient:</span>
-            <span class="fw-bold text-end">{{ order.delivery?.recipientName }}</span>
-          </div>
-          
-          <div class="d-flex justify-content-between py-2 border-bottom">
-            <span class="text-muted">Delivery Address:</span>
-            <span class="fw-bold text-end" style="max-width: 60%;">{{ order.delivery?.address }}, {{ order.delivery?.city }}</span>
-          </div>
-          
           <div class="d-flex justify-content-between py-3">
             <span class="text-muted">Total Amount:</span>
             <span class="fw-bold text-primary fs-5">{{ formatPrice(order.total) }} AFN</span>
           </div>
 
+          <div v-if="order.items && order.items.length > 0" class="mt-3">
+            <h5 class="fw-semibold mb-3">Order Items:</h5>
+            <div v-for="item in order.items" :key="item.id" class="d-flex justify-content-between py-2 border-bottom">
+              <span>{{ item.product_name }} × {{ item.quantity }}</span>
+              <span>{{ formatPrice(item.subtotal) }} AFN</span>
+            </div>
+          </div>
+
           <div class="d-grid gap-3 mt-4">
-            <router-link to="/tracking" class="btn btn-primary btn-lg">
-              <i class="bi bi-box-seam me-2"></i>Track Order
+            <router-link to="/orders" class="btn btn-primary btn-lg">
+              <i class="bi bi-box-seam me-2"></i>View All Orders
             </router-link>
             <router-link to="/shop" class="btn btn-outline-secondary btn-lg">
               Continue Shopping
@@ -57,20 +55,17 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useOrdersStore } from '@/stores/orders'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
-import api from '@/services/api'
 
 const route = useRoute()
+const ordersStore = useOrdersStore()
 const order = ref(null)
 
 onMounted(async () => {
-  try {
-    const response = await api.get(`/orders/${route.params.orderId}`)
-    order.value = response.data
-  } catch (error) {
-    console.error('Failed to load order:', error)
-  }
+  const orderId = route.params.orderId
+  order.value = await ordersStore.fetchOrderById(orderId)
 })
 
 function formatPrice(price) {

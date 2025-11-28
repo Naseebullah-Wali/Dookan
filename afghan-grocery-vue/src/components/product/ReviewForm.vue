@@ -37,7 +37,7 @@
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import StarRating from '@/components/common/StarRating.vue'
-import api from '@/services/api'
+import { useReviewsStore } from '@/stores/reviews'
 
 const props = defineProps({
   productId: {
@@ -49,6 +49,7 @@ const props = defineProps({
 const emit = defineEmits(['review-submitted'])
 
 const authStore = useAuthStore()
+const reviewsStore = useReviewsStore()
 
 const formData = ref({
   rating: 0,
@@ -67,16 +68,12 @@ async function handleSubmit() {
 
   try {
     const reviewData = {
-      productId: props.productId,
-      userId: authStore.user.id,
-      userName: `${authStore.user.firstName} ${authStore.user.lastName}`,
+      product_id: props.productId,
       rating: formData.value.rating,
-      comment: formData.value.comment.trim(),
-      helpful: 0,
-      createdAt: new Date().toISOString()
+      comment: formData.value.comment.trim()
     }
 
-    const response = await api.post('/reviews', reviewData)
+    const newReview = await reviewsStore.createReview(reviewData)
     
     window.showToast('Review submitted successfully!', 'success')
     
@@ -87,7 +84,7 @@ async function handleSubmit() {
     }
 
     // Emit event to parent
-    emit('review-submitted', response.data)
+    emit('review-submitted', newReview)
   } catch (error) {
     console.error('Failed to submit review:', error)
     window.showToast('Failed to submit review. Please try again.', 'error')

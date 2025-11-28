@@ -103,6 +103,12 @@ const routes = [
         name: 'Register',
         component: () => import('@/views/RegisterPage.vue'),
         meta: { title: 'Register - Afghan Grocery', guestOnly: true }
+    },
+    {
+        path: '/:pathMatch(.*)*',
+        name: 'NotFound',
+        component: () => import('@/views/NotFoundPage.vue'),
+        meta: { title: '404 - Page Not Found' }
     }
 ]
 

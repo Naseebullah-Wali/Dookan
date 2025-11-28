@@ -57,28 +57,28 @@
           <div class="card-body p-4">
             <h2 class="h4 fw-bold mb-4">Quick Actions</h2>
             <div class="row g-3">
-              <div class="col-md-6 col-lg-3">
+              <div class="col-md-3">
                 <button @click="activeTab = 'products'" class="btn btn-outline-primary w-100 py-4 h-100 d-flex flex-column align-items-center justify-content-center gap-2" :class="{ active: activeTab === 'products' }">
                   <span class="fs-4">📦</span>
-                  <span class="fw-bold">Manage Products</span>
+                  <span class="fw-bold">Products</span>
                 </button>
               </div>
-              <div class="col-md-6 col-lg-3">
+              <div class="col-md-3">
+                <button @click="activeTab = 'categories'" class="btn btn-outline-primary w-100 py-4 h-100 d-flex flex-column align-items-center justify-content-center gap-2" :class="{ active: activeTab === 'categories' }">
+                  <span class="fs-4">🏷️</span>
+                  <span class="fw-bold">Categories</span>
+                </button>
+              </div>
+              <div class="col-md-3">
                 <button @click="activeTab = 'orders'" class="btn btn-outline-primary w-100 py-4 h-100 d-flex flex-column align-items-center justify-content-center gap-2" :class="{ active: activeTab === 'orders' }">
                   <span class="fs-4">🛒</span>
-                  <span class="fw-bold">View Orders</span>
+                  <span class="fw-bold">Orders</span>
                 </button>
               </div>
-              <div class="col-md-6 col-lg-3">
+              <div class="col-md-3">
                 <button @click="activeTab = 'users'" class="btn btn-outline-primary w-100 py-4 h-100 d-flex flex-column align-items-center justify-content-center gap-2" :class="{ active: activeTab === 'users' }">
                   <span class="fs-4">👥</span>
-                  <span class="fw-bold">Manage Users</span>
-                </button>
-              </div>
-              <div class="col-md-6 col-lg-3">
-                <button class="btn btn-outline-primary w-100 py-4 h-100 d-flex flex-column align-items-center justify-content-center gap-2">
-                  <span class="fs-4">📊</span>
-                  <span class="fw-bold">View Analytics</span>
+                  <span class="fw-bold">Users</span>
                 </button>
               </div>
             </div>
@@ -90,7 +90,9 @@
           <div class="card-body p-4">
             <div class="d-flex justify-content-between align-items-center mb-4">
               <h2 class="h4 fw-bold mb-0">Products Management</h2>
-              <button class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i>Add Product</button>
+              <button class="btn btn-primary btn-sm" @click="openProductModal(null)">
+                <i class="bi bi-plus-lg me-1"></i>Add Product
+              </button>
             </div>
             <div class="table-responsive">
               <table class="table table-hover align-middle">
@@ -106,10 +108,10 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="product in products.slice(0, 10)" :key="product.id">
+                  <tr v-for="product in productsStore.products" :key="product.id">
                     <td>{{ product.id }}</td>
                     <td class="fw-semibold">{{ product.name }}</td>
-                    <td><span class="badge bg-light text-dark border">{{ product.category }}</span></td>
+                    <td><span class="badge bg-light text-dark border">{{ getCategoryName(product.category_id) }}</span></td>
                     <td>{{ formatPrice(product.price) }} AFN</td>
                     <td>{{ product.stock }}</td>
                     <td>
@@ -119,8 +121,12 @@
                     </td>
                     <td>
                       <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-secondary" title="Edit"><i class="bi bi-pencil"></i></button>
-                        <button class="btn btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></button>
+                        <button class="btn btn-outline-secondary" title="Edit" @click="openProductModal(product)">
+                          <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-outline-danger" title="Delete" @click="handleDeleteProduct(product.id)">
+                          <i class="bi bi-trash"></i>
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -152,11 +158,16 @@
                 <tbody>
                   <tr v-for="order in orders" :key="order.id">
                     <td class="fw-bold">#{{ order.id }}</td>
-                    <td>User {{ order.userId }}</td>
-                    <td>{{ order.items.length }} items</td>
+                    <td>User {{ order.user_id }}</td>
+                    <td>{{ order.items?.length || 0 }} items</td>
                     <td class="fw-bold">{{ formatPrice(order.total) }} AFN</td>
                     <td>
-                      <select v-model="order.status" class="form-select form-select-sm" style="width: 140px;">
+                      <select 
+                        v-model="order.status" 
+                        class="form-select form-select-sm" 
+                        style="width: 140px;"
+                        @change="updateOrderStatus(order)"
+                      >
                         <option value="pending">Pending</option>
                         <option value="processing">Processing</option>
                         <option value="shipped">Shipped</option>
@@ -164,9 +175,60 @@
                         <option value="cancelled">Cancelled</option>
                       </select>
                     </td>
-                    <td class="text-muted small">{{ formatDate(order.createdAt) }}</td>
+                    <td class="text-muted small">{{ formatDate(order.created_at) }}</td>
                     <td>
-                      <button class="btn btn-outline-primary btn-sm" title="View Details"><i class="bi bi-eye"></i></button>
+                      <router-link :to="`/confirmation/${order.id}`" class="btn btn-outline-primary btn-sm" title="View Details">
+                        <i class="bi bi-eye"></i>
+                      </router-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Categories Management -->
+        <div v-if="activeTab === 'categories'" class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h2 class="h4 fw-bold mb-0">Categories Management</h2>
+              <button class="btn btn-primary btn-sm" @click="openCategoryModal(null)">
+                <i class="bi bi-plus-lg me-1"></i>Add Category
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-hover align-middle">
+                <thead class="table-light">
+                  <tr>
+                    <th>ID</th>
+                    <th>Icon</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="category in productsStore.categories" :key="category.id">
+                    <td>{{ category.id }}</td>
+                    <td><span class="fs-4">{{ category.icon }}</span></td>
+                    <td class="fw-semibold">{{ category.name }}</td>
+                    <td class="text-muted small">{{ category.description || 'N/A' }}</td>
+                    <td>
+                      <span :class="['badge rounded-pill', category.is_active ? 'bg-success' : 'bg-secondary']">
+                        {{ category.is_active ? 'Active' : 'Inactive' }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-secondary" title="Edit" @click="openCategoryModal(category)">
+                          <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-outline-danger" title="Delete" @click="handleDeleteCategory(category.id)">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 </tbody>
@@ -188,20 +250,31 @@
                     <th>ID</th>
                     <th>Name</th>
                     <th>Email</th>
+                    <th>Role</th>
                     <th>Joined</th>
-                    <th>Orders</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="user in users" :key="user.id">
                     <td>{{ user.id }}</td>
-                    <td class="fw-semibold">{{ user.firstName }} {{ user.lastName }}</td>
+                    <td class="fw-semibold">{{ user.name }}</td>
                     <td>{{ user.email }}</td>
-                    <td class="text-muted small">{{ formatDate(user.createdAt) }}</td>
-                    <td><span class="badge bg-secondary rounded-pill">{{ getUserOrderCount(user.id) }}</span></td>
                     <td>
-                      <button class="btn btn-outline-primary btn-sm" title="View Profile"><i class="bi bi-eye"></i></button>
+                      <select 
+                        v-model="user.role" 
+                        class="form-select form-select-sm" 
+                        style="width: 120px;"
+                        @change="updateUserRole(user)"
+                        :disabled="user.id === authStore.user?.id"
+                      >
+                        <option value="customer">Customer</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    </td>
+                    <td class="text-muted small">{{ formatDate(user.created_at) }}</td>
+                    <td>
+                      <span v-if="user.id === authStore.user?.id" class="badge bg-info">You</span>
                     </td>
                   </tr>
                 </tbody>
@@ -212,6 +285,19 @@
       </div>
     </div>
 
+    <ProductModal 
+      ref="productModalRef"
+      :product="selectedProduct"
+      :categories="productsStore.categories"
+      @save="handleSaveProduct"
+    />
+
+    <CategoryModal 
+      ref="categoryModalRef"
+      :category="selectedCategory"
+      @save="handleSaveCategory"
+    />
+
     <AppFooter />
   </div>
 </template>
@@ -219,27 +305,35 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useProductsStore } from '@/stores/products'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
+import ProductModal from '@/components/admin/ProductModal.vue'
+import CategoryModal from '@/components/admin/CategoryModal.vue'
 import api from '@/services/api'
 
 const authStore = useAuthStore()
+const productsStore = useProductsStore()
 
 const activeTab = ref('products')
-const products = ref([])
 const orders = ref([])
 const users = ref([])
+const loading = ref(false)
+const productModalRef = ref(null)
+const selectedProduct = ref(null)
+const categoryModalRef = ref(null)
+const selectedCategory = ref(null)
 
 const isAdmin = computed(() => {
-  return authStore.user?.email === 'demo@afghangrocery.com' || authStore.user?.role === 'admin'
+  return authStore.user?.role === 'admin'
 })
 
 const stats = computed(() => {
   return {
-    totalProducts: products.value.length,
+    totalProducts: productsStore.products.length,
     totalOrders: orders.value.length,
     totalUsers: users.value.length,
-    totalRevenue: orders.value.reduce((sum, order) => sum + order.total, 0)
+    totalRevenue: orders.value.reduce((sum, order) => sum + (Number(order.total) || 0), 0)
   }
 })
 
@@ -250,33 +344,126 @@ onMounted(async () => {
 })
 
 async function loadData() {
+  loading.value = true
   try {
-    const [productsRes, ordersRes, usersRes] = await Promise.all([
-      api.get('/products'),
+    if (productsStore.categories.length === 0) {
+      await productsStore.fetchCategories()
+    }
+    await productsStore.fetchProducts()
+    
+    const [ordersRes, usersRes] = await Promise.all([
       api.get('/orders'),
-      api.get('/users')
+      api.get('/auth/users')
     ])
     
-    products.value = productsRes.data
-    orders.value = ordersRes.data
-    users.value = usersRes.data
+    orders.value = ordersRes.data.data || ordersRes.data
+    users.value = usersRes.data.data || usersRes.data
   } catch (error) {
     console.error('Failed to load admin data:', error)
+  } finally {
+    loading.value = false
   }
 }
 
-function getUserOrderCount(userId) {
-  return orders.value.filter(o => o.userId === userId).length
+function openProductModal(product) {
+  selectedProduct.value = product
+  productModalRef.value.show()
+}
+
+async function handleSaveProduct(productData) {
+  try {
+    if (productData.id) {
+      await productsStore.updateProduct(productData.id, productData)
+      window.showToast('Product updated successfully', 'success')
+    } else {
+      await productsStore.createProduct(productData)
+      window.showToast('Product created successfully', 'success')
+    }
+    productModalRef.value.hide()
+  } catch (error) {
+    console.error('Failed to save product:', error)
+    window.showToast('Failed to save product', 'error')
+  }
+}
+
+async function handleDeleteProduct(id) {
+  if (!confirm('Are you sure you want to delete this product?')) return
+  
+  try {
+    await productsStore.deleteProduct(id)
+    window.showToast('Product deleted successfully', 'success')
+  } catch (error) {
+    console.error('Failed to delete product:', error)
+    window.showToast('Failed to delete product', 'error')
+  }
+}
+
+async function updateOrderStatus(order) {
+  try {
+    await api.put(`/orders/${order.id}`, { status: order.status })
+    window.showToast('Order status updated', 'success')
+  } catch (error) {
+    console.error('Failed to update status:', error)
+    window.showToast('Failed to update status', 'error')
+  }
+}
+
+function getCategoryName(categoryId) {
+  const category = productsStore.categories.find(c => c.id === categoryId)
+  return category ? category.name : categoryId
 }
 
 function formatPrice(price) {
-  return price?.toLocaleString() || '0'
+  return Number(price)?.toLocaleString() || '0'
 }
 
 function formatDate(dateString) {
   if (!dateString) return 'N/A'
   const date = new Date(dateString)
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+function openCategoryModal(category) {
+  selectedCategory.value = category
+  categoryModalRef.value.show()
+}
+
+async function handleSaveCategory(categoryData) {
+  try {
+    if (categoryData.id) {
+      await productsStore.updateCategory(categoryData.id, categoryData)
+      window.showToast('Category updated successfully', 'success')
+    } else {
+      await productsStore.createCategory(categoryData)
+      window.showToast('Category created successfully', 'success')
+    }
+    categoryModalRef.value.hide()
+  } catch (error) {
+    console.error('Failed to save category:', error)
+    window.showToast('Failed to save category', 'error')
+  }
+}
+
+async function handleDeleteCategory(id) {
+  if (!confirm('Are you sure you want to delete this category?')) return
+  
+  try {
+    await productsStore.deleteCategory(id)
+    window.showToast('Category deleted successfully', 'success')
+  } catch (error) {
+    console.error('Failed to delete category:', error)
+    window.showToast('Failed to delete category', 'error')
+  }
+}
+
+async function updateUserRole(user) {
+  try {
+    await api.put(`/auth/users/${user.id}`, { role: user.role })
+    window.showToast('User role updated successfully', 'success')
+  } catch (error) {
+    console.error('Failed to update user role:', error)
+    window.showToast('Failed to update user role', 'error')
+  }
 }
 </script>
 

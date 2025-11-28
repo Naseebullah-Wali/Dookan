@@ -16,8 +16,8 @@
           <div class="card border-0 shadow-sm">
             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
               <div>
-                <h5 class="mb-1 fw-bold">Order #{{ order.id }}</h5>
-                <p class="text-muted mb-0 small">{{ formatDate(order.createdAt) }}</p>
+                <h5 class="mb-1 fw-bold">Order {{ order.order_number }}</h5>
+                <p class="text-muted mb-0 small">{{ formatDate(order.created_at) }}</p>
               </div>
               <span class="badge rounded-pill" :class="getStatusBadgeClass(order.status)">
                 {{ order.status }}
@@ -30,11 +30,11 @@
                   <tbody>
                     <tr v-for="item in order.items" :key="item.id">
                       <td class="ps-0">
-                        <span class="fw-medium">{{ item.name }}</span>
+                        <span class="fw-medium">{{ item.product_name }}</span>
                         <span class="text-muted ms-2">× {{ item.quantity }}</span>
                       </td>
                       <td class="text-end pe-0 fw-medium">
-                        {{ formatPrice(item.price * item.quantity) }} AFN
+                        {{ formatPrice(item.subtotal) }} AFN
                       </td>
                     </tr>
                   </tbody>
@@ -46,8 +46,8 @@
               <span class="fw-bold text-primary fs-5">
                 Total: {{ formatPrice(order.total) }} AFN
               </span>
-              <router-link to="/tracking" class="btn btn-outline-primary btn-sm">
-                <i class="bi bi-truck me-2"></i>Track Order
+              <router-link :to="`/confirmation/${order.id}`" class="btn btn-outline-primary btn-sm">
+                <i class="bi bi-eye me-2"></i>View Details
               </router-link>
             </div>
           </div>
@@ -70,22 +70,16 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useAuthStore } from '@/stores/auth'
+import { useOrdersStore } from '@/stores/orders'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
-import api from '@/services/api'
 
-const authStore = useAuthStore()
+const ordersStore = useOrdersStore()
 const orders = ref([])
 const loading = ref(true)
 
 onMounted(async () => {
-  try {
-    const response = await api.get(`/orders?userId=${authStore.user?.id}`)
-    orders.value = response.data
-  } catch (error) {
-    console.error('Failed to load orders:', error)
-  }
+  orders.value = await ordersStore.fetchUserOrders()
   loading.value = false
 })
 
