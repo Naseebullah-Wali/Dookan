@@ -22,10 +22,12 @@ class WishlistModel {
                 w.created_at,
                 p.name,
                 p.price,
+                p.original_price,
                 p.image,
                 p.stock,
                 p.rating,
-                p.category_id
+                p.category_id,
+                p.size
             FROM wishlist w
             JOIN products p ON w.product_id = p.id
             WHERE w.user_id = ?

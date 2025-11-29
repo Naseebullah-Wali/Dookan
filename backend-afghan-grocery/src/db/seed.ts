@@ -16,6 +16,13 @@ export const seedDatabase = async (): Promise<void> => {
         VALUES (?, ?, ?, ?, ?)
       `, 'admin@afghangrocery.com', adminPassword, 'Admin User', 'admin', 1);
 
+        // Create test admin user
+        const testAdminPassword = await hashPassword('123test');
+        await db.run(`
+        INSERT INTO users (email, password, name, role, is_verified)
+        VALUES (?, ?, ?, ?, ?)
+      `, 'test@gmail.com', testAdminPassword, 'Test Admin', 'admin', 1);
+
         // Create test customer
         const customerPassword = await hashPassword('customer123');
         await db.run(`
@@ -58,6 +65,9 @@ export const seedDatabase = async (): Promise<void> => {
                 image: '/images/products/basmati-rice.jpg',
                 unit: 'kg',
                 weight: 5,
+                size: '5kg',
+                is_new: 0,
+                sale_percentage: 15,
                 is_featured: 1,
             },
             {
@@ -72,6 +82,9 @@ export const seedDatabase = async (): Promise<void> => {
                 image: '/images/products/saffron.jpg',
                 unit: 'gram',
                 weight: 0.01,
+                size: '10g',
+                is_new: 1,
+                sale_percentage: 10,
                 is_featured: 1,
             },
             {
@@ -85,6 +98,9 @@ export const seedDatabase = async (): Promise<void> => {
                 image: '/images/products/mulberries.jpg',
                 unit: 'kg',
                 weight: 0.5,
+                size: '500g',
+                is_new: 1,
+                sale_percentage: 0,
                 is_featured: 1,
             },
             {
@@ -98,6 +114,9 @@ export const seedDatabase = async (): Promise<void> => {
                 image: '/images/products/almonds.jpg',
                 unit: 'kg',
                 weight: 1,
+                size: '1kg',
+                is_new: 0,
+                sale_percentage: 0,
                 is_featured: 1,
             },
             {
@@ -111,6 +130,9 @@ export const seedDatabase = async (): Promise<void> => {
                 image: '/images/products/ghee.jpg',
                 unit: 'liter',
                 weight: 1,
+                size: '1L',
+                is_new: 0,
+                sale_percentage: 20,
             },
             {
                 name: 'Green Tea',
@@ -123,6 +145,9 @@ export const seedDatabase = async (): Promise<void> => {
                 image: '/images/products/green-tea.jpg',
                 unit: 'gram',
                 weight: 0.25,
+                size: '250g',
+                is_new: 0,
+                sale_percentage: 0,
             },
             {
                 name: 'Pistachio',
@@ -135,6 +160,9 @@ export const seedDatabase = async (): Promise<void> => {
                 image: '/images/products/pistachio.jpg',
                 unit: 'kg',
                 weight: 0.5,
+                size: '500g',
+                is_new: 1,
+                sale_percentage: 0,
             },
             {
                 name: 'Cardamom',
@@ -147,6 +175,9 @@ export const seedDatabase = async (): Promise<void> => {
                 image: '/images/products/cardamom.jpg',
                 unit: 'gram',
                 weight: 0.1,
+                size: '100g',
+                is_new: 0,
+                sale_percentage: 25,
             },
         ];
 
@@ -154,9 +185,9 @@ export const seedDatabase = async (): Promise<void> => {
             await db.run(`
           INSERT INTO products (
             name, name_ps, name_fa, description, price, original_price,
-            stock, category_id, image, unit, weight, is_featured
+            stock, category_id, image, unit, weight, size, is_new, sale_percentage, is_featured
           )
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `,
                 product.name,
                 product.name_ps,
@@ -169,6 +200,9 @@ export const seedDatabase = async (): Promise<void> => {
                 product.image,
                 product.unit,
                 product.weight,
+                product.size,
+                product.is_new || 0,
+                product.sale_percentage || 0,
                 product.is_featured || 0
             );
         }
@@ -297,6 +331,7 @@ export const seedDatabase = async (): Promise<void> => {
 
     console.log('✅ Database seeded successfully');
     console.log('📧 Admin: admin@afghangrocery.com / admin123');
+    console.log('📧 Test Admin: test@gmail.com / 123test');
     console.log('📧 Customer: customer@test.com / customer123');
 };
 

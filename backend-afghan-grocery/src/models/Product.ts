@@ -25,6 +25,8 @@ export interface Product {
     verified: number;
     seller?: string;
     supplier?: string;
+    is_new: number;
+    sale_percentage: number;
     is_featured: number;
     is_active: number;
     rating: number;
@@ -56,6 +58,8 @@ export interface CreateProductData {
     verified?: boolean;
     seller?: string;
     supplier?: string;
+    is_new?: boolean;
+    sale_percentage?: number;
     is_featured?: boolean;
 }
 
@@ -83,9 +87,9 @@ class ProductModel {
         name, name_ps, name_fa, name_de, name_fr,
         description, description_ps, description_fa, description_de, description_fr,
         price, original_price, stock, category_id, image, images,
-        unit, weight, size, verified, seller, supplier, is_featured
+        unit, weight, size, verified, seller, supplier, is_new, sale_percentage, is_featured
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
             data.name,
             data.name_ps || null,
@@ -109,6 +113,8 @@ class ProductModel {
             data.verified ? 1 : 0,
             data.seller || null,
             data.supplier || null,
+            data.is_new ? 1 : 0,
+            data.sale_percentage || 0,
             data.is_featured ? 1 : 0
         );
 
@@ -152,6 +158,16 @@ class ProductModel {
         if (data.verified !== undefined) {
             updates.push('verified = ?');
             values.push(data.verified ? 1 : 0);
+        }
+
+        if (data.is_new !== undefined) {
+            updates.push('is_new = ?');
+            values.push(data.is_new ? 1 : 0);
+        }
+
+        if (data.sale_percentage !== undefined) {
+            updates.push('sale_percentage = ?');
+            values.push(data.sale_percentage);
         }
 
         if (data.is_featured !== undefined) {

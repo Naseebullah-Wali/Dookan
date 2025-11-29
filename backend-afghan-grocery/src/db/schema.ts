@@ -63,6 +63,8 @@ export const initializeDatabase = async (): Promise<void> => {
       verified INTEGER DEFAULT 0,
       seller TEXT,
       supplier TEXT,
+      is_new INTEGER DEFAULT 0,
+      sale_percentage INTEGER DEFAULT 0,
       is_featured INTEGER DEFAULT 0,
       is_active INTEGER DEFAULT 1,
       rating REAL DEFAULT 0,
