@@ -7,12 +7,12 @@
         <div class="col-lg-5 col-md-7 col-sm-9 col-11">
           <div class="card border-0 shadow-lg">
             <div class="card-body p-3 p-sm-4 p-md-5">
-              <h1 class="text-center mb-2 fs-3 fs-md-1">Welcome Back</h1>
-              <p class="text-center text-muted mb-3 mb-md-4 small">Login to your Dookan account</p>
+              <h1 class="text-center mb-2 fs-3 fs-md-1">{{ $t('login.welcomeBack') }}</h1>
+              <p class="text-center text-muted mb-3 mb-md-4 small">{{ $t('login.subtitle') }}</p>
 
               <form @submit.prevent="handleLogin">
                 <div class="mb-3">
-                  <label class="form-label fw-semibold small">Email</label>
+                  <label class="form-label fw-semibold small">{{ $t('common.email') }}</label>
                   <input
                     v-model="email"
                     type="email"
@@ -23,12 +23,12 @@
                 </div>
 
                 <div class="mb-3">
-                  <label class="form-label fw-semibold small">Password</label>
+                  <label class="form-label fw-semibold small">{{ $t('common.password') }}</label>
                   <input
                     v-model="password"
                     type="password"
                     class="form-control"
-                    placeholder="Enter your password"
+                    :placeholder="$t('login.passwordPlaceholder')"
                     required
                   />
                 </div>
@@ -39,27 +39,27 @@
 
                 <button type="submit" class="btn btn-primary btn-lg w-100 mb-3" :disabled="loading">
                   <span v-if="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
-                  {{ loading ? 'Logging in...' : 'Login' }}
+                  {{ loading ? $t('common.loggingIn') : $t('common.login') }}
                 </button>
               </form>
 
               <div class="position-relative my-3 my-md-4">
                 <hr>
-                <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">or</span>
+                <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">{{ $t('common.or') }}</span>
               </div>
 
               <div class="alert alert-info py-2 py-md-3">
-                <p class="mb-2 small"><strong><i class="bi bi-info-circle me-2"></i>Demo Account:</strong></p>
-                <p class="mb-1 small" style="font-size: 0.85rem;">Email: customer@test.com</p>
-                <p class="mb-2 mb-md-3 small" style="font-size: 0.85rem;">Password: customer123</p>
+                <p class="mb-2 small"><strong><i class="bi bi-info-circle me-2"></i>{{ $t('login.demoAccount') }}:</strong></p>
+                <p class="mb-1 small" style="font-size: 0.85rem;">{{ $t('common.email') }}: customer@test.com</p>
+                <p class="mb-2 mb-md-3 small" style="font-size: 0.85rem;">{{ $t('common.password') }}: customer123</p>
                 <button @click="useDemoAccount" class="btn btn-outline-primary btn-sm w-100">
-                  <i class="bi bi-person-check me-2"></i>Use Demo Account
+                  <i class="bi bi-person-check me-2"></i>{{ $t('login.useDemo') }}
                 </button>
               </div>
 
               <div class="text-center mt-3 mt-md-4">
-                <span class="text-muted small">Don't have an account? </span>
-                <router-link to="/register" class="text-decoration-none fw-semibold small">Register here</router-link>
+                <span class="text-muted small">{{ $t('login.noAccount') }} </span>
+                <router-link to="/register" class="text-decoration-none fw-semibold small">{{ $t('login.registerHere') }}</router-link>
               </div>
             </div>
           </div>
@@ -75,11 +75,13 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useI18n } from 'vue-i18n'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 const email = ref('')
 const password = ref('')
@@ -93,10 +95,10 @@ async function handleLogin() {
   const success = await authStore.login(email.value, password.value)
   
   if (success) {
-    window.showToast('Login successful!', 'success')
+    window.showToast(t('messages.loginSuccess'), 'success')
     router.push('/')
   } else {
-    error.value = authStore.error || 'Login failed. Please check your credentials.'
+    error.value = authStore.error || t('messages.loginFailed')
   }
   
   loading.value = false

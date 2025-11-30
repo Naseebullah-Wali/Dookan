@@ -6,7 +6,7 @@
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-5">
         <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
+          <span class="visually-hidden">{{ $t('common.loading') }}</span>
         </div>
       </div>
 
@@ -14,9 +14,9 @@
         <!-- Breadcrumb -->
         <nav aria-label="breadcrumb" class="mb-4">
           <ol class="breadcrumb">
-            <li class="breadcrumb-item"><router-link to="/">Home</router-link></li>
-            <li class="breadcrumb-item"><router-link to="/shop">Shop</router-link></li>
-            <li class="breadcrumb-item active">{{ product.name }}</li>
+            <li class="breadcrumb-item"><router-link to="/">{{ $t('common.home') }}</router-link></li>
+            <li class="breadcrumb-item"><router-link to="/shop">{{ $t('common.shop') }}</router-link></li>
+            <li class="breadcrumb-item active">{{ languageStore.getLocalizedName(product) }}</li>
           </ol>
         </nav>
 
@@ -26,47 +26,47 @@
             <div class="position-relative">
               <img :src="productImageUrl" :alt="product.name" class="img-fluid rounded shadow-lg" />
               <span v-if="product.verified" class="badge bg-success position-absolute top-0 start-0 m-3">
-                <i class="bi bi-check-circle me-1"></i>Verified Supplier
+                <i class="bi bi-check-circle me-1"></i>{{ $t('product.verified') }}
               </span>
             </div>
           </div>
 
           <div class="col-lg-6 col-12">
-            <h1 class="mb-3">{{ product.name }}</h1>
+            <h1 class="mb-3">{{ languageStore.getLocalizedName(product) }}</h1>
             
             <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
               <div class="d-flex gap-2 align-items-center">
                 <span class="text-warning fw-semibold"><i class="bi bi-star-fill"></i> {{ formattedRating }}</span>
-                <span class="text-muted small">({{ product.review_count }} reviews)</span>
+                <span class="text-muted small">({{ product.review_count }} {{ $t('product.reviews') }})</span>
               </div>
               <span class="fw-semibold" :class="product.stock > 0 ? 'text-success' : 'text-danger'">
-                {{ product.stock > 0 ? `In Stock (${product.stock})` : 'Out of Stock' }}
+                {{ product.stock > 0 ? `${$t('product.inStock')} (${product.stock})` : $t('product.outOfStock') }}
               </span>
             </div>
 
             <div class="d-flex align-items-center gap-3 mb-4">
-              <span class="display-5 fw-bold text-primary">{{ formatPrice(product.price) }} AFN</span>
+              <span class="display-5 fw-bold text-primary">{{ formatPrice(product.price) }} {{ $t('common.afn') }}</span>
               <span v-if="product.compareAtPrice" class="fs-5 text-muted text-decoration-line-through">
-                {{ formatPrice(product.compareAtPrice) }} AFN
+                {{ formatPrice(product.compareAtPrice) }} {{ $t('common.afn') }}
               </span>
               <span v-if="product.compareAtPrice" class="badge bg-danger">
-                Save {{ Math.round((1 - product.price / product.compareAtPrice) * 100) }}%
+                {{ $t('product.sale') }} {{ Math.round((1 - product.price / product.compareAtPrice) * 100) }}% {{ $t('product.off') }}
               </span>
             </div>
 
-            <p class="lead mb-4">{{ product.description }}</p>
+            <p class="lead mb-4">{{ languageStore.getLocalizedName(product, 'description') }}</p>
 
             <div class="bg-light p-4 rounded mb-4">
               <div class="d-flex justify-content-between py-2 border-bottom">
-                <span class="fw-semibold">Size:</span>
+                <span class="fw-semibold">{{ $t('product.size') }}:</span>
                 <span>{{ product.size || 'Standard' }}</span>
               </div>
               <div class="d-flex justify-content-between py-2 border-bottom">
-                <span class="fw-semibold">Supplier:</span>
+                <span class="fw-semibold">{{ $t('product.supplier') }}:</span>
                 <span>{{ product.supplier || 'Afghan Grocery' }}</span>
               </div>
               <div class="d-flex justify-content-between py-2">
-                <span class="fw-semibold">Category:</span>
+                <span class="fw-semibold">{{ $t('shop.category') }}:</span>
                 <span>{{ getCategoryName(product.category_id) }}</span>
               </div>
             </div>
@@ -87,7 +87,7 @@
                 @click="handleAddToCart"
                 :disabled="product.stock === 0"
               >
-                <i class="bi bi-cart-plus me-2"></i>Add to Cart
+                <i class="bi bi-cart-plus me-2"></i>{{ $t('product.addToCart') }}
               </button>
               <WishlistButton :product="product" class="btn-lg" />
             </div>
@@ -100,7 +100,7 @@
         <!-- Reviews Section -->
         <section class="reviews-section py-5">
           <div class="mb-4">
-            <h2 class="mb-2">Customer Reviews</h2>
+            <h2 class="mb-2">{{ $t('product.reviews') }}</h2>
             <div class="section-divider"></div>
           </div>
           
@@ -122,7 +122,7 @@
               </div>
             </div>
           </div>
-          <p v-else class="text-center text-muted py-5">No reviews yet. Be the first to review!</p>
+          <p v-else class="text-center text-muted py-5">{{ $t('shop.noReviews') }}</p>
         </section>
 
         <!-- Related Products -->
@@ -135,8 +135,8 @@
       </div>
 
       <div v-else class="text-center py-5">
-        <h2 class="mb-4">Product not found</h2>
-        <router-link to="/shop" class="btn btn-primary">Back to Shop</router-link>
+        <h2 class="mb-4">{{ $t('shop.productNotFound') }}</h2>
+        <router-link to="/shop" class="btn btn-primary">{{ $t('shop.backToShop') }}</router-link>
       </div>
     </div>
 
@@ -150,6 +150,8 @@ import { useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useProductsStore } from '@/stores/products'
 import { useReviewsStore } from '@/stores/reviews'
+import { useLanguageStore } from '@/stores/language'
+import { useI18n } from 'vue-i18n'
 import { getImageUrl } from '@/services/imageService'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
@@ -162,6 +164,8 @@ const route = useRoute()
 const cartStore = useCartStore()
 const productsStore = useProductsStore()
 const reviewsStore = useReviewsStore()
+const languageStore = useLanguageStore()
+const { t } = useI18n()
 
 const product = ref(null)
 const quantity = ref(1)
@@ -204,12 +208,12 @@ function formatDate(date) {
 
 function getCategoryName(categoryId) {
   const category = productsStore.categories.find(c => c.id === categoryId)
-  return category ? category.name : categoryId
+  return category ? languageStore.getLocalizedName(category) : categoryId
 }
 
 function handleAddToCart() {
   cartStore.addToCart(product.value, quantity.value)
-  window.showToast(`${quantity.value}x ${product.value.name} added to cart!`, 'success')
+  window.showToast(t('messages.addedToCart'), 'success')
   quantity.value = 1
 }
 

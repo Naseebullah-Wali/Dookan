@@ -1,6 +1,6 @@
 <template>
   <div class="rating-filter">
-    <label class="form-label fw-semibold">Minimum Rating</label>
+    <label class="form-label fw-semibold">{{ $t('filters.minimumRating') }}</label>
     <div class="d-flex flex-column gap-2">
       <button
         v-for="rating in [5, 4, 3, 2, 1]"
@@ -11,13 +11,13 @@
         <span class="d-flex">
           <i v-for="star in rating" :key="star" class="bi bi-star-fill text-warning"></i>
         </span>
-        <span class="small">{{ rating }}+ Stars</span>
+        <span class="small">{{ rating }}+ {{ $t('filters.stars') }}</span>
       </button>
       <button
         :class="['btn btn-sm text-start', selectedRating === null ? 'btn-primary' : 'btn-outline-secondary']"
         @click="selectRating(null)"
       >
-        <span class="small">All Ratings</span>
+        <span class="small">{{ $t('filters.allRatings') }}</span>
       </button>
     </div>
   </div>
@@ -25,6 +25,9 @@
 
 <script setup>
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   modelValue: {

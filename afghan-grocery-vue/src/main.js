@@ -13,6 +13,9 @@ window.bootstrap = bootstrap
 const app = createApp(App)
 const pinia = createPinia()
 
+import i18n from './i18n'
+
 app.use(pinia)
 app.use(router)
+app.use(i18n)
 app.mount('#app')

@@ -9,19 +9,19 @@
           <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center fw-bold" style="width: 48px; height: 48px;">
             <i class="bi bi-check"></i>
           </div>
-          <small class="text-muted mt-2">Cart</small>
+          <small class="text-muted mt-2">{{ $t('cart.title') }}</small>
         </div>
         <div class="d-flex flex-column align-items-center">
           <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 48px; height: 48px;">2</div>
-          <small class="text-muted mt-2">Delivery</small>
+          <small class="text-muted mt-2">{{ $t('checkout.delivery') }}</small>
         </div>
         <div class="d-flex flex-column align-items-center">
           <div class="rounded-circle bg-light text-muted d-flex align-items-center justify-content-center fw-bold" style="width: 48px; height: 48px;">3</div>
-          <small class="text-muted mt-2">Payment</small>
+          <small class="text-muted mt-2">{{ $t('checkout.payment') }}</small>
         </div>
         <div class="d-flex flex-column align-items-center">
           <div class="rounded-circle bg-light text-muted d-flex align-items-center justify-content-center fw-bold" style="width: 48px; height: 48px;">4</div>
-          <small class="text-muted mt-2">Confirm</small>
+          <small class="text-muted mt-2">{{ $t('checkout.confirm') }}</small>
         </div>
       </div>
 
@@ -31,17 +31,17 @@
             <!-- Delivery Information -->
             <div class="card border-0 shadow-sm mb-4">
               <div class="card-body p-4">
-                <h2 class="mb-4">Delivery Information</h2>
+                <h2 class="mb-4">{{ $t('checkout.deliveryInfo') }}</h2>
                 <div class="mb-3">
-                  <label class="form-label fw-semibold">Recipient Name</label>
+                  <label class="form-label fw-semibold">{{ $t('checkout.recipientName') }}</label>
                   <input v-model="formData.recipientName" type="text" class="form-control form-control-lg" required />
                 </div>
                 <div class="mb-3">
-                  <label class="form-label fw-semibold">Phone Number</label>
+                  <label class="form-label fw-semibold">{{ $t('checkout.phoneNumber') }}</label>
                   <input v-model="formData.phone" type="tel" class="form-control form-control-lg" required placeholder="+93 700 123 456" />
                 </div>
                 <div class="mb-3">
-                  <label class="form-label fw-semibold">City</label>
+                  <label class="form-label fw-semibold">{{ $t('checkout.city') }}</label>
                   <select v-model="formData.city" class="form-select form-select-lg" required @change="updateDeliveryFee">
                     <option value="kabul">Kabul</option>
                     <option value="herat">Herat</option>
@@ -52,12 +52,12 @@
                   </select>
                 </div>
                 <div class="mb-3">
-                  <label class="form-label fw-semibold">Complete Address</label>
-                  <textarea v-model="formData.address" class="form-control" rows="3" required placeholder="Street, district, landmarks..."></textarea>
+                  <label class="form-label fw-semibold">{{ $t('checkout.address') }}</label>
+                  <textarea v-model="formData.address" class="form-control" rows="3" required :placeholder="$t('checkout.addressPlaceholder')"></textarea>
                 </div>
                 <div class="mb-0">
-                  <label class="form-label fw-semibold">Delivery Notes (Optional)</label>
-                  <textarea v-model="formData.notes" class="form-control" rows="2" placeholder="Any special instructions..."></textarea>
+                  <label class="form-label fw-semibold">{{ $t('checkout.deliveryNotes') }}</label>
+                  <textarea v-model="formData.notes" class="form-control" rows="2" :placeholder="$t('checkout.notesPlaceholder')"></textarea>
                 </div>
               </div>
             </div>
@@ -65,15 +65,15 @@
             <!-- Payment Method -->
             <div class="card border-0 shadow-sm mb-4">
               <div class="card-body p-4">
-                <h2 class="mb-4">Payment Method</h2>
+                <h2 class="mb-4">{{ $t('checkout.paymentMethod') }}</h2>
                 <div class="d-grid gap-3">
                   <label class="payment-option">
                     <input v-model="formData.paymentMethod" type="radio" value="online" class="d-none" />
                     <div class="d-flex align-items-center gap-3 p-3 border rounded payment-card">
                       <div style="font-size: 2rem;">💳</div>
                       <div>
-                        <div class="fw-semibold">Pay Online</div>
-                        <small class="text-muted">For customers abroad</small>
+                        <div class="fw-semibold">{{ $t('checkout.payOnline') }}</div>
+                        <small class="text-muted">{{ $t('checkout.payOnlineDesc') }}</small>
                       </div>
                     </div>
                   </label>
@@ -82,8 +82,8 @@
                     <div class="d-flex align-items-center gap-3 p-3 border rounded payment-card">
                       <div style="font-size: 2rem;">💵</div>
                       <div>
-                        <div class="fw-semibold">Cash on Delivery</div>
-                        <small class="text-muted">Pay when delivered</small>
+                        <div class="fw-semibold">{{ $t('checkout.cod') }}</div>
+                        <small class="text-muted">{{ $t('checkout.codDesc') }}</small>
                       </div>
                     </div>
                   </label>
@@ -92,7 +92,7 @@
             </div>
 
             <button type="submit" class="btn btn-primary btn-lg w-100">
-              <i class="bi bi-check-circle me-2"></i>Place Order - {{ formatPrice(total) }} AFN
+              <i class="bi bi-check-circle me-2"></i>{{ $t('checkout.placeOrder') }} - {{ formatPrice(total) }} {{ $t('common.afn') }}
             </button>
           </form>
         </div>
@@ -101,26 +101,26 @@
         <div class="col-lg-4 col-12">
           <div class="card border-0 shadow-sm sticky-top" style="top: 88px;">
             <div class="card-body p-4">
-              <h5 class="card-title mb-4">Order Summary</h5>
+              <h5 class="card-title mb-4">{{ $t('checkout.orderSummary') }}</h5>
               <div class="mb-3">
                 <div v-for="item in cartStore.items" :key="item.id" class="d-flex justify-content-between mb-2 small">
-                  <span>{{ item.name }} × {{ item.quantity }}</span>
-                  <span>{{ formatPrice(item.price * item.quantity) }} AFN</span>
+                  <span>{{ languageStore.getLocalizedName(item) }} × {{ item.quantity }}</span>
+                  <span>{{ formatPrice(item.price * item.quantity) }} {{ $t('common.afn') }}</span>
                 </div>
               </div>
               <hr>
               <div class="d-flex justify-content-between mb-2">
-                <span>Subtotal</span>
-                <span>{{ formatPrice(cartStore.subtotal) }} AFN</span>
+                <span>{{ $t('cart.subtotal') }}</span>
+                <span>{{ formatPrice(cartStore.subtotal) }} {{ $t('common.afn') }}</span>
               </div>
               <div class="d-flex justify-content-between mb-3">
-                <span>Delivery Fee</span>
-                <span>{{ formatPrice(deliveryFee) }} AFN</span>
+                <span>{{ $t('cart.shipping') }}</span>
+                <span>{{ formatPrice(deliveryFee) }} {{ $t('common.afn') }}</span>
               </div>
               <hr>
               <div class="d-flex justify-content-between fs-5 fw-bold text-primary">
-                <span>Total</span>
-                <span>{{ formatPrice(total) }} AFN</span>
+                <span>{{ $t('cart.total') }}</span>
+                <span>{{ formatPrice(total) }} {{ $t('common.afn') }}</span>
               </div>
             </div>
           </div>
@@ -137,6 +137,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
+import { useLanguageStore } from '@/stores/language'
+import { useI18n } from 'vue-i18n'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import { useOrdersStore } from '@/stores/orders'
@@ -145,6 +147,8 @@ const router = useRouter()
 const cartStore = useCartStore()
 const authStore = useAuthStore()
 const ordersStore = useOrdersStore()
+const languageStore = useLanguageStore()
+const { t } = useI18n()
 
 const formData = ref({
   recipientName: '',
@@ -190,7 +194,7 @@ function formatPrice(price) {
 
 async function handleCheckout() {
   if (!authStore.user) {
-    window.showToast('Please login to place an order', 'error')
+    window.showToast(t('messages.loginRequired'), 'error')
     router.push('/login?redirect=/checkout')
     return
   }
@@ -224,10 +228,10 @@ async function handleCheckout() {
     const order = await ordersStore.createOrder(orderData)
     cartStore.clearCart()
     router.push(`/confirmation/${order.id}`)
-    window.showToast('Order placed successfully!', 'success')
+    window.showToast(t('messages.orderSuccess'), 'success')
   } catch (error) {
     console.error('Checkout error:', error)
-    window.showToast('Failed to place order. Please try again.', 'error')
+    window.showToast(t('messages.orderError'), 'error')
   }
 }
 </script>

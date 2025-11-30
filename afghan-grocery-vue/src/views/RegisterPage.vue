@@ -7,13 +7,13 @@
         <div class="col-lg-6 col-md-8 col-sm-10 col-11">
           <div class="card border-0 shadow-lg">
             <div class="card-body p-3 p-sm-4 p-md-5">
-              <h1 class="text-center mb-2 fs-3 fs-md-1">Create Account</h1>
-              <p class="text-center text-muted mb-3 mb-md-4 small">Join Dookan today</p>
+              <h1 class="text-center mb-2 fs-3 fs-md-1">{{ $t('login.createAccount') }}</h1>
+              <p class="text-center text-muted mb-3 mb-md-4 small">{{ $t('login.joinDookan') }}</p>
 
               <form @submit.prevent="handleRegister">
                 <div class="row g-2 g-md-3 mb-3">
                   <div class="col-md-6">
-                    <label class="form-label fw-semibold small">First Name</label>
+                    <label class="form-label fw-semibold small">{{ $t('profile.firstName') }}</label>
                     <input
                       v-model="formData.firstName"
                       type="text"
@@ -22,7 +22,7 @@
                     />
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label fw-semibold small">Last Name</label>
+                    <label class="form-label fw-semibold small">{{ $t('profile.lastName') }}</label>
                     <input
                       v-model="formData.lastName"
                       type="text"
@@ -33,7 +33,7 @@
                 </div>
 
                 <div class="mb-3">
-                  <label class="form-label fw-semibold small">Email</label>
+                  <label class="form-label fw-semibold small">{{ $t('common.email') }}</label>
                   <input
                     v-model="formData.email"
                     type="email"
@@ -43,7 +43,7 @@
                 </div>
 
                 <div class="mb-3">
-                  <label class="form-label fw-semibold small">Phone</label>
+                  <label class="form-label fw-semibold small">{{ $t('checkout.phoneNumber') }}</label>
                   <input
                     v-model="formData.phone"
                     type="tel"
@@ -53,7 +53,7 @@
                 </div>
 
                 <div class="mb-3">
-                  <label class="form-label fw-semibold small">Password</label>
+                  <label class="form-label fw-semibold small">{{ $t('common.password') }}</label>
                   <input
                     v-model="formData.password"
                     type="password"
@@ -61,7 +61,7 @@
                     required
                     minlength="6"
                   />
-                  <div class="form-text small">Password must be at least 6 characters</div>
+                  <div class="form-text small">{{ $t('login.passwordHint') }}</div>
                 </div>
 
                 <div v-if="error" class="alert alert-danger py-2 small" role="alert">
@@ -70,13 +70,13 @@
 
                 <button type="submit" class="btn btn-primary btn-lg w-100 mb-3" :disabled="loading">
                   <span v-if="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
-                  {{ loading ? 'Creating Account...' : 'Create Account' }}
+                  {{ loading ? $t('login.creatingAccount') : $t('login.createAccount') }}
                 </button>
               </form>
 
               <div class="text-center mt-3 mt-md-4">
-                <span class="text-muted small">Already have an account? </span>
-                <router-link to="/login" class="text-decoration-none fw-semibold small">Login here</router-link>
+                <span class="text-muted small">{{ $t('login.alreadyHaveAccount') }} </span>
+                <router-link to="/login" class="text-decoration-none fw-semibold small">{{ $t('login.loginHere') }}</router-link>
               </div>
             </div>
           </div>
@@ -92,11 +92,13 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useI18n } from 'vue-i18n'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const { t } = useI18n()
 
 const formData = ref({
   firstName: '',
@@ -123,10 +125,10 @@ async function handleRegister() {
   const success = await authStore.register(userData)
   
   if (success) {
-    window.showToast('Account created successfully!', 'success')
+    window.showToast(t('messages.accountCreated'), 'success')
     router.push('/')
   } else {
-    error.value = authStore.error || 'Registration failed. Please try again.'
+    error.value = authStore.error || t('messages.registrationFailed')
   }
   
   loading.value = false

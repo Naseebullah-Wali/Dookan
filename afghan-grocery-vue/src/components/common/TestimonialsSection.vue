@@ -2,8 +2,8 @@
   <div class="testimonials-section py-5 overflow-hidden">
     <div class="container-fluid p-0">
       <div class="container mb-5">
-        <h2 class="text-center mb-2">What Our Customers Say</h2>
-        <p class="text-center text-muted">Trusted by thousands of Afghan families worldwide</p>
+        <h2 class="text-center mb-2">{{ $t('home.testimonials.title') }}</h2>
+        <p class="text-center text-muted">{{ $t('home.testimonials.subtitle') }}</p>
       </div>
 
       <div v-if="!loading" class="marquee-wrapper">
@@ -71,6 +71,9 @@
 import { ref, onMounted } from 'vue'
 import api from '@/services/api'
 import { getAvatarUrl } from '@/services/imageService'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const testimonials = ref([])
 const loading = ref(true)
@@ -85,46 +88,46 @@ onMounted(async () => {
     testimonials.value = [
       {
         id: 1,
-        user_name: 'Ahmad Khalil',
-        location: 'Kabul, Afghanistan',
+        user_name: t('testimonials.customer1.name'),
+        location: t('testimonials.customer1.location'),
         rating: 5,
-        comment: 'Excellent service! The quality of products is outstanding and delivery is always on time. Highly recommended for Afghan groceries.',
+        comment: t('testimonials.customer1.comment'),
         gender: 'male',
         created_at: '2025-01-15T10:00:00Z'
       },
       {
         id: 2,
-        user_name: 'Fatima Rahman',
-        location: 'London, UK',
+        user_name: t('testimonials.customer2.name'),
+        location: t('testimonials.customer2.location'),
         rating: 5,
-        comment: 'Finally found authentic Afghan products in the UK! The basmati rice and spices are exactly like back home. Thank you!',
+        comment: t('testimonials.customer2.comment'),
         gender: 'female',
         created_at: '2025-01-10T14:30:00Z'
       },
       {
         id: 3,
-        user_name: 'Mohammed Aziz',
-        location: 'Dubai, UAE',
+        user_name: t('testimonials.customer3.name'),
+        location: t('testimonials.customer3.location'),
         rating: 5,
-        comment: 'Best Afghan grocery store online. Fresh products, reasonable prices, and excellent customer service. Will order again!',
+        comment: t('testimonials.customer3.comment'),
         gender: 'male',
         created_at: '2025-01-08T09:15:00Z'
       },
       {
         id: 4,
-        user_name: 'Zainab Hussain',
-        location: 'Toronto, Canada',
+        user_name: t('testimonials.customer4.name'),
+        location: t('testimonials.customer4.location'),
         rating: 5,
-        comment: 'Amazing quality and fast shipping to Canada! My family loves all the products. The flour makes perfect naan bread.',
+        comment: t('testimonials.customer4.comment'),
         gender: 'female',
         created_at: '2025-01-05T16:45:00Z'
       },
       {
         id: 5,
-        user_name: 'Rashid Ali',
-        location: 'Herat, Afghanistan',
+        user_name: t('testimonials.customer5.name'),
+        location: t('testimonials.customer5.location'),
         rating: 5,
-        comment: 'Very reliable service. Products are always fresh and well-packaged. Great prices too!',
+        comment: t('testimonials.customer5.comment'),
         gender: 'male',
         created_at: '2025-01-03T11:20:00Z'
       }

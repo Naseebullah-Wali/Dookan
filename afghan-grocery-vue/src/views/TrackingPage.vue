@@ -3,13 +3,13 @@
     <AppHeader />
     
     <div class="container py-5">
-      <h1 class="text-center mb-5 fw-bold">Track Your Order</h1>
+      <h1 class="text-center mb-5 fw-bold">{{ $t('tracking.title') }}</h1>
 
       <div class="row justify-content-center mb-5">
         <div class="col-md-8 col-lg-6">
           <div class="card border-0 shadow-sm">
             <div class="card-body p-4">
-              <h3 class="text-center mb-4">Enter Order ID</h3>
+              <h3 class="text-center mb-4">{{ $t('tracking.enterOrderId') }}</h3>
               <form @submit.prevent="handleSearch" class="d-flex gap-2">
                 <input
                   v-model="orderId"
@@ -19,7 +19,7 @@
                   required
                 />
                 <button type="submit" class="btn btn-primary btn-lg px-4">
-                  <i class="bi bi-search me-2"></i>Track
+                  <i class="bi bi-search me-2"></i>{{ $t('tracking.track') }}
                 </button>
               </form>
             </div>
@@ -29,7 +29,7 @@
 
       <div v-if="loading" class="d-flex justify-content-center py-5">
         <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
+          <span class="visually-hidden">{{ $t('common.loading') }}</span>
         </div>
       </div>
 
@@ -38,8 +38,8 @@
           <div class="card border-0 shadow-sm">
             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
               <div>
-                <h2 class="h4 mb-1 fw-bold">Order #{{ order.id }}</h2>
-                <p class="text-muted mb-0 small">Placed on {{ formatDate(order.createdAt) }}</p>
+                <h2 class="h4 mb-1 fw-bold">{{ $t('admin.order') }} #{{ order.id }}</h2>
+                <p class="text-muted mb-0 small">{{ $t('tracking.placedOn') }} {{ formatDate(order.createdAt) }}</p>
               </div>
               <span class="badge rounded-pill" :class="getStatusBadgeClass(order.status)">
                 {{ order.status }}
@@ -56,7 +56,7 @@
                     <i class="bi bi-check-lg fs-4"></i>
                   </div>
                   <div>
-                    <h4 class="h5 mb-1">Order Placed</h4>
+                    <h4 class="h5 mb-1">{{ $t('tracking.orderPlaced') }}</h4>
                     <p class="text-muted mb-0">{{ formatDate(order.createdAt) }}</p>
                   </div>
                 </div>
@@ -68,8 +68,8 @@
                     <i class="bi bi-box-seam fs-4"></i>
                   </div>
                   <div>
-                    <h4 class="h5 mb-1">Processing</h4>
-                    <p class="text-muted mb-0">{{ order.status !== 'pending' ? 'In progress' : 'Pending' }}</p>
+                    <h4 class="h5 mb-1">{{ $t('tracking.processing') }}</h4>
+                    <p class="text-muted mb-0">{{ order.status !== 'pending' ? $t('tracking.inProgress') : $t('tracking.pending') }}</p>
                   </div>
                 </div>
 
@@ -80,8 +80,8 @@
                     <i class="bi bi-truck fs-4"></i>
                   </div>
                   <div>
-                    <h4 class="h5 mb-1">Shipped</h4>
-                    <p class="text-muted mb-0">{{ ['shipped', 'delivered'].includes(order.status) ? 'On the way' : 'Not yet shipped' }}</p>
+                    <h4 class="h5 mb-1">{{ $t('tracking.shipped') }}</h4>
+                    <p class="text-muted mb-0">{{ ['shipped', 'delivered'].includes(order.status) ? $t('tracking.onTheWay') : $t('tracking.notYetShipped') }}</p>
                   </div>
                 </div>
 
@@ -92,37 +92,37 @@
                     <i class="bi bi-house-door fs-4"></i>
                   </div>
                   <div>
-                    <h4 class="h5 mb-1">Delivered</h4>
-                    <p class="text-muted mb-0">{{ order.status === 'delivered' ? 'Completed' : 'Not yet delivered' }}</p>
+                    <h4 class="h5 mb-1">{{ $t('tracking.delivered') }}</h4>
+                    <p class="text-muted mb-0">{{ order.status === 'delivered' ? $t('tracking.completed') : $t('tracking.notYetDelivered') }}</p>
                   </div>
                 </div>
               </div>
 
               <!-- Delivery Details -->
               <div class="mb-5">
-                <h3 class="h5 fw-bold mb-3">Delivery Information</h3>
+                <h3 class="h5 fw-bold mb-3">{{ $t('tracking.deliveryInfo') }}</h3>
                 <div class="row g-3">
                   <div class="col-md-6">
                     <div class="p-3 bg-light rounded">
-                      <span class="fw-bold d-block mb-1">Recipient</span>
+                      <span class="fw-bold d-block mb-1">{{ $t('checkout.recipient') }}</span>
                       <span>{{ order.delivery?.recipientName }}</span>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="p-3 bg-light rounded">
-                      <span class="fw-bold d-block mb-1">Phone</span>
+                      <span class="fw-bold d-block mb-1">{{ $t('common.phone') }}</span>
                       <span>{{ order.delivery?.phone }}</span>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="p-3 bg-light rounded">
-                      <span class="fw-bold d-block mb-1">City</span>
+                      <span class="fw-bold d-block mb-1">{{ $t('checkout.city') }}</span>
                       <span>{{ order.delivery?.city }}</span>
                     </div>
                   </div>
                   <div class="col-md-6">
                     <div class="p-3 bg-light rounded">
-                      <span class="fw-bold d-block mb-1">Address</span>
+                      <span class="fw-bold d-block mb-1">{{ $t('checkout.address') }}</span>
                       <span>{{ order.delivery?.address }}</span>
                     </div>
                   </div>
@@ -131,7 +131,7 @@
 
               <!-- Order Items -->
               <div class="mb-4">
-                <h3 class="h5 fw-bold mb-3">Order Items</h3>
+                <h3 class="h5 fw-bold mb-3">{{ $t('admin.items') }}</h3>
                 <div v-for="item in order.items" :key="item.id" class="d-flex align-items-center gap-3 mb-3 p-3 bg-light rounded">
                   <img :src="item.image" :alt="item.name" class="rounded object-fit-cover" style="width: 60px; height: 60px;" />
                   <div class="flex-grow-1">
@@ -139,7 +139,7 @@
                     <p class="text-muted mb-0 small">{{ item.size }} × {{ item.quantity }}</p>
                   </div>
                   <div class="fw-bold text-primary">
-                    {{ formatPrice(item.price * item.quantity) }} AFN
+                    {{ formatPrice(item.price * item.quantity) }} {{ $t('common.afn') }}
                   </div>
                 </div>
               </div>
@@ -147,16 +147,16 @@
               <!-- Order Total -->
               <div class="border-top pt-4">
                 <div class="d-flex justify-content-between mb-2">
-                  <span class="text-muted">Subtotal</span>
-                  <span class="fw-medium">{{ formatPrice(order.subtotal) }} AFN</span>
+                  <span class="text-muted">{{ $t('cart.subtotal') }}</span>
+                  <span class="fw-medium">{{ formatPrice(order.subtotal) }} {{ $t('common.afn') }}</span>
                 </div>
                 <div class="d-flex justify-content-between mb-3">
-                  <span class="text-muted">Delivery Fee</span>
-                  <span class="fw-medium">{{ formatPrice(order.deliveryFee) }} AFN</span>
+                  <span class="text-muted">{{ $t('checkout.deliveryFee') }}</span>
+                  <span class="fw-medium">{{ formatPrice(order.deliveryFee) }} {{ $t('common.afn') }}</span>
                 </div>
                 <div class="d-flex justify-content-between pt-3 border-top">
-                  <span class="fs-5 fw-bold">Total</span>
-                  <span class="fs-5 fw-bold text-primary">{{ formatPrice(order.total) }} AFN</span>
+                  <span class="fs-5 fw-bold">{{ $t('cart.total') }}</span>
+                  <span class="fs-5 fw-bold text-primary">{{ formatPrice(order.total) }} {{ $t('common.afn') }}</span>
                 </div>
               </div>
             </div>
@@ -166,9 +166,9 @@
 
       <div v-else-if="searched && !order" class="text-center py-5">
         <div class="display-1 mb-3">❌</div>
-        <h3 class="fw-bold">Order Not Found</h3>
-        <p class="text-muted">We couldn't find an order with ID: {{ orderId }}</p>
-        <p class="text-muted">Please check your order ID and try again.</p>
+        <h3 class="fw-bold">{{ $t('tracking.notFound') }}</h3>
+        <p class="text-muted">{{ $t('tracking.notFoundMessage') }} {{ orderId }}</p>
+        <p class="text-muted">{{ $t('tracking.checkId') }}</p>
       </div>
     </div>
 

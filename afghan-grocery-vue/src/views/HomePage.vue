@@ -7,17 +7,16 @@
       <div class="container">
         <div class="row justify-content-center">
           <div class="col-lg-8 col-md-10 col-12 text-center">
-            <h1 class="display-4 fw-bold mb-4">Send Food, Share Love</h1>
+            <h1 class="display-4 fw-bold mb-4">{{ $t('home.hero.title') }}</h1>
             <p class="lead text-muted mb-5">
-              Order essential groceries for your family in Afghanistan. 
-              Fresh, quality products delivered to their doorstep.
+              {{ $t('home.hero.description') }}
             </p>
             <div class="d-flex gap-3 justify-content-center flex-wrap">
               <router-link to="/shop" class="btn btn-primary btn-lg">
-                <i class="bi bi-bag me-2"></i>Shop Now
+                <i class="bi bi-bag me-2"></i>{{ $t('home.hero.shopNow') }}
               </router-link>
               <router-link to="/tracking" class="btn btn-outline-secondary btn-lg">
-                <i class="bi bi-box-seam me-2"></i>Track Order
+                <i class="bi bi-box-seam me-2"></i>{{ $t('home.hero.learnMore') }}
               </router-link>
             </div>
           </div>
@@ -31,7 +30,7 @@
     <section class="categories-section py-5 bg-white">
       <div class="container">
         <div class="text-center mb-5">
-          <h2 class="mb-2">Shop by Category</h2>
+          <h2 class="mb-2">{{ $t('home.categories.title') }}</h2>
           <div class="section-divider mx-auto"></div>
         </div>
         <div class="row g-4">
@@ -46,8 +45,8 @@
             >
               <div class="card-body text-center p-4">
                 <div class="category-icon mb-3">{{ category.icon }}</div>
-                <h5 class="card-title text-dark mb-2">{{ category.name }}</h5>
-                <p class="card-text text-muted small mb-0">{{ category.count }}+ products</p>
+                <h5 class="card-title text-dark mb-2">{{ languageStore.getLocalizedName(category) }}</h5>
+                <p class="card-text text-muted small mb-0">{{ category.count }}+ {{ $t('common.products') }}</p>
               </div>
             </router-link>
           </div>
@@ -63,11 +62,11 @@
       <div class="container">
         <div class="d-flex justify-content-between align-items-center mb-5">
           <div>
-            <h2 class="mb-2">Featured Products</h2>
+            <h2 class="mb-2">{{ $t('home.featured.title') }}</h2>
             <div class="section-divider"></div>
           </div>
           <router-link to="/shop" class="btn btn-outline-primary">
-            View All <i class="bi bi-arrow-right ms-2"></i>
+            {{ $t('home.hero.shopNow') }} <i class="bi bi-arrow-right ms-2"></i>
           </router-link>
         </div>
         
@@ -108,6 +107,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useProductsStore } from '@/stores/products'
+import { useLanguageStore } from '@/stores/language'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import NewsTicker from '@/components/common/NewsTicker.vue'
@@ -115,6 +115,7 @@ import TestimonialsSection from '@/components/common/TestimonialsSection.vue'
 import ProductCard from '@/components/product/ProductCard.vue'
 
 const productsStore = useProductsStore()
+const languageStore = useLanguageStore()
 const featuredProducts = ref([])
 const categories = ref([])
 const loading = ref(true)

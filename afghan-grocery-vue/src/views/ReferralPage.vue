@@ -6,8 +6,8 @@
       <!-- Hero Section -->
       <div class="card border-0 shadow-sm mb-5 overflow-hidden">
         <div class="card-body p-5 text-center bg-primary bg-gradient text-white">
-          <h1 class="display-5 fw-bold mb-3">🎁 Refer Friends, Earn Rewards!</h1>
-          <p class="lead mb-0 opacity-90">Share Afghan Grocery with your friends and family. You both get rewarded!</p>
+          <h1 class="display-5 fw-bold mb-3">🎁 {{ $t('referral.title') }}</h1>
+          <p class="lead mb-0 opacity-90">{{ $t('referral.subtitle') }}</p>
         </div>
       </div>
 
@@ -15,9 +15,9 @@
         <div class="col-md-6 col-lg-5">
           <div class="card border-0 shadow-sm text-center p-5">
             <div class="display-1 mb-4">🔒</div>
-            <h2 class="mb-3">Login Required</h2>
-            <p class="text-muted mb-4">Please login to access your referral program</p>
-            <router-link to="/login" class="btn btn-primary btn-lg px-5">Login</router-link>
+            <h2 class="mb-3">{{ $t('referral.loginRequired') }}</h2>
+            <p class="text-muted mb-4">{{ $t('referral.loginMessage') }}</p>
+            <router-link to="/login" class="btn btn-primary btn-lg px-5">{{ $t('common.login') }}</router-link>
           </div>
         </div>
       </div>
@@ -29,21 +29,21 @@
             <div class="card border-0 shadow-sm h-100 text-center p-4">
               <div class="display-4 mb-3">👥</div>
               <div class="h2 fw-bold text-primary mb-1">{{ referralStats.totalReferrals }}</div>
-              <div class="text-muted small text-uppercase fw-bold">Total Referrals</div>
+              <div class="text-muted small text-uppercase fw-bold">{{ $t('referral.totalReferrals') }}</div>
             </div>
           </div>
           <div class="col-md-4">
             <div class="card border-0 shadow-sm h-100 text-center p-4">
               <div class="display-4 mb-3">💰</div>
-              <div class="h2 fw-bold text-primary mb-1">{{ referralStats.totalRewards }} AFN</div>
-              <div class="text-muted small text-uppercase fw-bold">Total Earned</div>
+              <div class="h2 fw-bold text-primary mb-1">{{ referralStats.totalRewards }} {{ $t('common.afn') }}</div>
+              <div class="text-muted small text-uppercase fw-bold">{{ $t('referral.totalEarned') }}</div>
             </div>
           </div>
           <div class="col-md-4">
             <div class="card border-0 shadow-sm h-100 text-center p-4">
               <div class="display-4 mb-3">⏳</div>
               <div class="h2 fw-bold text-primary mb-1">{{ referralStats.pendingReferrals }}</div>
-              <div class="text-muted small text-uppercase fw-bold">Pending</div>
+              <div class="text-muted small text-uppercase fw-bold">{{ $t('referral.pending') }}</div>
             </div>
           </div>
         </div>
@@ -53,8 +53,8 @@
           <div class="col-lg-6">
             <div class="card border-0 shadow-sm h-100">
               <div class="card-body p-4">
-                <h2 class="h4 fw-bold mb-3">Your Referral Link</h2>
-                <p class="text-muted mb-4">Share this link with friends to earn rewards</p>
+                <h2 class="h4 fw-bold mb-3">{{ $t('referral.yourLink') }}</h2>
+                <p class="text-muted mb-4">{{ $t('referral.shareLink') }}</p>
                 
                 <div class="input-group mb-4">
                   <input
@@ -65,12 +65,12 @@
                     @click="selectLink"
                   />
                   <button @click="copyLink" class="btn btn-primary px-4" type="button">
-                    {{ copied ? '✓ Copied!' : '📋 Copy' }}
+                    {{ copied ? $t('referral.copied') : $t('referral.copy') }}
                   </button>
                 </div>
 
                 <div class="social-share">
-                  <p class="fw-bold mb-3">Share on:</p>
+                  <p class="fw-bold mb-3">{{ $t('referral.shareOn') }}:</p>
                   <div class="d-flex gap-2 flex-wrap">
                     <button class="btn btn-success text-white">
                       <i class="bi bi-whatsapp me-2"></i>WhatsApp
@@ -94,27 +94,27 @@
           <div class="col-lg-6">
             <div class="card border-0 shadow-sm h-100">
               <div class="card-body p-4">
-                <h2 class="h4 fw-bold mb-4">How It Works</h2>
+                <h2 class="h4 fw-bold mb-4">{{ $t('referral.howItWorks') }}</h2>
                 <div class="d-flex flex-column gap-4">
                   <div class="d-flex gap-3">
                     <div class="flex-shrink-0 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; font-size: 1.25rem; font-weight: bold;">1</div>
                     <div>
-                      <h3 class="h5 fw-bold mb-1">Share Your Link</h3>
-                      <p class="text-muted mb-0">Send your unique referral link to friends</p>
+                      <h3 class="h5 fw-bold mb-1">{{ $t('referral.step1Title') }}</h3>
+                      <p class="text-muted mb-0">{{ $t('referral.step1Text') }}</p>
                     </div>
                   </div>
                   <div class="d-flex gap-3">
                     <div class="flex-shrink-0 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; font-size: 1.25rem; font-weight: bold;">2</div>
                     <div>
-                      <h3 class="h5 fw-bold mb-1">Friend Signs Up</h3>
-                      <p class="text-muted mb-0">They create an account using your link</p>
+                      <h3 class="h5 fw-bold mb-1">{{ $t('referral.step2Title') }}</h3>
+                      <p class="text-muted mb-0">{{ $t('referral.step2Text') }}</p>
                     </div>
                   </div>
                   <div class="d-flex gap-3">
                     <div class="flex-shrink-0 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; font-size: 1.25rem; font-weight: bold;">3</div>
                     <div>
-                      <h3 class="h5 fw-bold mb-1">Both Get Rewarded</h3>
-                      <p class="text-muted mb-0">You get 100 AFN, they get 50 AFN discount</p>
+                      <h3 class="h5 fw-bold mb-1">{{ $t('referral.step3Title') }}</h3>
+                      <p class="text-muted mb-0">{{ $t('referral.step3Text') }}</p>
                     </div>
                   </div>
                 </div>
@@ -126,19 +126,19 @@
         <!-- Referral History -->
         <div class="card border-0 shadow-sm mt-5">
           <div class="card-body p-4">
-            <h2 class="h4 fw-bold mb-4">Referral History</h2>
+            <h2 class="h4 fw-bold mb-4">{{ $t('referral.history') }}</h2>
             
             <div v-if="referrals.length === 0" class="text-center py-5 text-muted">
-              <p class="mb-0">No referrals yet. Start sharing your link!</p>
+              <p class="mb-0">{{ $t('referral.noReferrals') }}</p>
             </div>
             
             <div v-else class="table-responsive">
               <table class="table table-hover align-middle">
                 <thead class="table-light">
                   <tr>
-                    <th scope="col">Status</th>
-                    <th scope="col">Date</th>
-                    <th scope="col" class="text-end">Reward</th>
+                    <th scope="col">{{ $t('common.status') }}</th>
+                    <th scope="col">{{ $t('common.date') }}</th>
+                    <th scope="col" class="text-end">{{ $t('referral.reward') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -146,11 +146,11 @@
                     <td>
                       <span class="badge rounded-pill" :class="referral.status === 'completed' ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'">
                         <i class="bi me-1" :class="referral.status === 'completed' ? 'bi-check-circle-fill' : 'bi-hourglass-split'"></i>
-                        {{ referral.status === 'completed' ? 'Completed' : 'Pending' }}
+                        {{ referral.status === 'completed' ? $t('common.completed') : $t('common.pending') }}
                       </span>
                     </td>
                     <td class="text-muted">{{ formatDate(referral.createdAt) }}</td>
-                    <td class="text-end fw-bold text-success">+{{ referral.reward }} AFN</td>
+                    <td class="text-end fw-bold text-success">+{{ referral.reward }} {{ $t('common.afn') }}</td>
                   </tr>
                 </tbody>
               </table>
@@ -170,6 +170,9 @@ import { useAuthStore } from '@/stores/auth'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import api from '@/services/api'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const authStore = useAuthStore()
 
@@ -216,12 +219,12 @@ async function copyLink() {
   try {
     await navigator.clipboard.writeText(referralLink.value)
     copied.value = true
-    window.showToast('Referral link copied!', 'success')
+    window.showToast(t('referral.linkCopied'), 'success')
     setTimeout(() => {
       copied.value = false
     }, 2000)
   } catch (error) {
-    window.showToast('Failed to copy link', 'error')
+    window.showToast(t('referral.copyFailed'), 'error')
   }
 }
 

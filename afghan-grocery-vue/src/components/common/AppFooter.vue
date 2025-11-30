@@ -13,29 +13,27 @@
         
         <!-- Quick Links -->
         <div class="col-lg-2 col-md-6 col-6">
-          <h5 class="fw-bold mb-3 text-white">Quick Links</h5>
+          <h5 class="fw-bold mb-3 text-white">{{ $t('footer.quickLinks') }}</h5>
           <div class="d-flex flex-column gap-2">
-            <router-link to="/shop" class="text-white-50 text-decoration-none hover-text-white">Shop</router-link>
-            <router-link to="/tracking" class="text-white-50 text-decoration-none hover-text-white">Track Order</router-link>
-            <router-link to="/about" class="text-white-50 text-decoration-none hover-text-white">About Us</router-link>
-            <router-link to="/contact" class="text-white-50 text-decoration-none hover-text-white">Contact</router-link>
+            <router-link to="/shop" class="text-white-50 text-decoration-none hover-text-white">{{ $t('common.shop') }}</router-link>
+            <router-link to="/about" class="text-white-50 text-decoration-none hover-text-white">{{ $t('common.about') }}</router-link>
+            <router-link to="/contact" class="text-white-50 text-decoration-none hover-text-white">{{ $t('common.contact') }}</router-link>
           </div>
         </div>
         
         <!-- Customer Service -->
         <div class="col-lg-3 col-md-6 col-6">
-          <h5 class="fw-bold mb-3 text-white">Customer Service</h5>
+          <h5 class="fw-bold mb-3 text-white">{{ $t('footer.customerService') }}</h5>
           <div class="d-flex flex-column gap-2">
-            <router-link to="/orders" class="text-white-50 text-decoration-none hover-text-white">My Orders</router-link>
-            <router-link to="/wishlist" class="text-white-50 text-decoration-none hover-text-white">Wishlist</router-link>
-            <router-link to="/referral" class="text-white-50 text-decoration-none hover-text-white">Referral Program</router-link>
-            <a href="#" class="text-white-50 text-decoration-none hover-text-white">Help Center</a>
+            <router-link to="/orders" class="text-white-50 text-decoration-none hover-text-white">{{ $t('profile.orders') }}</router-link>
+            <router-link to="/wishlist" class="text-white-50 text-decoration-none hover-text-white">{{ $t('common.wishlist') }}</router-link>
+            <a href="#" class="text-white-50 text-decoration-none hover-text-white">{{ $t('footer.support') }}</a>
           </div>
         </div>
         
         <!-- Contact Info -->
         <div class="col-lg-3 col-md-6 col-12">
-          <h5 class="fw-bold mb-3 text-white">Contact</h5>
+          <h5 class="fw-bold mb-3 text-white">{{ $t('common.contact') }}</h5>
           <div class="d-flex flex-column gap-2">
             <p class="text-white-50 mb-0"><i class="bi bi-envelope me-2"></i>info@dookan.af</p>
             <p class="text-white-50 mb-0"><i class="bi bi-telephone me-2"></i>+93 700 123 456</p>
@@ -48,12 +46,12 @@
       <div class="pt-4 border-top border-secondary">
         <div class="row align-items-center">
           <div class="col-md-6 col-12 text-center text-md-start mb-3 mb-md-0">
-            <p class="text-white-50 mb-0">&copy; 2025 Dookan. All rights reserved. Made with ❤️ for Afghan families</p>
+            <p class="text-white-50 mb-0">{{ $t('footer.copyright') }}</p>
           </div>
           <div class="col-md-6 col-12 text-center text-md-end">
             <div class="d-flex gap-3 justify-content-center justify-content-md-end">
-              <a href="#" class="text-white-50 hover-text-white text-decoration-none">Privacy Policy</a>
-              <a href="#" class="text-white-50 hover-text-white text-decoration-none">Terms of Service</a>
+              <a href="#" class="text-white-50 hover-text-white text-decoration-none">{{ $t('footer.privacyPolicy') }}</a>
+              <a href="#" class="text-white-50 hover-text-white text-decoration-none">{{ $t('footer.termsOfService') }}</a>
             </div>
           </div>
         </div>

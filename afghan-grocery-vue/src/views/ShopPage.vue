@@ -7,7 +7,7 @@
       <div class="container">
         <div class="row mb-3">
           <div class="col-12">
-            <h1 class="mb-2">Shop All Products</h1>
+            <h1 class="mb-2">{{ $t('shop.title') }}</h1>
             <div class="section-divider"></div>
           </div>
         </div>
@@ -18,7 +18,7 @@
               <input
                 v-model="searchQuery"
                 type="text"
-                placeholder="Search products..."
+                :placeholder="$t('common.search')"
                 class="form-control border-start-0"
                 @input="handleSearch"
               />
@@ -26,11 +26,11 @@
           </div>
           <div class="col-lg-3 col-md-4 col-sm-8 col-9">
             <select v-model="sortBy" class="form-select shadow-sm">
-              <option value="">Sort By</option>
-              <option value="price-asc">Price: Low to High</option>
-              <option value="price-desc">Price: High to Low</option>
-              <option value="rating">Highest Rated</option>
-              <option value="newest">Newest First</option>
+              <option value="">{{ $t('shop.sortBy') }}</option>
+              <option value="price-asc">{{ $t('shop.sortOptions.priceLowHigh') }}</option>
+              <option value="price-desc">{{ $t('shop.sortOptions.priceHighLow') }}</option>
+              <option value="rating">{{ $t('shop.sortOptions.featured') }}</option>
+              <option value="newest">{{ $t('shop.sortOptions.newest') }}</option>
             </select>
           </div>
           <div class="col-lg-1 col-md-1 col-sm-4 col-3 d-lg-none">
@@ -50,13 +50,13 @@
           <div class="card border-0 shadow-sm filters-sidebar">
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
-                <h5 class="mb-0 fw-bold">Filters</h5>
-                <button @click="clearFilters" class="btn btn-link btn-sm text-primary p-0 text-decoration-underline">Clear All</button>
+                <h5 class="mb-0 fw-bold">{{ $t('shop.filters') }}</h5>
+                <button @click="clearFilters" class="btn btn-link btn-sm text-primary p-0 text-decoration-underline">{{ $t('shop.clearFilters') }}</button>
               </div>
 
               <!-- Categories -->
               <div class="mb-4 pb-4 border-bottom">
-                <h6 class="fw-semibold mb-3">Categories</h6>
+                <h6 class="fw-semibold mb-3">{{ $t('header.categories') }}</h6>
                 <div class="d-flex flex-column gap-2">
                   <button
                     v-for="category in categories"
@@ -64,13 +64,13 @@
                     :class="['btn btn-sm text-start', selectedCategory === category.id ? 'btn-primary' : 'btn-outline-secondary']"
                     @click="selectedCategory = category.id"
                   >
-                    {{ category.icon }} {{ category.name }}
+                    {{ category.icon }} {{ languageStore.getLocalizedName(category) }}
                   </button>
                   <button
                     :class="['btn btn-sm text-start', !selectedCategory ? 'btn-primary' : 'btn-outline-secondary']"
                     @click="selectedCategory = null"
                   >
-                    All Products
+                    {{ $t('shop.allCategories') }}
                   </button>
                 </div>
               </div>
@@ -95,10 +95,10 @@
 
               <!-- Additional Filters -->
               <div>
-                <h6 class="fw-semibold mb-3">Other Filters</h6>
+                <h6 class="fw-semibold mb-3">{{ $t('shop.filters') }}</h6>
                 <div class="form-check mb-2">
                   <input v-model="inStockOnly" type="checkbox" class="form-check-input" id="inStockCheck" />
-                  <label class="form-check-label" for="inStockCheck">In Stock Only</label>
+                  <label class="form-check-label" for="inStockCheck">{{ $t('product.inStock') }}</label>
                 </div>
               </div>
             </div>
@@ -110,7 +110,7 @@
           <!-- Results Info -->
           <div class="alert alert-light d-flex align-items-center mb-4">
             <i class="bi bi-info-circle me-2"></i>
-            <span class="fw-semibold">{{ filteredProducts.length }} {{ filteredProducts.length === 1 ? 'product' : 'products' }} found</span>
+            <span class="fw-semibold">{{ $t('shop.productsFound', { count: filteredProducts.length }) }}</span>
           </div>
 
           <!-- Loading State -->
@@ -127,9 +127,9 @@
           <!-- Empty State -->
           <div v-else-if="filteredProducts.length === 0" class="text-center py-5">
             <div style="font-size: 4rem;" class="mb-4">📦</div>
-            <h2 class="mb-3">No products found</h2>
-            <p class="text-muted mb-4">Try adjusting your search or filters</p>
-            <button @click="clearFilters" class="btn btn-primary">Clear Filters</button>
+            <h2 class="mb-3">{{ $t('shop.noProducts') }}</h2>
+            <p class="text-muted mb-4">{{ $t('shop.clearFilters') }}</p>
+            <button @click="clearFilters" class="btn btn-primary">{{ $t('shop.clearFilters') }}</button>
           </div>
           
           <!-- Products Grid -->
@@ -144,13 +144,13 @@
       <!-- Mobile Filters Offcanvas -->
       <div class="offcanvas offcanvas-start" tabindex="-1" id="filtersOffcanvas" aria-labelledby="filtersOffcanvasLabel">
         <div class="offcanvas-header border-bottom">
-          <h5 class="offcanvas-title fw-bold" id="filtersOffcanvasLabel">Filters</h5>
+          <h5 class="offcanvas-title fw-bold" id="filtersOffcanvasLabel">{{ $t('shop.filters') }}</h5>
           <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
           <!-- Categories -->
           <div class="mb-4 pb-4 border-bottom">
-            <h6 class="fw-semibold mb-3">Categories</h6>
+            <h6 class="fw-semibold mb-3">{{ $t('header.categories') }}</h6>
             <div class="d-flex flex-column gap-2">
               <button
                 v-for="category in categories"
@@ -159,14 +159,14 @@
                 @click="selectedCategory = category.id"
                 data-bs-dismiss="offcanvas"
               >
-                {{ category.icon }} {{ category.name }}
+                {{ category.icon }} {{ languageStore.getLocalizedName(category) }}
               </button>
               <button
                 :class="['btn btn-sm text-start', !selectedCategory ? 'btn-primary' : 'btn-outline-secondary']"
                 @click="selectedCategory = null"
                 data-bs-dismiss="offcanvas"
               >
-                All Products
+                {{ $t('shop.allCategories') }}
               </button>
             </div>
           </div>
@@ -191,15 +191,15 @@
 
           <!-- Additional Filters -->
           <div class="mb-4">
-            <h6 class="fw-semibold mb-3">Other Filters</h6>
+            <h6 class="fw-semibold mb-3">{{ $t('shop.filters') }}</h6>
             <div class="form-check mb-2">
               <input v-model="inStockOnly" type="checkbox" class="form-check-input" id="inStockCheckMobile" />
-              <label class="form-check-label" for="inStockCheckMobile">In Stock Only</label>
+              <label class="form-check-label" for="inStockCheckMobile">{{ $t('product.inStock') }}</label>
             </div>
           </div>
 
           <!-- Clear All Button -->
-          <button @click="clearFilters" class="btn btn-outline-danger w-100" data-bs-dismiss="offcanvas">Clear All Filters</button>
+          <button @click="clearFilters" class="btn btn-outline-danger w-100" data-bs-dismiss="offcanvas">{{ $t('shop.clearFilters') }}</button>
         </div>
       </div>
     </div>
@@ -212,6 +212,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProductsStore } from '@/stores/products'
+import { useLanguageStore } from '@/stores/language'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import ProductCard from '@/components/product/ProductCard.vue'
@@ -221,6 +222,7 @@ import RatingFilter from '@/components/filters/RatingFilter.vue'
 const route = useRoute()
 const router = useRouter()
 const productsStore = useProductsStore()
+const languageStore = useLanguageStore()
 
 const searchQuery = ref('')
 const selectedCategory = ref(null)

@@ -8,31 +8,31 @@
         <div class="error-icon">🔍</div>
       </div>
       
-      <h1 class="display-4 fw-bold mb-3">Page Not Found</h1>
+      <h1 class="display-4 fw-bold mb-3">{{ $t('common.pageNotFound') }}</h1>
       <p class="lead text-muted mb-5">
-        Oops! The page you're looking for doesn't exist or has been moved.
+        {{ $t('common.pageNotFoundMessage') }}
       </p>
       
       <div class="d-flex gap-3 justify-content-center flex-wrap">
         <router-link to="/" class="btn btn-primary btn-lg px-5 rounded-pill">
-          <i class="bi bi-house-door me-2"></i>Go Home
+          <i class="bi bi-house-door me-2"></i>{{ $t('common.goHome') }}
         </router-link>
         <router-link to="/shop" class="btn btn-outline-primary btn-lg px-5 rounded-pill">
-          <i class="bi bi-shop me-2"></i>Browse Shop
+          <i class="bi bi-shop me-2"></i>{{ $t('common.browseShop') }}
         </router-link>
         <button @click="goBack" class="btn btn-outline-secondary btn-lg px-5 rounded-pill">
-          <i class="bi bi-arrow-left me-2"></i>Go Back
+          <i class="bi bi-arrow-left me-2"></i>{{ $t('common.goBack') }}
         </button>
       </div>
       
       <div class="mt-5 pt-5">
-        <h3 class="h5 mb-4 text-muted">Popular Pages</h3>
+        <h3 class="h5 mb-4 text-muted">{{ $t('common.popularPages') }}</h3>
         <div class="row g-3 justify-content-center">
           <div class="col-md-3 col-sm-6">
             <router-link to="/shop" class="card border-0 shadow-sm h-100 text-decoration-none hover-lift">
               <div class="card-body text-center p-4">
                 <div class="fs-1 mb-2">🛒</div>
-                <h6 class="fw-bold mb-0">Shop</h6>
+                <h6 class="fw-bold mb-0">{{ $t('common.shop') }}</h6>
               </div>
             </router-link>
           </div>
@@ -40,7 +40,7 @@
             <router-link to="/orders" class="card border-0 shadow-sm h-100 text-decoration-none hover-lift">
               <div class="card-body text-center p-4">
                 <div class="fs-1 mb-2">📦</div>
-                <h6 class="fw-bold mb-0">Orders</h6>
+                <h6 class="fw-bold mb-0">{{ $t('admin.orders') }}</h6>
               </div>
             </router-link>
           </div>
@@ -48,7 +48,7 @@
             <router-link to="/profile" class="card border-0 shadow-sm h-100 text-decoration-none hover-lift">
               <div class="card-body text-center p-4">
                 <div class="fs-1 mb-2">👤</div>
-                <h6 class="fw-bold mb-0">Profile</h6>
+                <h6 class="fw-bold mb-0">{{ $t('common.profile') }}</h6>
               </div>
             </router-link>
           </div>
@@ -56,7 +56,7 @@
             <router-link to="/cart" class="card border-0 shadow-sm h-100 text-decoration-none hover-lift">
               <div class="card-body text-center p-4">
                 <div class="fs-1 mb-2">🛍️</div>
-                <h6 class="fw-bold mb-0">Cart</h6>
+                <h6 class="fw-bold mb-0">{{ $t('cart.title') }}</h6>
               </div>
             </router-link>
           </div>

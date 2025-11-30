@@ -1,16 +1,16 @@
 <template>
   <div class="address-book">
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h3 class="h5 fw-bold mb-0">Saved Addresses</h3>
+      <h3 class="h5 fw-bold mb-0">{{ $t('profile.savedAddresses') }}</h3>
       <button @click="showAddForm = true" class="btn btn-primary btn-sm">
-        <i class="bi bi-plus-lg me-1"></i>Add New Address
+        <i class="bi bi-plus-lg me-1"></i>{{ $t('profile.addNewAddress') }}
       </button>
     </div>
 
     <!-- Add/Edit Address Form -->
     <div v-if="showAddForm || editingAddress" class="card border-0 shadow-sm mb-4">
       <div class="card-body p-4">
-        <h4 class="h6 fw-bold mb-4">{{ editingAddress ? 'Edit Address' : 'Add New Address' }}</h4>
+        <h4 class="h6 fw-bold mb-4">{{ editingAddress ? $t('profile.editAddress') : $t('profile.addNewAddress') }}</h4>
         <form @submit.prevent="handleSaveAddress">
           <div class="mb-3">
             <label class="form-label">Address Name *</label>
@@ -18,16 +18,16 @@
           </div>
           <div class="row g-3 mb-3">
             <div class="col-md-6">
-              <label class="form-label">Full Name *</label>
+              <label class="form-label">{{ $t('profile.fullName') }} *</label>
               <input v-model="formData.fullName" type="text" class="form-control" required />
             </div>
             <div class="col-md-6">
-              <label class="form-label">Phone *</label>
+              <label class="form-label">{{ $t('checkout.phoneNumber') }} *</label>
               <input v-model="formData.phone" type="tel" class="form-control" placeholder="+93 700 123 456" required />
             </div>
           </div>
           <div class="mb-3">
-            <label class="form-label">City *</label>
+            <label class="form-label">{{ $t('checkout.city') }} *</label>
             <select v-model="formData.city" class="form-select" required>
               <option value="kabul">Kabul</option>
               <option value="herat">Herat</option>
@@ -38,19 +38,19 @@
             </select>
           </div>
           <div class="mb-3">
-            <label class="form-label">Complete Address *</label>
+            <label class="form-label">{{ $t('checkout.address') }} *</label>
             <textarea v-model="formData.address" class="form-control" rows="3" required></textarea>
           </div>
           <div class="form-check mb-4">
             <input v-model="formData.isDefault" type="checkbox" class="form-check-input" id="defaultCheck" />
-            <label class="form-check-label" for="defaultCheck">Set as default address</label>
+            <label class="form-check-label" for="defaultCheck">{{ $t('profile.setAsDefault') }}</label>
           </div>
           <div class="d-flex gap-2">
             <button type="submit" class="btn btn-primary" :disabled="loading">
               <span v-if="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
-              {{ loading ? 'Saving...' : 'Save Address' }}
+              {{ loading ? $t('common.saving') : $t('profile.saveAddress') }}
             </button>
-            <button type="button" class="btn btn-outline-secondary" @click="cancelForm">Cancel</button>
+            <button type="button" class="btn btn-outline-secondary" @click="cancelForm">{{ $t('common.cancel') }}</button>
           </div>
         </form>
       </div>
@@ -62,7 +62,7 @@
         <div class="card-body p-4">
           <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
             <h4 class="h6 fw-bold mb-0">{{ address.name }}</h4>
-            <span v-if="address.isDefault" class="badge bg-primary rounded-pill">Default</span>
+            <span v-if="address.isDefault" class="badge bg-primary rounded-pill">{{ $t('profile.default') }}</span>
           </div>
           <div class="mb-3 text-muted small">
             <p class="mb-1"><strong class="text-dark">{{ address.fullName }}</strong></p>
@@ -71,19 +71,19 @@
             <p class="mb-0">{{ getCityName(address.city) }}</p>
           </div>
           <div class="d-flex gap-2">
-            <button @click="handleEdit(address)" class="btn btn-outline-primary btn-sm">Edit</button>
+            <button @click="handleEdit(address)" class="btn btn-outline-primary btn-sm">{{ $t('common.edit') }}</button>
             <button @click="handleSetDefault(address)" class="btn btn-outline-secondary btn-sm" :disabled="address.isDefault">
-              Set Default
+              {{ $t('profile.setDefault') }}
             </button>
-            <button @click="handleDelete(address)" class="btn btn-outline-danger btn-sm">Delete</button>
+            <button @click="handleDelete(address)" class="btn btn-outline-danger btn-sm">{{ $t('common.delete') }}</button>
           </div>
         </div>
       </div>
     </div>
 
     <div v-else-if="!showAddForm" class="text-center py-5">
-      <p class="text-muted mb-3">No saved addresses yet</p>
-      <button @click="showAddForm = true" class="btn btn-primary">Add Your First Address</button>
+      <p class="text-muted mb-3">{{ $t('profile.noAddresses') }}</p>
+      <button @click="showAddForm = true" class="btn btn-primary">{{ $t('profile.addFirstAddress') }}</button>
     </div>
   </div>
 </template>
@@ -91,6 +91,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import addressService from '@/services/addressService'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const addresses = ref([])
 const showAddForm = ref(false)
@@ -148,17 +151,17 @@ async function handleSaveAddress() {
 
     if (editingAddress.value) {
       await addressService.update(editingAddress.value.id, addressData)
-      window.showToast('Address updated successfully!', 'success')
+      window.showToast(t('messages.addressUpdated'), 'success')
     } else {
       await addressService.create(addressData)
-      window.showToast('Address created successfully!', 'success')
+      window.showToast(t('messages.addressCreated'), 'success')
     }
 
     await loadAddresses()
     cancelForm()
   } catch (error) {
     console.error('Failed to save address:', error)
-    window.showToast('Failed to save address', 'error')
+    window.showToast(t('messages.error'), 'error')
   } finally {
     loading.value = false
   }
@@ -180,23 +183,23 @@ async function handleSetDefault(address) {
   try {
     await addressService.update(address.id, { is_default: true })
     await loadAddresses()
-    window.showToast('Default address updated', 'success')
+    window.showToast(t('messages.defaultAddressUpdated'), 'success')
   } catch (error) {
     console.error('Failed to set default address:', error)
-    window.showToast('Failed to set default address', 'error')
+    window.showToast(t('messages.error'), 'error')
   }
 }
 
 async function handleDelete(address) {
-  if (!confirm('Are you sure you want to delete this address?')) return
+  if (!confirm(t('messages.confirmDelete'))) return
 
   try {
     await addressService.delete(address.id)
     addresses.value = addresses.value.filter(a => a.id !== address.id)
-    window.showToast('Address deleted', 'info')
+    window.showToast(t('messages.addressDeleted'), 'info')
   } catch (error) {
     console.error('Failed to delete address:', error)
-    window.showToast('Failed to delete address', 'error')
+    window.showToast(t('messages.error'), 'error')
   }
 }
 

@@ -3,7 +3,7 @@
     :class="['wishlist-btn', { active: isItemInWishlist }]"
     @click.stop="handleToggle"
     :disabled="loading"
-    :title="isItemInWishlist ? 'Remove from wishlist' : 'Add to wishlist'"
+    :title="isItemInWishlist ? $t('wishlist.removeFromWishlist') : $t('wishlist.addToWishlist')"
   >
     <i :class="['bi', isItemInWishlist ? 'bi-heart-fill' : 'bi-heart']"></i>
   </button>

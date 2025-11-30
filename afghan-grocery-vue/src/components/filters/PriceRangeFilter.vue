@@ -1,13 +1,13 @@
 <template>
   <div class="price-range-filter">
-    <label class="form-label fw-semibold">Price Range</label>
+    <label class="form-label fw-semibold">{{ $t('filters.priceRange') }}</label>
     <div class="d-flex align-items-center gap-2 mb-3">
       <input
         v-model.number="localMin"
         type="number"
         class="form-control form-control-sm"
         style="width: 80px;"
-        placeholder="Min"
+        :placeholder="$t('filters.min')"
         @input="updateRange"
       />
       <span>-</span>
@@ -16,10 +16,10 @@
         type="number"
         class="form-control form-control-sm"
         style="width: 80px;"
-        placeholder="Max"
+        :placeholder="$t('filters.max')"
         @input="updateRange"
       />
-      <span class="small">AFN</span>
+      <span class="small">{{ $t('common.afn') }}</span>
     </div>
     <div class="position-relative mb-2" style="height: 40px;">
       <input
@@ -42,14 +42,17 @@
       />
     </div>
     <div class="d-flex justify-content-between small text-muted">
-      <span>{{ localMin }} AFN</span>
-      <span>{{ localMax }} AFN</span>
+      <span>{{ localMin }} {{ $t('common.afn') }}</span>
+      <span>{{ localMax }} {{ $t('common.afn') }}</span>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   min: {

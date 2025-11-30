@@ -2,28 +2,43 @@
   <div class="card h-100 border-0 shadow-sm product-card">
     <div class="position-relative product-image-wrapper">
       <img :src="productImageUrl" :alt="product.name" class="card-img-top product-image" />
-      <span v-if="product.verified" class="position-absolute top-0 end-0 m-3 badge bg-success">
-        <i class="bi bi-check-circle me-1"></i>Verified
-      </span>
+      
+      <!-- Dynamic Badges -->
+      <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2 align-items-end">
+        <span v-if="product.verified" class="badge bg-success">
+          <i class="bi bi-check-circle me-1"></i>{{ $t('product.verified') }}
+        </span>
+        <span v-if="product.sale_percentage > 0" class="badge bg-danger">
+          {{ product.sale_percentage }}% {{ $t('product.off') }}
+        </span>
+        <span v-if="product.is_new" class="badge bg-info">
+          {{ $t('product.new') }}
+        </span>
+      </div>
+      
       <WishlistButton :product="product" class="position-absolute top-0 start-0 m-3" />
     </div>
     <div class="card-body d-flex flex-column">
       <router-link :to="`/product/${product.id}`" class="text-decoration-none">
-        <h5 class="card-title text-dark fw-semibold mb-2 product-title">{{ product.name }}</h5>
+        <h5 class="card-title text-dark fw-semibold mb-2 product-title">{{ languageStore.getLocalizedName(product) }}</h5>
       </router-link>
-      <p class="card-text text-muted small mb-2">{{ product.size }} • {{ product.supplier }}</p>
+      <p v-if="product.size || product.supplier" class="card-text text-muted small mb-2">
+        <span v-if="product.size">{{ product.size }}</span>
+        <span v-if="product.size && product.supplier"> • </span>
+        <span v-if="product.supplier">{{ product.supplier }}</span>
+      </p>
       <div class="d-flex align-items-center gap-2 mb-2">
         <span class="text-warning"><i class="bi bi-star-fill"></i> {{ formattedRating }}</span>
-        <span class="text-muted small">({{ product.reviewCount }})</span>
+        <!-- <span class="text-muted small">({{ product.reviewCount }})</span> -->
       </div>
       <div class="d-flex align-items-center gap-2 mb-3">
-        <span class="fs-5 fw-bold text-primary">{{ formatPrice(product.price) }} AFN</span>
+        <span class="fs-5 fw-bold text-primary">{{ formatPrice(product.price) }} {{ $t('common.afn') }}</span>
         <span v-if="product.compareAtPrice" class="text-muted text-decoration-line-through small">
-          {{ formatPrice(product.compareAtPrice) }} AFN
+          {{ formatPrice(product.compareAtPrice) }} {{ $t('common.afn') }}
         </span>
       </div>
       <button class="btn btn-primary w-100 mt-auto" @click="handleAddToCart">
-        <i class="bi bi-cart-plus me-2"></i>Add to Cart
+        <i class="bi bi-cart-plus me-2"></i>{{ $t('product.addToCart') }}
       </button>
     </div>
   </div>
@@ -32,8 +47,10 @@
 <script setup>
 import { computed } from 'vue'
 import { useCartStore } from '@/stores/cart'
+import { useLanguageStore } from '@/stores/language'
 import WishlistButton from '@/components/common/WishlistButton.vue'
 import { getImageUrl } from '@/services/imageService'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
   product: {
@@ -43,6 +60,8 @@ const props = defineProps({
 })
 
 const cartStore = useCartStore()
+const languageStore = useLanguageStore()
+const { t } = useI18n()
 
 // Computed property for product image URL
 const productImageUrl = computed(() => getImageUrl(props.product.image))
@@ -59,7 +78,7 @@ function formatPrice(price) {
 
 function handleAddToCart() {
   cartStore.addToCart(props.product)
-  window.showToast(`${props.product.name} added to cart!`, 'success')
+  window.showToast(t('messages.addedToCart'), 'success')
 }
 
 </script>

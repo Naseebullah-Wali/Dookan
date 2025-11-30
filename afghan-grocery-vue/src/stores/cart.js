@@ -24,14 +24,33 @@ export const useCartStore = defineStore('cart', () => {
         const existingItem = items.value.find(item => item.id === product.id)
 
         if (existingItem) {
-            existingItem.quantity += quantity
+            // Update stock if it's missing (for old cart items)
+            if (!existingItem.stock && product.stock) {
+                existingItem.stock = product.stock
+            }
+
+            // Check stock limit
+            const itemStock = existingItem.stock || Infinity
+            const newQuantity = existingItem.quantity + quantity
+
+            if (itemStock !== Infinity && newQuantity > itemStock) {
+                window.showToast(`Cannot add more. Only ${itemStock} in stock`, 'warning')
+                return
+            }
+            existingItem.quantity = newQuantity
         } else {
+            // Check if requested quantity exceeds stock
+            if (product.stock && quantity > product.stock) {
+                window.showToast(`Cannot add ${quantity}. Only ${product.stock} in stock`, 'warning')
+                return
+            }
             items.value.push({
                 id: product.id,
                 name: product.name,
                 price: product.price,
                 image: product.image,
                 size: product.size,
+                stock: product.stock || 999,
                 quantity
             })
         }
@@ -45,16 +64,27 @@ export const useCartStore = defineStore('cart', () => {
     }
 
     function updateQuantity(productId, quantity) {
+        const item = items.value.find(item => item.id === productId)
+
+        if (!item) return
+
+        // Validate quantity
         if (quantity <= 0) {
             removeFromCart(productId)
             return
         }
 
-        const item = items.value.find(item => item.id === productId)
-        if (item) {
-            item.quantity = quantity
+        // Check stock limit (handle old cart items without stock field)
+        const itemStock = item.stock || Infinity
+        if (itemStock !== Infinity && quantity > itemStock) {
+            window.showToast(`Cannot exceed available stock (${itemStock})`, 'warning')
+            item.quantity = itemStock
             saveCart()
+            return
         }
+
+        item.quantity = quantity
+        saveCart()
     }
 
     function clearCart() {

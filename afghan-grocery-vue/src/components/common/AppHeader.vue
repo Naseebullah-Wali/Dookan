@@ -17,21 +17,22 @@
         <div class="collapse navbar-collapse" id="navbarContent">
           <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-4">
             <li class="nav-item">
-              <router-link to="/" class="nav-link fw-semibold">Home</router-link>
+              <router-link to="/" class="nav-link fw-semibold">{{ $t('common.home') }}</router-link>
             </li>
             <li class="nav-item">
-              <router-link to="/shop" class="nav-link fw-semibold">Shop</router-link>
+              <router-link to="/shop" class="nav-link fw-semibold">{{ $t('common.shop') }}</router-link>
             </li>
             <li class="nav-item">
-              <router-link to="/about" class="nav-link fw-semibold">About</router-link>
+              <router-link to="/about" class="nav-link fw-semibold">{{ $t('common.about') }}</router-link>
             </li>
             <li class="nav-item">
-              <router-link to="/contact" class="nav-link fw-semibold">Contact</router-link>
+              <router-link to="/contact" class="nav-link fw-semibold">{{ $t('common.contact') }}</router-link>
             </li>
           </ul>
 
           <!-- Actions -->
           <div class="d-flex align-items-center gap-3">
+            <LanguageSwitcher />
             <template v-if="authStore.isAuthenticated">
               <router-link to="/wishlist" class="btn btn-link text-decoration-none p-0 position-relative hover-scale" title="Wishlist" style="color: var(--bs-primary);">
                 <i class="bi bi-heart fs-4"></i>
@@ -56,11 +57,10 @@
                   <span class="d-none d-lg-block fw-semibold">{{ authStore.user?.firstName || 'User' }}</span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2" aria-labelledby="userDropdown">
-                  <li><router-link to="/profile" class="dropdown-item d-flex align-items-center gap-2 py-2"><i class="bi bi-person"></i> Profile</router-link></li>
-                  <li><router-link to="/orders" class="dropdown-item d-flex align-items-center gap-2 py-2"><i class="bi bi-box-seam"></i> Orders</router-link></li>
-                  <li><router-link to="/referral" class="dropdown-item d-flex align-items-center gap-2 py-2"><i class="bi bi-gift"></i> Referral</router-link></li>
+                  <li><router-link to="/profile" class="dropdown-item d-flex align-items-center gap-2 py-2"><i class="bi bi-person"></i> {{ $t('common.profile') }}</router-link></li>
+                  <li><router-link to="/orders" class="dropdown-item d-flex align-items-center gap-2 py-2"><i class="bi bi-box-seam"></i> {{ $t('profile.orders') }}</router-link></li>
                   <li><hr class="dropdown-divider"></li>
-                  <li><button @click="handleLogout" class="dropdown-item d-flex align-items-center gap-2 py-2 text-danger"><i class="bi bi-box-arrow-right"></i> Logout</button></li>
+                  <li><button @click="handleLogout" class="dropdown-item d-flex align-items-center gap-2 py-2 text-danger"><i class="bi bi-box-arrow-right"></i> {{ $t('common.logout') }}</button></li>
                 </ul>
               </div>
             </template>
@@ -71,8 +71,8 @@
                   {{ cartStore.itemCount }}
                 </span>
               </router-link>
-              <router-link to="/login" class="btn btn-outline-primary btn-sm px-3">Login</router-link>
-              <router-link to="/register" class="btn btn-primary btn-sm px-3">Sign Up</router-link>
+              <router-link to="/login" class="btn btn-outline-primary btn-sm px-3">{{ $t('common.login') }}</router-link>
+              <router-link to="/register" class="btn btn-primary btn-sm px-3">{{ $t('common.register') }}</router-link>
             </template>
           </div>
         </div>
@@ -91,22 +91,25 @@
       <div class="offcanvas-body d-flex flex-column p-4">
         <!-- Mobile Nav Links -->
         <nav class="nav flex-column gap-2 mb-4">
-          <router-link to="/" class="nav-link fs-5 fw-semibold text-dark d-flex align-items-center gap-3 p-3 rounded-3 bg-light-hover" active-class="bg-primary-subtle text-primary" data-bs-dismiss="offcanvas">
-            <i class="bi bi-house"></i> Home
-          </router-link>
-          <router-link to="/shop" class="nav-link fs-5 fw-semibold text-dark d-flex align-items-center gap-3 p-3 rounded-3 bg-light-hover" active-class="bg-primary-subtle text-primary" data-bs-dismiss="offcanvas">
-            <i class="bi bi-shop"></i> Shop
-          </router-link>
-          <router-link to="/about" class="nav-link fs-5 fw-semibold text-dark d-flex align-items-center gap-3 p-3 rounded-3 bg-light-hover" active-class="bg-primary-subtle text-primary" data-bs-dismiss="offcanvas">
-            <i class="bi bi-info-circle"></i> About
-          </router-link>
-          <router-link to="/contact" class="nav-link fs-5 fw-semibold text-dark d-flex align-items-center gap-3 p-3 rounded-3 bg-light-hover" active-class="bg-primary-subtle text-primary" data-bs-dismiss="offcanvas">
-            <i class="bi bi-envelope"></i> Contact
-          </router-link>
+          <button @click="navigateTo('/')" class="nav-link fs-5 fw-semibold text-dark d-flex align-items-center gap-3 p-3 rounded-3 bg-light-hover text-start border-0 bg-transparent" :class="{ 'bg-primary-subtle text-primary': route.path === '/' }">
+            <i class="bi bi-house"></i> {{ $t('common.home') }}
+          </button>
+          <button @click="navigateTo('/shop')" class="nav-link fs-5 fw-semibold text-dark d-flex align-items-center gap-3 p-3 rounded-3 bg-light-hover text-start border-0 bg-transparent" :class="{ 'bg-primary-subtle text-primary': route.path === '/shop' }">
+            <i class="bi bi-shop"></i> {{ $t('common.shop') }}
+          </button>
+          <button @click="navigateTo('/about')" class="nav-link fs-5 fw-semibold text-dark d-flex align-items-center gap-3 p-3 rounded-3 bg-light-hover text-start border-0 bg-transparent" :class="{ 'bg-primary-subtle text-primary': route.path === '/about' }">
+            <i class="bi bi-info-circle"></i> {{ $t('common.about') }}
+          </button>
+          <button @click="navigateTo('/contact')" class="nav-link fs-5 fw-semibold text-dark d-flex align-items-center gap-3 p-3 rounded-3 bg-light-hover text-start border-0 bg-transparent" :class="{ 'bg-primary-subtle text-primary': route.path === '/contact' }">
+            <i class="bi bi-envelope"></i> {{ $t('common.contact') }}
+          </button>
         </nav>
 
         <!-- Mobile User Section -->
         <div class="mt-auto pt-4 border-top">
+          <div class="mb-3 d-flex justify-content-center">
+            <LanguageSwitcher />
+          </div>
           <template v-if="authStore.isAuthenticated">
             <div class="d-flex align-items-center gap-3 mb-4 p-3 bg-light rounded-3">
               <div class="user-avatar rounded-circle text-white d-flex align-items-center justify-content-center fw-bold" style="width: 48px; height: 48px; background-color: var(--bs-primary); font-size: 1.25rem;">
@@ -118,29 +121,29 @@
               </div>
             </div>
             <div class="d-grid gap-2">
-              <router-link to="/wishlist" class="btn btn-outline-light text-dark d-flex align-items-center justify-content-between" data-bs-dismiss="offcanvas">
-                <span><i class="bi bi-heart me-2"></i> Wishlist</span>
+              <button @click="navigateTo('/wishlist')" class="btn btn-outline-light text-dark d-flex align-items-center justify-content-between">
+                <span><i class="bi bi-heart me-2"></i> {{ $t('common.wishlist') }}</span>
                 <span v-if="wishlistStore.itemCount > 0" class="badge bg-danger rounded-pill">{{ wishlistStore.itemCount }}</span>
-              </router-link>
-              <router-link to="/cart" class="btn btn-outline-light text-dark d-flex align-items-center justify-content-between" data-bs-dismiss="offcanvas">
-                <span><i class="bi bi-cart3 me-2"></i> Cart</span>
+              </button>
+              <button @click="navigateTo('/cart')" class="btn btn-outline-light text-dark d-flex align-items-center justify-content-between">
+                <span><i class="bi bi-cart3 me-2"></i> {{ $t('common.cart') }}</span>
                 <span v-if="cartStore.itemCount > 0" class="badge bg-danger rounded-pill">{{ cartStore.itemCount }}</span>
-              </router-link>
-              <router-link to="/profile" class="btn btn-outline-light text-dark d-flex align-items-center gap-2" data-bs-dismiss="offcanvas">
-                <i class="bi bi-person"></i> Profile
-              </router-link>
-              <router-link to="/orders" class="btn btn-outline-light text-dark d-flex align-items-center gap-2" data-bs-dismiss="offcanvas">
-                <i class="bi bi-box-seam"></i> Orders
-              </router-link>
-              <button @click="handleLogout" class="btn btn-danger d-flex align-items-center justify-content-center gap-2 mt-2" data-bs-dismiss="offcanvas">
-                <i class="bi bi-box-arrow-right"></i> Logout
+              </button>
+              <button @click="navigateTo('/profile')" class="btn btn-outline-light text-dark d-flex align-items-center gap-2">
+                <i class="bi bi-person"></i> {{ $t('common.profile') }}
+              </button>
+              <button @click="navigateTo('/orders')" class="btn btn-outline-light text-dark d-flex align-items-center gap-2">
+                <i class="bi bi-box-seam"></i> {{ $t('profile.orders') }}
+              </button>
+              <button @click="handleLogout" class="btn btn-danger d-flex align-items-center justify-content-center gap-2 mt-2">
+                <i class="bi bi-box-arrow-right"></i> {{ $t('common.logout') }}
               </button>
             </div>
           </template>
           <template v-else>
             <div class="d-grid gap-2">
-              <router-link to="/login" class="btn btn-outline-primary" data-bs-dismiss="offcanvas">Login</router-link>
-              <router-link to="/register" class="btn btn-primary" data-bs-dismiss="offcanvas">Sign Up</router-link>
+              <button @click="navigateTo('/login')" class="btn btn-outline-primary">{{ $t('common.login') }}</button>
+              <button @click="navigateTo('/register')" class="btn btn-primary">{{ $t('common.register') }}</button>
             </div>
           </template>
         </div>
@@ -155,6 +158,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import { useWishlistStore } from '@/stores/wishlist'
+import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
@@ -181,6 +185,29 @@ function closeMobileMenu() {
   if (offcanvasInstance) {
     offcanvasInstance.hide()
   }
+  
+  // Manually cleanup Bootstrap's body modifications
+  setTimeout(() => {
+    document.body.classList.remove('modal-open')
+    document.body.style.overflow = ''
+    document.body.style.paddingRight = ''
+    
+    // Remove backdrop if it exists
+    const backdrop = document.querySelector('.offcanvas-backdrop')
+    if (backdrop) {
+      backdrop.remove()
+    }
+  }, 100)
+}
+
+function navigateTo(path) {
+  // Close the menu first
+  closeMobileMenu()
+  
+  // Navigate after a short delay to ensure menu closes
+  setTimeout(() => {
+    router.push(path)
+  }, 150)
 }
 
 // Watch for route changes and close mobile menu

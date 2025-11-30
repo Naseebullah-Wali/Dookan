@@ -5,9 +5,9 @@
     <!-- Hero Section -->
     <section class="hero-section py-5 text-center border-bottom">
       <div class="container">
-        <h1 class="mb-2">Contact Us</h1>
+        <h1 class="mb-2">{{ $t('contact.title') }}</h1>
         <div class="section-divider mx-auto mb-3"></div>
-        <p class="text-muted lead">We're here to help! Get in touch with us.</p>
+        <p class="text-muted lead">{{ $t('contact.subtitle') }}</p>
       </div>
     </section>
 
@@ -18,33 +18,33 @@
         <div class="col-lg-8 col-12">
           <div class="card border-0 shadow-sm">
             <div class="card-body p-4 p-md-5">
-              <h2 class="mb-4">Send us a Message</h2>
+              <h2 class="mb-4">{{ $t('contact.formTitle') }}</h2>
               <form @submit.prevent="handleSubmit">
                 <div class="mb-3">
-                  <label class="form-label fw-semibold">Name</label>
+                  <label class="form-label fw-semibold">{{ $t('common.name') }}</label>
                   <input v-model="formData.name" type="text" class="form-control form-control-lg" required />
                 </div>
                 <div class="mb-3">
-                  <label class="form-label fw-semibold">Email</label>
+                  <label class="form-label fw-semibold">{{ $t('common.email') }}</label>
                   <input v-model="formData.email" type="email" class="form-control form-control-lg" required />
                 </div>
                 <div class="mb-3">
-                  <label class="form-label fw-semibold">Phone (Optional)</label>
+                  <label class="form-label fw-semibold">{{ $t('common.phone') }} ({{ $t('common.optional') }})</label>
                   <input v-model="formData.phone" type="tel" class="form-control form-control-lg" placeholder="+93 700 123 456" />
                 </div>
                 <div class="mb-3">
-                  <label class="form-label fw-semibold">Subject</label>
+                  <label class="form-label fw-semibold">{{ $t('contact.subject') }}</label>
                   <select v-model="formData.subject" class="form-select form-select-lg" required>
-                    <option value="">Select a subject</option>
-                    <option value="order">Order Inquiry</option>
-                    <option value="delivery">Delivery Question</option>
-                    <option value="product">Product Information</option>
-                    <option value="feedback">Feedback</option>
-                    <option value="other">Other</option>
+                    <option value="">{{ $t('contact.selectSubject') }}</option>
+                    <option value="order">{{ $t('contact.orderInquiry') }}</option>
+                    <option value="delivery">{{ $t('contact.deliveryQuestion') }}</option>
+                    <option value="product">{{ $t('contact.productInfo') }}</option>
+                    <option value="feedback">{{ $t('contact.feedback') }}</option>
+                    <option value="other">{{ $t('contact.other') }}</option>
                   </select>
                 </div>
                 <div class="mb-4">
-                  <label class="form-label fw-semibold">Message</label>
+                  <label class="form-label fw-semibold">{{ $t('contact.message') }}</label>
                   <textarea 
                     v-model="formData.message" 
                     class="form-control" 
@@ -56,7 +56,7 @@
                 <button type="submit" class="btn btn-primary btn-lg w-100" :disabled="loading">
                   <span v-if="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
                   <i v-else class="bi bi-envelope me-2"></i>
-                  {{ loading ? 'Sending...' : 'Send Message' }}
+                  {{ loading ? $t('contact.sending') : $t('contact.sendMessage') }}
                 </button>
               </form>
             </div>
@@ -68,18 +68,18 @@
           <!-- Quick Contact -->
           <div class="card border-0 shadow-sm mb-4">
             <div class="card-body p-4">
-              <h5 class="card-title mb-4">Quick Contact</h5>
+              <h5 class="card-title mb-4">{{ $t('contact.quickContact') }}</h5>
               <div class="d-flex gap-3 p-3 bg-light rounded mb-3">
                 <div style="font-size: 2rem;">📧</div>
                 <div>
-                  <div class="small text-muted mb-1">Email</div>
+                  <div class="small text-muted mb-1">{{ $t('common.email') }}</div>
                   <a href="mailto:info@dookan.af" class="text-decoration-none fw-semibold">info@dookan.af</a>
                 </div>
               </div>
               <div class="d-flex gap-3 p-3 bg-light rounded mb-3">
                 <div style="font-size: 2rem;">📱</div>
                 <div>
-                  <div class="small text-muted mb-1">Phone</div>
+                  <div class="small text-muted mb-1">{{ $t('common.phone') }}</div>
                   <a href="tel:+93700123456" class="text-decoration-none fw-semibold">+93 700 123 456</a>
                 </div>
               </div>
@@ -96,15 +96,15 @@
           <!-- Business Hours -->
           <div class="card border-0 shadow-sm mb-4">
             <div class="card-body p-4">
-              <h5 class="card-title mb-4">Business Hours</h5>
+              <h5 class="card-title mb-4">{{ $t('contact.businessHours') }}</h5>
               <div class="mb-3">
                 <div class="d-flex justify-content-between py-2 border-bottom">
-                  <span>Saturday - Thursday</span>
+                  <span>{{ $t('contact.weekdays') }}</span>
                   <span class="fw-semibold">9:00 AM - 6:00 PM</span>
                 </div>
                 <div class="d-flex justify-content-between py-2">
-                  <span>Friday</span>
-                  <span class="fw-semibold">Closed</span>
+                  <span>{{ $t('contact.friday') }}</span>
+                  <span class="fw-semibold">{{ $t('contact.closed') }}</span>
                 </div>
               </div>
               <p class="text-center text-muted small mb-0">Afghanistan Time (AFT)</p>
@@ -114,18 +114,18 @@
           <!-- FAQ -->
           <div class="card border-0 shadow-sm">
             <div class="card-body p-4">
-              <h5 class="card-title mb-4">Common Questions</h5>
+              <h5 class="card-title mb-4">{{ $t('contact.faq') }}</h5>
               <div class="mb-4">
-                <h6 class="text-primary mb-2">How long does delivery take?</h6>
-                <p class="text-muted mb-0">Typically 2-3 business days within major cities.</p>
+                <h6 class="text-primary mb-2">{{ $t('contact.faq1Q') }}</h6>
+                <p class="text-muted mb-0">{{ $t('contact.faq1A') }}</p>
               </div>
               <div class="mb-4">
-                <h6 class="text-primary mb-2">Do you deliver to all cities?</h6>
-                <p class="text-muted mb-0">We deliver to Kabul, Herat, Mazar, Kandahar, Jalalabad, and more.</p>
+                <h6 class="text-primary mb-2">{{ $t('contact.faq2Q') }}</h6>
+                <p class="text-muted mb-0">{{ $t('contact.faq2A') }}</p>
               </div>
               <div>
-                <h6 class="text-primary mb-2">What payment methods do you accept?</h6>
-                <p class="text-muted mb-0">We accept online payments and cash on delivery.</p>
+                <h6 class="text-primary mb-2">{{ $t('contact.faq3Q') }}</h6>
+                <p class="text-muted mb-0">{{ $t('contact.faq3A') }}</p>
               </div>
             </div>
           </div>
@@ -139,8 +139,8 @@
       <section class="mb-5">
         <div class="card border-0 shadow-sm text-center">
           <div class="card-body p-5">
-            <h2 class="mb-3">Follow Us</h2>
-            <p class="text-muted mb-4">Stay connected with us on social media for updates and special offers!</p>
+            <h2 class="mb-3">{{ $t('contact.followUs') }}</h2>
+            <p class="text-muted mb-4">{{ $t('contact.followUsText') }}</p>
             <div class="d-flex gap-3 justify-content-center flex-wrap">
               <a href="#" class="btn btn-outline-primary"><i class="bi bi-facebook me-2"></i>Facebook</a>
               <a href="#" class="btn btn-outline-primary"><i class="bi bi-instagram me-2"></i>Instagram</a>
@@ -160,6 +160,9 @@
 import { ref } from 'vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const formData = ref({
   name: '',
@@ -177,7 +180,7 @@ async function handleSubmit() {
   // Simulate sending message
   await new Promise(resolve => setTimeout(resolve, 1000))
   
-  window.showToast('Message sent successfully! We\'ll get back to you soon.', 'success')
+  window.showToast(t('contact.messageSent'), 'success')
   
   // Reset form
   formData.value = {

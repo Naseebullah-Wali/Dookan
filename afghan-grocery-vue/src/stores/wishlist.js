@@ -12,7 +12,6 @@ export const useWishlistStore = defineStore('wishlist', () => {
     const itemCount = computed(() => items.value.length)
 
     const isInWishlist = (productId) => {
-        console.log('Checking wishlist for:', productId, 'Items:', items.value)
         return items.value.some(item => item.productId == productId || item.product_id == productId)
     }
 
@@ -26,7 +25,9 @@ export const useWishlistStore = defineStore('wishlist', () => {
         error.value = null
         try {
             const response = await api.get(`/wishlist?_=${new Date().getTime()}`)
-            const rawItems = response.data.data || []
+
+            // Backend returns array directly in response.data, not response.data.data
+            const rawItems = Array.isArray(response.data) ? response.data : (response.data.data || [])
 
             // Transform backend response to consistent format
             items.value = rawItems.map(item => ({
@@ -38,10 +39,12 @@ export const useWishlistStore = defineStore('wishlist', () => {
                     id: item.product_id,
                     name: item.name,
                     price: item.price,
+                    original_price: item.original_price,
                     image: item.image,
                     stock: item.stock,
                     rating: item.rating,
-                    category_id: item.category_id
+                    category_id: item.category_id,
+                    size: item.size
                 }
             }))
         } catch (err) {
@@ -63,18 +66,47 @@ export const useWishlistStore = defineStore('wishlist', () => {
             return false
         }
 
+        // Optimistic update - add to UI immediately
+        const optimisticItem = {
+            id: Date.now(), // temporary ID
+            productId: product.id,
+            product_id: product.id,
+            created_at: new Date().toISOString(),
+            product: {
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                image: product.image,
+                stock: product.stock,
+                rating: product.rating,
+                category_id: product.category_id,
+                size: product.size
+            }
+        }
+        items.value.push(optimisticItem)
+
         loading.value = true
         error.value = null
         try {
-            await api.post('/wishlist', {
+            const response = await api.post('/wishlist', {
                 product_id: product.id
             })
-            // Refetch to get complete data with product details
-            await fetchWishlist()
+
+            // Update the optimistic item with real ID from response
+            const index = items.value.findIndex(item => item.id === optimisticItem.id)
+            if (index !== -1 && response.data && response.data.data && response.data.data.id) {
+                items.value[index].id = response.data.data.id
+            } else if (index !== -1 && response.data && response.data.id) {
+                items.value[index].id = response.data.id
+            }
+
             window.showToast('Added to wishlist!', 'success')
             return true
         } catch (err) {
+            // Rollback optimistic update on error
+            items.value = items.value.filter(item => item.id !== optimisticItem.id)
             error.value = err.message
+            console.error('Failed to add to wishlist:', err)
             window.showToast('Failed to add to wishlist', 'error')
             return false
         } finally {
@@ -83,17 +115,24 @@ export const useWishlistStore = defineStore('wishlist', () => {
     }
 
     async function removeFromWishlist(productId) {
+        const item = items.value.find(i => i.productId == productId || i.product_id == productId)
+        if (!item) {
+            return false
+        }
+
+        // Optimistic update - remove from UI immediately
+        const itemBackup = { ...item }
+        items.value = items.value.filter(i => (i.productId != productId && i.product_id != productId))
+
         loading.value = true
         error.value = null
         try {
-            const item = items.value.find(i => i.productId == productId || i.product_id == productId)
-            if (item) {
-                await api.delete(`/wishlist/${item.id}`)
-                items.value = items.value.filter(i => (i.productId != productId && i.product_id != productId))
-                window.showToast('Removed from wishlist', 'info')
-            }
+            await api.delete(`/wishlist/${item.id}`)
+            window.showToast('Removed from wishlist', 'info')
             return true
         } catch (err) {
+            // Rollback optimistic update on error
+            items.value.push(itemBackup)
             error.value = err.message
             window.showToast('Failed to remove from wishlist', 'error')
             return false
@@ -103,7 +142,9 @@ export const useWishlistStore = defineStore('wishlist', () => {
     }
 
     async function toggleWishlist(product) {
-        if (isInWishlist(product.id)) {
+        const wasInWishlist = isInWishlist(product.id)
+
+        if (wasInWishlist) {
             return await removeFromWishlist(product.id)
         } else {
             return await addToWishlist(product)

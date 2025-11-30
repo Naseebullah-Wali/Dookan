@@ -3,39 +3,39 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">{{ isEditing ? 'Edit Category' : 'Add New Category' }}</h5>
+          <h5 class="modal-title">{{ isEditing ? $t('admin.editCategory') : $t('admin.addCategory') }}</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <form @submit.prevent="handleSubmit">
             <div class="mb-3">
-              <label class="form-label">Category Name *</label>
+              <label class="form-label">{{ $t('common.name') }} *</label>
               <input v-model="formData.name" type="text" class="form-control" required />
             </div>
             
             <div class="mb-3">
-              <label class="form-label">Icon (Emoji)</label>
+              <label class="form-label">{{ $t('common.icon') }} ({{ $t('admin.emoji') }})</label>
               <input v-model="formData.icon" type="text" class="form-control" placeholder="🍎" />
-              <small class="text-muted">Enter an emoji to represent this category</small>
+              <small class="text-muted">{{ $t('admin.emojiHint') }}</small>
             </div>
             
             <div class="mb-3">
-              <label class="form-label">Description</label>
+              <label class="form-label">{{ $t('common.description') }}</label>
               <textarea v-model="formData.description" class="form-control" rows="3"></textarea>
             </div>
             
             <div class="form-check mb-3">
               <input v-model="formData.is_active" type="checkbox" class="form-check-input" id="isActive" />
               <label class="form-check-label" for="isActive">
-                Active
+                {{ $t('common.active') }}
               </label>
             </div>
             
             <div class="d-flex justify-content-end gap-2">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ $t('common.cancel') }}</button>
               <button type="submit" class="btn btn-primary" :disabled="loading">
                 <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
-                {{ isEditing ? 'Update Category' : 'Create Category' }}
+                {{ isEditing ? $t('admin.updateCategory') : $t('admin.createCategory') }}
               </button>
             </div>
           </form>
@@ -48,6 +48,9 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { Modal } from 'bootstrap'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = defineProps({
   category: {

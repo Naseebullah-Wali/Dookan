@@ -3,11 +3,11 @@
     <AppHeader />
     
     <div class="container py-5">
-      <h1 class="mb-4 fw-bold">Order History</h1>
+      <h1 class="mb-4 fw-bold">{{ $t('profile.orderHistory') }}</h1>
 
       <div v-if="loading" class="d-flex justify-content-center py-5">
         <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
+          <span class="visually-hidden">{{ $t('common.loading') }}</span>
         </div>
       </div>
 
@@ -16,7 +16,7 @@
           <div class="card border-0 shadow-sm">
             <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
               <div>
-                <h5 class="mb-1 fw-bold">Order {{ order.order_number }}</h5>
+                <h5 class="mb-1 fw-bold">{{ $t('admin.order') }} {{ order.order_number }}</h5>
                 <p class="text-muted mb-0 small">{{ formatDate(order.created_at) }}</p>
               </div>
               <span class="badge rounded-pill" :class="getStatusBadgeClass(order.status)">
@@ -34,7 +34,7 @@
                         <span class="text-muted ms-2">× {{ item.quantity }}</span>
                       </td>
                       <td class="text-end pe-0 fw-medium">
-                        {{ formatPrice(item.subtotal) }} AFN
+                        {{ formatPrice(item.subtotal) }} {{ $t('common.afn') }}
                       </td>
                     </tr>
                   </tbody>
@@ -44,10 +44,10 @@
 
             <div class="card-footer bg-white py-3 d-flex justify-content-between align-items-center">
               <span class="fw-bold text-primary fs-5">
-                Total: {{ formatPrice(order.total) }} AFN
+                {{ $t('cart.total') }}: {{ formatPrice(order.total) }} {{ $t('common.afn') }}
               </span>
               <router-link :to="`/confirmation/${order.id}`" class="btn btn-outline-primary btn-sm">
-                <i class="bi bi-eye me-2"></i>View Details
+                <i class="bi bi-eye me-2"></i>{{ $t('profile.viewDetails') }}
               </router-link>
             </div>
           </div>
@@ -56,10 +56,10 @@
 
       <div v-else class="text-center py-5">
         <div class="display-1 mb-3">📦</div>
-        <h2 class="fw-bold">No orders yet</h2>
-        <p class="text-muted mb-4">Start shopping to see your orders here!</p>
+        <h2 class="fw-bold">{{ $t('profile.noOrders') }}</h2>
+        <p class="text-muted mb-4">{{ $t('profile.startShopping') }}</p>
         <router-link to="/shop" class="btn btn-primary btn-lg px-5 rounded-pill">
-          Start Shopping
+          {{ $t('cart.continueShopping') }}
         </router-link>
       </div>
     </div>
