@@ -145,7 +145,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useProductsStore } from '@/stores/products'
@@ -181,8 +181,8 @@ const formattedRating = computed(() => {
   return Number(product.value.rating).toFixed(1)
 })
 
-onMounted(async () => {
-  const productId = route.params.id
+async function loadProduct(productId) {
+  loading.value = true
   
   // Ensure categories are loaded for getCategoryName
   if (productsStore.categories.length === 0) {
@@ -196,6 +196,21 @@ onMounted(async () => {
   }
   
   loading.value = false
+  
+  // Scroll to top when product changes
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+onMounted(async () => {
+  const productId = route.params.id
+  await loadProduct(productId)
+})
+
+// Watch for route changes to reload product when clicking related products
+watch(() => route.params.id, async (newId, oldId) => {
+  if (newId && newId !== oldId) {
+    await loadProduct(newId)
+  }
 })
 
 function formatPrice(price) {

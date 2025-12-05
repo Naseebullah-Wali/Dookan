@@ -14,8 +14,14 @@ const app = createApp(App)
 const pinia = createPinia()
 
 import i18n from './i18n'
+import { useAuthStore } from './stores/auth'
 
 app.use(pinia)
 app.use(router)
 app.use(i18n)
+
+// Initialize auth state from Supabase
+const authStore = useAuthStore()
+authStore.initialize()
+
 app.mount('#app')

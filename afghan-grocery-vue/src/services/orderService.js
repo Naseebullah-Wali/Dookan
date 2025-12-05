@@ -1,15 +1,15 @@
 /**
- * Orders API Service
- * Handles all order-related API calls
+ * Orders Service - Supabase Implementation
+ * Handles all order-related database operations
  */
-import api from './api'
+import { supabase, getCurrentUser } from '../lib/supabase'
 
 export const orderService = {
     /**
      * Create a new order
      * @param {Object} orderData - Order data
      * @param {number} orderData.address_id - Delivery address ID
-     * @param {string} orderData.payment_method - Payment method (cod, card, bank_transfer)
+     * @param {string} orderData.payment_method - Payment method (cod, card, bank_transfer, paypal)
      * @param {Array} orderData.items - Order items
      * @param {number} orderData.subtotal - Subtotal amount
      * @param {number} [orderData.shipping_fee] - Shipping fee
@@ -19,8 +19,52 @@ export const orderService = {
      * @returns {Promise<Object>} Created order
      */
     async create(orderData) {
-        const response = await api.post('/orders', orderData)
-        return response.data
+        const user = await getCurrentUser()
+        if (!user) throw new Error('Not authenticated')
+
+        const { items, ...orderInfo } = orderData
+
+        // Calculate total
+        const total = orderInfo.subtotal +
+            (orderInfo.shipping_fee || 0) +
+            (orderInfo.tax || 0) -
+            (orderInfo.discount || 0)
+
+        // Create order
+        const { data: order, error: orderError } = await supabase
+            .from('orders')
+            .insert({
+                ...orderInfo,
+                user_id: user.id,
+                total,
+                status: 'pending',
+                payment_status: 'pending'
+            })
+            .select()
+            .single()
+
+        if (orderError) throw orderError
+
+        // Create order items
+        const orderItems = items.map(item => ({
+            order_id: order.id,
+            product_id: item.product_id,
+            product_name: item.name,
+            product_image: item.image,
+            sku: item.sku,
+            price: item.price,
+            quantity: item.quantity,
+            subtotal: item.price * item.quantity
+        }))
+
+        const { error: itemsError } = await supabase
+            .from('order_items')
+            .insert(orderItems)
+
+        if (itemsError) throw itemsError
+
+        // Fetch complete order with items
+        return await this.getById(order.id)
     },
 
     /**
@@ -31,12 +75,30 @@ export const orderService = {
      * @returns {Promise<Object>} Orders with pagination
      */
     async getMyOrders(params = {}) {
-        const queryParams = new URLSearchParams()
-        if (params.page) queryParams.append('page', params.page)
-        if (params.limit) queryParams.append('limit', params.limit)
+        const user = await getCurrentUser()
+        if (!user) throw new Error('Not authenticated')
 
-        const response = await api.get(`/orders?${queryParams}`)
-        return response.data
+        const { page = 1, limit = 20 } = params
+
+        const from = (page - 1) * limit
+        const to = from + limit - 1
+
+        const { data, error, count } = await supabase
+            .from('orders')
+            .select('*, addresses(*)', { count: 'exact' })
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .range(from, to)
+
+        if (error) throw error
+
+        return {
+            orders: data,
+            total: count,
+            page,
+            limit,
+            totalPages: Math.ceil(count / limit)
+        }
     },
 
     /**
@@ -45,8 +107,14 @@ export const orderService = {
      * @returns {Promise<Object>} Order details with items
      */
     async getById(id) {
-        const response = await api.get(`/orders/${id}`)
-        return response.data
+        const { data, error } = await supabase
+            .from('orders')
+            .select('*, addresses(*), order_items(*, products(*))')
+            .eq('id', id)
+            .single()
+
+        if (error) throw error
+        return data
     },
 
     /**
@@ -60,16 +128,42 @@ export const orderService = {
      * @returns {Promise<Object>} Orders with pagination
      */
     async getAll(filters = {}) {
-        const params = new URLSearchParams()
+        const { status, payment_status, user_id, page = 1, limit = 20 } = filters
 
-        if (filters.status) params.append('status', filters.status)
-        if (filters.payment_status) params.append('payment_status', filters.payment_status)
-        if (filters.user_id) params.append('user_id', filters.user_id)
-        if (filters.page) params.append('page', filters.page)
-        if (filters.limit) params.append('limit', filters.limit)
+        let query = supabase
+            .from('orders')
+            .select('*, addresses(*), profiles(name, email)', { count: 'exact' })
 
-        const response = await api.get(`/orders?${params}`)
-        return response.data
+        if (status) {
+            query = query.eq('status', status)
+        }
+
+        if (payment_status) {
+            query = query.eq('payment_status', payment_status)
+        }
+
+        if (user_id) {
+            query = query.eq('user_id', user_id)
+        }
+
+        const from = (page - 1) * limit
+        const to = from + limit - 1
+
+        query = query
+            .order('created_at', { ascending: false })
+            .range(from, to)
+
+        const { data, error, count } = await query
+
+        if (error) throw error
+
+        return {
+            orders: data,
+            total: count,
+            page,
+            limit,
+            totalPages: Math.ceil(count / limit)
+        }
     },
 
     /**
@@ -79,12 +173,19 @@ export const orderService = {
      * @param {string} [data.status] - Order status
      * @param {string} [data.payment_status] - Payment status
      * @param {string} [data.tracking_number] - Tracking number
-     * @param {string} [data.notes] - Order notes
+     * @param {string} [data.admin_notes] - Admin notes
      * @returns {Promise<Object>} Updated order
      */
     async updateStatus(id, data) {
-        const response = await api.put(`/orders/${id}`, data)
-        return response.data
+        const { data: order, error } = await supabase
+            .from('orders')
+            .update(data)
+            .eq('id', id)
+            .select()
+            .single()
+
+        if (error) throw error
+        return order
     }
 }
 

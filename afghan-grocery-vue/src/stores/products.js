@@ -21,17 +21,29 @@ export const useProductsStore = defineStore('products', () => {
         try {
             const response = await productService.getAll(filters)
 
-            // Handle paginated response
-            if (response.data && response.pagination) {
-                products.value = response.data
-                pagination.value = response.pagination
+            // Handle Supabase response format: {products, total, page, limit, totalPages}
+            if (response.products) {
+                products.value = response.products
+                pagination.value = {
+                    page: response.page || 1,
+                    limit: response.limit || 20,
+                    total: response.total || 0,
+                    totalPages: response.totalPages || 0
+                }
             } else {
-                // Fallback for non-paginated response
-                products.value = Array.isArray(response) ? response : response.data || []
+                // Fallback for direct array response
+                products.value = Array.isArray(response) ? response : []
+                pagination.value = {
+                    page: 1,
+                    limit: products.value.length,
+                    total: products.value.length,
+                    totalPages: 1
+                }
             }
 
             return products.value
         } catch (err) {
+            console.error('Error fetching products:', err)
             error.value = err.message
             products.value = []
             return []
@@ -45,9 +57,10 @@ export const useProductsStore = defineStore('products', () => {
         error.value = null
         try {
             const response = await productService.getFeatured(limit)
-            featuredProducts.value = Array.isArray(response) ? response : response.data || []
+            featuredProducts.value = Array.isArray(response) ? response : []
             return featuredProducts.value
         } catch (err) {
+            console.error('Error fetching featured products:', err)
             error.value = err.message
             featuredProducts.value = []
             return []
@@ -63,6 +76,7 @@ export const useProductsStore = defineStore('products', () => {
             const product = await productService.getById(id)
             return product
         } catch (err) {
+            console.error('Error fetching product by ID:', err)
             error.value = err.message
             return null
         } finally {
@@ -73,9 +87,10 @@ export const useProductsStore = defineStore('products', () => {
     async function fetchCategories() {
         try {
             const response = await categoryService.getAll(true)
-            categories.value = Array.isArray(response) ? response : response.data || []
+            categories.value = Array.isArray(response) ? response : []
             return categories.value
         } catch (err) {
+            console.error('Error fetching categories:', err)
             error.value = err.message
             categories.value = []
             return []
@@ -85,9 +100,10 @@ export const useProductsStore = defineStore('products', () => {
     async function fetchCategoriesWithCounts() {
         try {
             const response = await categoryService.getWithCounts()
-            categories.value = Array.isArray(response) ? response : response.data || []
+            categories.value = Array.isArray(response) ? response : []
             return categories.value
         } catch (err) {
+            console.error('Error fetching categories with counts:', err)
             error.value = err.message
             categories.value = []
             return []

@@ -37,7 +37,9 @@ api.interceptors.response.use(
     (error) => {
         if (error.response?.status === 401) {
             const authStore = useAuthStore()
-            authStore.logout()
+            // DISABLED: This causes Supabase session to be cleared when legacy API calls fail
+            // authStore.logout()
+            console.warn('Legacy API 401 Unauthorized - ignoring auto-logout')
         }
 
         // Extract error message from backend response

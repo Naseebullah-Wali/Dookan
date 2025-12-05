@@ -12,16 +12,9 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
-import { useAuthStore } from '@/stores/auth'
 import ToastContainer from '@/components/common/ToastContainer.vue'
 
-const authStore = useAuthStore()
-
-onMounted(() => {
-  // Auto-login from localStorage
-  authStore.checkAuth()
-})
+// Auth is now initialized in main.js via authStore.initialize()
 </script>
 
 <style>

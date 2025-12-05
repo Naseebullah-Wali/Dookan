@@ -93,6 +93,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useI18n } from 'vue-i18n'
+import { supabase } from '@/lib/supabase'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 
@@ -124,14 +125,15 @@ async function handleRegister() {
   
   const success = await authStore.register(userData)
   
+  loading.value = false
+  
   if (success) {
     window.showToast(t('messages.accountCreated'), 'success')
+    // Session is now persisted in auth store, safe to redirect
     router.push('/')
   } else {
     error.value = authStore.error || t('messages.registrationFailed')
   }
-  
-  loading.value = false
 }
 </script>
 

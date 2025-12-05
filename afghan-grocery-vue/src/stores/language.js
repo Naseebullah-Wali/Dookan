@@ -40,7 +40,7 @@ export const useLanguageStore = defineStore('language', () => {
         if (!item) return ''
 
         const fieldMap = {
-            en: field,
+            en: `${field}_en`,
             ps: `${field}_ps`,
             fa: `${field}_fa`,
             de: `${field}_de`,
@@ -48,7 +48,8 @@ export const useLanguageStore = defineStore('language', () => {
         }
 
         const localizedField = fieldMap[currentLocale.value]
-        return item[localizedField] || item[field] || ''
+        // Fallback to English if localized field doesn't exist
+        return item[localizedField] || item[`${field}_en`] || item[field] || ''
     }
 
     // Initialize direction on store creation

@@ -1,38 +1,68 @@
 /**
- * Categories API Service
- * Handles all category-related API calls
+ * Categories Service - Supabase Implementation
+ * Handles all category-related database operations
  */
-import api from './api'
+import { supabase } from '../lib/supabase'
 
 export const categoryService = {
     /**
      * Get all categories
      * @param {boolean} [activeOnly=true] - Filter only active categories
+     * @param {string} [lang='en'] - Language code
      * @returns {Promise<Array>} Categories list
      */
-    async getAll(activeOnly = true) {
-        const params = activeOnly ? '?active=true' : ''
-        const response = await api.get(`/categories${params}`)
-        return response.data
+    async getAll(activeOnly = true, lang = 'en') {
+        let query = supabase
+            .from('categories')
+            .select('*')
+            .order('display_order', { ascending: true })
+
+        if (activeOnly) {
+            query = query.eq('active', true)
+        }
+
+        const { data, error } = await query
+
+        if (error) throw error
+        return data
     },
 
     /**
      * Get category by ID
      * @param {number} id - Category ID
+     * @param {string} [lang='en'] - Language code
      * @returns {Promise<Object>} Category data
      */
-    async getById(id) {
-        const response = await api.get(`/categories/${id}`)
-        return response.data
+    async getById(id, lang = 'en') {
+        const { data, error } = await supabase
+            .from('categories')
+            .select('*')
+            .eq('id', id)
+            .single()
+
+        if (error) throw error
+        return data
     },
 
     /**
      * Get categories with product counts
+     * @param {string} [lang='en'] - Language code
      * @returns {Promise<Array>} Categories with counts
      */
-    async getWithCounts() {
-        const response = await api.get('/categories?with_counts=true')
-        return response.data
+    async getWithCounts(lang = 'en') {
+        const { data, error } = await supabase
+            .from('categories')
+            .select('*, products(count)')
+            .eq('active', true)
+            .order('display_order', { ascending: true })
+
+        if (error) throw error
+
+        // Transform the data to include product count
+        return data.map(category => ({
+            ...category,
+            product_count: category.products?.[0]?.count || 0
+        }))
     },
 
     /**
@@ -41,8 +71,14 @@ export const categoryService = {
      * @returns {Promise<Object>} Created category
      */
     async create(categoryData) {
-        const response = await api.post('/categories', categoryData)
-        return response.data
+        const { data, error } = await supabase
+            .from('categories')
+            .insert(categoryData)
+            .select()
+            .single()
+
+        if (error) throw error
+        return data
     },
 
     /**
@@ -52,8 +88,15 @@ export const categoryService = {
      * @returns {Promise<Object>} Updated category
      */
     async update(id, categoryData) {
-        const response = await api.put(`/categories/${id}`, categoryData)
-        return response.data
+        const { data, error } = await supabase
+            .from('categories')
+            .update(categoryData)
+            .eq('id', id)
+            .select()
+            .single()
+
+        if (error) throw error
+        return data
     },
 
     /**
@@ -62,8 +105,13 @@ export const categoryService = {
      * @returns {Promise<Object>} Success response
      */
     async delete(id) {
-        const response = await api.delete(`/categories/${id}`)
-        return response.data
+        const { error } = await supabase
+            .from('categories')
+            .delete()
+            .eq('id', id)
+
+        if (error) throw error
+        return { message: 'Category deleted successfully' }
     }
 }
 
