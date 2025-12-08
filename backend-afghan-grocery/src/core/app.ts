@@ -17,6 +17,7 @@ import uploadRoutes from '../routes/uploadRoutes';
 import addressRoutes from '../routes/addressRoutes';
 import testimonialRoutes from '../routes/testimonialRoutes';
 import newsItemRoutes from '../routes/newsItemRoutes';
+import paymentRoutes from '../routes/paymentRoutes';
 import path from 'path';
 
 class App {
@@ -88,6 +89,7 @@ class App {
         this.app.use(`/api/${apiVersion}/addresses`, addressRoutes);
         this.app.use(`/api/${apiVersion}/testimonials`, testimonialRoutes);
         this.app.use(`/api/${apiVersion}/news`, newsItemRoutes);
+        this.app.use(`/api/${apiVersion}/payments`, paymentRoutes);
 
         // Welcome route
         this.app.get('/', (_req, res) => {

@@ -67,23 +67,81 @@
               <div class="card-body p-4">
                 <h2 class="mb-4">{{ $t('checkout.paymentMethod') }}</h2>
                 <div class="d-grid gap-3">
+                  <!-- PayPal -->
                   <label class="payment-option">
-                    <input v-model="formData.paymentMethod" type="radio" value="online" class="d-none" />
+                    <input v-model="formData.paymentMethod" type="radio" value="paypal" class="d-none" />
                     <div class="d-flex align-items-center gap-3 p-3 border rounded payment-card">
-                      <div style="font-size: 2rem;">💳</div>
-                      <div>
-                        <div class="fw-semibold">{{ $t('checkout.payOnline') }}</div>
-                        <small class="text-muted">{{ $t('checkout.payOnlineDesc') }}</small>
+                      <div style="font-size: 2rem;">🅿️</div>
+                      <div class="flex-grow-1">
+                        <div class="fw-semibold">PayPal</div>
+                        <small class="text-muted">Pay securely with PayPal</small>
+                        <div v-if="formData.paymentMethod === 'paypal'" id="paypal-button-container" class="mt-3"></div>
                       </div>
                     </div>
                   </label>
+
+                  <!-- Crypto TRC20 -->
                   <label class="payment-option">
-                    <input v-model="formData.paymentMethod" type="radio" value="cod" class="d-none" />
+                    <input v-model="formData.paymentMethod" type="radio" value="trc20" class="d-none" />
                     <div class="d-flex align-items-center gap-3 p-3 border rounded payment-card">
-                      <div style="font-size: 2rem;">💵</div>
+                      <div style="font-size: 2rem;">💎</div>
+                      <div class="w-100">
+                        <div class="fw-semibold">Crypto (USDT TRC20)</div>
+                        <small class="text-muted">Tron Network</small>
+                        <div v-if="formData.paymentMethod === 'trc20'" class="mt-3 p-3 bg-light rounded" @click.stop>
+                            <p class="mb-1 small">Send <strong>{{ formatPrice(total) }} AFN</strong> (approx {{ (total / 70).toFixed(2) }} USDT) to:</p>
+                            <div class="input-group mb-2">
+                                <input type="text" class="form-control form-control-sm" value="T..." readonly>
+                                <button class="btn btn-outline-secondary btn-sm" type="button">Copy</button>
+                            </div>
+                            <label class="form-label small">Transaction Hash (TXID)</label>
+                            <div class="input-group">
+                                <input v-model="cryptoTxHash" type="text" class="form-control form-control-sm" placeholder="Paste hash here">
+                                <button @click="verifyCrypto('TRC20')" class="btn btn-primary btn-sm" type="button" :disabled="isVerifyingCrypto || cryptoVerified">
+                                    {{ cryptoVerified ? 'Verified' : (isVerifyingCrypto ? 'Verifying...' : 'Verify') }}
+                                </button>
+                            </div>
+                            <small v-if="cryptoVerified" class="text-success d-block mt-1">Payment Verified!</small>
+                        </div>
+                      </div>
+                    </div>
+                  </label>
+
+                  <!-- Crypto Arbitrum -->
+                  <label class="payment-option">
+                    <input v-model="formData.paymentMethod" type="radio" value="arbitrum" class="d-none" />
+                    <div class="d-flex align-items-center gap-3 p-3 border rounded payment-card">
+                      <div style="font-size: 2rem;">🔷</div>
+                      <div class="w-100">
+                        <div class="fw-semibold">Crypto (Arbitrum USDT)</div>
+                        <small class="text-muted">Arbitrum One Network</small>
+                        <div v-if="formData.paymentMethod === 'arbitrum'" class="mt-3 p-3 bg-light rounded" @click.stop>
+                             <p class="mb-1 small">Send <strong>{{ formatPrice(total) }} AFN</strong> (approx {{ (total / 70).toFixed(2) }} USDT) to:</p>
+                             <div class="input-group mb-2">
+                                <input type="text" class="form-control form-control-sm" value="0x..." readonly>
+                                <button class="btn btn-outline-secondary btn-sm" type="button">Copy</button>
+                            </div>
+                            <label class="form-label small">Transaction Hash (TXID)</label>
+                            <div class="input-group">
+                                <input v-model="cryptoTxHash" type="text" class="form-control form-control-sm" placeholder="Paste hash here">
+                                <button @click="verifyCrypto('ARBITRUM')" class="btn btn-primary btn-sm" type="button" :disabled="isVerifyingCrypto || cryptoVerified">
+                                    {{ cryptoVerified ? 'Verified' : (isVerifyingCrypto ? 'Verifying...' : 'Verify') }}
+                                </button>
+                            </div>
+                             <small v-if="cryptoVerified" class="text-success d-block mt-1">Payment Verified!</small>
+                        </div>
+                      </div>
+                    </div>
+                  </label>
+
+                  <!-- WhatsApp -->
+                  <label class="payment-option">
+                    <input v-model="formData.paymentMethod" type="radio" value="whatsapp" class="d-none" />
+                    <div class="d-flex align-items-center gap-3 p-3 border rounded payment-card">
+                      <div style="font-size: 2rem;">📱</div>
                       <div>
-                        <div class="fw-semibold">{{ $t('checkout.cod') }}</div>
-                        <small class="text-muted">{{ $t('checkout.codDesc') }}</small>
+                        <div class="fw-semibold">WhatsApp Order</div>
+                        <small class="text-muted">Complete order via Chat</small>
                       </div>
                     </div>
                   </label>
@@ -142,6 +200,8 @@ import { useI18n } from 'vue-i18n'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import { useOrdersStore } from '@/stores/orders'
+import { loadScript } from "@paypal/paypal-js";
+import { PaymentService } from '@/services/PaymentService';
 
 const router = useRouter()
 const cartStore = useCartStore()
@@ -149,6 +209,25 @@ const authStore = useAuthStore()
 const ordersStore = useOrdersStore()
 const languageStore = useLanguageStore()
 const { t } = useI18n()
+
+// Payment State
+const cryptoTxHash = ref('');
+const isVerifyingCrypto = ref(false);
+const cryptoVerified = ref(false);
+const paypalLoaded = ref(false);
+
+const paymentOptions = {
+    trc20: {
+        name: 'Crypto (TRC20 USDT)',
+        address: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t', // Example, should come from env but hardcoding for UI demo or fetch from config
+        network: 'Tron (TRC20)'
+    },
+    arbitrum: {
+        name: 'Crypto (Arbitrum USDT)',
+        address: '0x...', // Example
+        network: 'Arbitrum One'
+    }
+};
 
 const formData = ref({
   recipientName: '',
@@ -192,11 +271,63 @@ function formatPrice(price) {
   return price.toLocaleString()
 }
 
+// Watch for payment method change to load PayPal
+import { watch } from 'vue';
+
+watch(() => formData.value.paymentMethod, async (newMethod) => {
+    if (newMethod === 'paypal' && !paypalLoaded.value) {
+        try {
+            const paypal = await loadScript({ "clientId": "test", currency: "USD" }); // client-id from config? For now use 'test' or get from backend config endpoint if strictly needed, but public key is usually safe.
+            if (paypal && paypal.Buttons) {
+                await paypal.Buttons({
+                    createOrder: async (data, actions) => {
+                         // Call backend to create order
+                         return PaymentService.createPayPalOrder(total.value / 70, 'USD').then(order => order.id);
+                    },
+                    onApprove: async (data, actions) => {
+                        // Capture order
+                        await PaymentService.capturePayPalOrder(data.orderID);
+                        // Complete checkout
+                        handleCheckout();
+                    }
+                }).render('#paypal-button-container');
+                paypalLoaded.value = true;
+            }
+        } catch (error) {
+            console.error("failed to load the PayPal JS SDK script", error);
+        }
+    }
+});
+
+async function verifyCrypto(type) {
+    if (!cryptoTxHash.value) return;
+    isVerifyingCrypto.value = true;
+    try {
+        const result = await PaymentService.verifyCryptoPayment(type, cryptoTxHash.value, total.value / 70); // approx conversion
+        if (result.verified) {
+            cryptoVerified.value = true;
+            window.showToast('Payment Verified Successfully!', 'success');
+        } else {
+             window.showToast('Verification Failed: ' + (result.message || 'Unknown error'), 'error');
+        }
+    } catch (error) {
+        window.showToast('Verification Error', 'error');
+    } finally {
+        isVerifyingCrypto.value = false;
+    }
+}
+
 async function handleCheckout() {
   if (!authStore.user) {
     window.showToast(t('messages.loginRequired'), 'error')
     router.push('/login?redirect=/checkout')
     return
+  }
+
+  // Validate Payment
+  if (['trc20', 'arbitrum'].includes(formData.value.paymentMethod) && !cryptoVerified.value) {
+      window.showToast('Please verify your crypto payment first', 'error');
+      return;
   }
 
   const orderData = {
@@ -225,8 +356,23 @@ async function handleCheckout() {
   }
 
   try {
+      // If WhatsApp, just redirect
+    if (formData.value.paymentMethod === 'whatsapp') {
+         const waData = await PaymentService.getWhatsAppLink('PENDING', total.value, cartStore.items); // Should backend generate ID? Or pass temp?
+         // For now, let's create a pending order in DB first, then redirect.
+    }
+
     const order = await ordersStore.createOrder(orderData)
     cartStore.clearCart()
+    
+    if (formData.value.paymentMethod === 'whatsapp') {
+        const waData = await PaymentService.getWhatsAppLink(order.id, total.value, orderData.items);
+        if (waData && waData.link) {
+            window.location.href = waData.link;
+            return;
+        }
+    }
+
     router.push(`/confirmation/${order.id}`)
     window.showToast(t('messages.orderSuccess'), 'success')
   } catch (error) {
