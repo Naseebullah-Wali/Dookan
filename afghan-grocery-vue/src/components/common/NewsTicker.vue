@@ -155,7 +155,7 @@ const getNewsImage = (newsItem) => {
 }
 
 const offset = ref(0)
-const cardWidth = 450
+const cardWidth = 550
 const gap = 24
 const totalItemWidth = cardWidth + gap
 let totalWidth = 0
@@ -205,8 +205,8 @@ function handleShopNow() {
 }
 
 .ticker-card {
-  width: 450px;
-  height: 200px;
+  width: 550px;
+  height: 240px;
   border-radius: 16px;
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;

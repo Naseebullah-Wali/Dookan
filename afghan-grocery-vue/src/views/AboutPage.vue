@@ -151,6 +151,11 @@
                 <div class="p-3 bg-light rounded text-center fw-semibold">📍 {{ $t('about.moreCities') }}</div>
               </div>
             </div>
+
+            <div class="mt-5">
+              <h4 class="mb-3">{{ $t('about.deliveryZoneMap') }}</h4>
+              <DeliveryMap height="450px" />
+            </div>
           </div>
         </div>
       </section>
@@ -184,6 +189,7 @@
 <script setup>
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
+import DeliveryMap from '@/components/common/DeliveryMap.vue'
 </script>
 
 <style scoped>

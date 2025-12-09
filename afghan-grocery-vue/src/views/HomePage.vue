@@ -3,21 +3,26 @@
     <AppHeader />
     
     <!-- Hero Section -->
-    <section class="hero py-5">
-      <div class="container">
-        <div class="row justify-content-center">
-          <div class="col-lg-8 col-md-10 col-12 text-center">
-            <h1 class="display-4 fw-bold mb-4">{{ $t('home.hero.title') }}</h1>
-            <p class="lead text-muted mb-5">
+    <section class="hero py-5 position-relative overflow-hidden">
+      <div class="container position-relative" style="z-index: 2;">
+        <div class="row align-items-center min-vh-60">
+          <div class="col-lg-6 col-md-6 col-12 text-center text-md-start">
+            <h1 class="display-4 fw-bold mb-4 fade-in-up delay-1">{{ $t('home.hero.title') }}</h1>
+            <p class="lead text-muted mb-5 fade-in-up delay-2">
               {{ $t('home.hero.description') }}
             </p>
-            <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <div class="d-flex gap-3 justify-content-center justify-content-md-start flex-wrap fade-in-up delay-3">
               <router-link to="/shop" class="btn btn-primary btn-lg">
                 <i class="bi bi-bag me-2"></i>{{ $t('home.hero.shopNow') }}
               </router-link>
               <router-link to="/tracking" class="btn btn-outline-secondary btn-lg">
                 <i class="bi bi-box-seam me-2"></i>{{ $t('home.hero.learnMore') }}
               </router-link>
+            </div>
+          </div>
+          <div class="col-lg-6 col-md-6 col-12 d-flex justify-content-center align-items-center fade-in-up delay-2">
+            <div class="hero-image-wrapper">
+              <img src="/images/delivery-hero.png" alt="Fast Delivery Service" class="img-fluid delivery-hero-img" />
             </div>
           </div>
         </div>
@@ -146,6 +151,34 @@ onMounted(async () => {
 <style scoped>
 .hero {
   background: linear-gradient(135deg, rgba(231, 111, 26, 0.1) 0%, rgba(47, 157, 82, 0.1) 100%);
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+}
+
+.min-vh-60 {
+  min-height: 60vh;
+}
+
+.hero-image-wrapper {
+  max-width: 500px;
+  width: 100%;
+  animation: float 3s ease-in-out infinite;
+}
+
+.delivery-hero-img {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.1));
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
 }
 
 .categories-section {
@@ -181,5 +214,39 @@ onMounted(async () => {
 
 .category-icon {
   font-size: 3rem;
+}
+
+/* Animations */
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.3s; }
+.delay-3 { animation-delay: 0.5s; }
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .hero {
+    min-height: auto;
+  }
+  
+  .min-vh-60 {
+    min-height: auto;
+  }
+  
+  .hero-image-wrapper {
+    max-width: 350px;
+    margin-top: 2rem;
+  }
 }
 </style>
