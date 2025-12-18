@@ -22,12 +22,14 @@
       <router-link :to="`/product/${product.id}`" class="text-decoration-none">
         <h5 class="card-title text-dark fw-semibold mb-2 product-title">{{ languageStore.getLocalizedName(product) }}</h5>
       </router-link>
-      <p v-if="product.size || product.supplier" class="card-text text-muted small mb-2">
+      <p v-if="product.size || product.weight || product.supplier" class="card-text text-muted small mb-2">
+        <span v-if="product.weight">{{ product.weight }}</span>
+        <span v-if="product.weight && (product.size || product.supplier)"> • </span>
         <span v-if="product.size">{{ product.size }}</span>
         <span v-if="product.size && product.supplier"> • </span>
         <span v-if="product.supplier">{{ product.supplier }}</span>
       </p>
-      <div class="d-flex align-items-center gap-2 mb-2">
+      <div v-if="product.rating && product.rating > 0" class="d-flex align-items-center gap-2 mb-2">
         <span class="text-warning"><i class="bi bi-star-fill"></i> {{ formattedRating }}</span>
         <!-- <span class="text-muted small">({{ product.reviewCount }})</span> -->
       </div>

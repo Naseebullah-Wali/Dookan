@@ -7,7 +7,7 @@
       </div>
 
       <div v-if="!loading" class="marquee-wrapper">
-        <div class="marquee-track d-flex gap-4" :style="{ animationDuration: '40s' }">
+        <div class="marquee-track d-flex gap-4" :class="{ 'rtl-animation': languageStore.isRTL }" :style="{ animationDuration: '40s' }">
           <!-- Original Testimonials -->
           <div 
             v-for="(testimonial, index) in testimonials"
@@ -72,8 +72,10 @@ import { ref, onMounted } from 'vue'
 import api from '@/services/api'
 import { getAvatarUrl } from '@/services/imageService'
 import { useI18n } from 'vue-i18n'
+import { useLanguageStore } from '@/stores/language'
 
 const { t } = useI18n()
+const languageStore = useLanguageStore()
 
 const testimonials = ref([])
 const loading = ref(true)
@@ -177,6 +179,10 @@ function formatDate(dateString) {
   animation: scroll linear infinite;
 }
 
+.marquee-track.rtl-animation {
+  animation: scroll-rtl linear infinite;
+}
+
 .marquee-track:hover {
   animation-play-state: paused;
 }
@@ -201,6 +207,15 @@ function formatDate(dateString) {
   }
   100% {
     transform: translateX(-50%);
+  }
+}
+
+@keyframes scroll-rtl {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(50%);
   }
 }
 

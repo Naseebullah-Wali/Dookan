@@ -16,11 +16,11 @@ const props = defineProps({
   },
   center: {
     type: Array,
-    default: () => [34.5228, 69.1787] // Kabul coordinates
+    default: () => [31.6289, 65.7372] // Kandahar coordinates
   },
   zoom: {
     type: Number,
-    default: 13
+    default: 12
   }
 });
 

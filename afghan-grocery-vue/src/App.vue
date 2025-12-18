@@ -6,6 +6,9 @@
       </transition>
     </router-view>
     
+    <!-- WhatsApp Support -->
+    <WhatsAppSupport />
+
     <!-- Toast Notifications -->
     <ToastContainer />
   </div>
@@ -13,6 +16,7 @@
 
 <script setup>
 import ToastContainer from '@/components/common/ToastContainer.vue'
+import WhatsAppSupport from '@/components/common/WhatsAppSupport.vue'
 
 // Auth is now initialized in main.js via authStore.initialize()
 </script>

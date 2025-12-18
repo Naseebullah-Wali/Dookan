@@ -4,7 +4,6 @@
         "cart": "Warenkorb",
         "wishlist": "Wunschliste",
         "profile": "Profil",
-        "login": "Anmelden",
         "logout": "Abmelden",
         "register": "Registrieren",
         "admin": "Admin-Bereich",
@@ -28,6 +27,7 @@
         "afn": "AFN",
         "name": "Name",
         "email": "E-Mail",
+        "password": "Passwort",
         "phone": "Telefon",
         "description": "Beschreibung",
         "category": "Kategorie",
@@ -45,7 +45,10 @@
         "browseShop": "Shop durchstöbern",
         "goBack": "Zurück",
         "popularPages": "Beliebte Seiten",
-        "products": "Produkte"
+        "products": "Produkte",
+        "or": "oder",
+        "loggingIn": "Anmelden...",
+        "login": "Anmelden"
     },
     "header": {
         "searchPlaceholder": "Nach afghanischen Lebensmitteln suchen...",
@@ -129,6 +132,7 @@
         "relatedProducts": "Ähnliche Produkte",
         "quantity": "Menge",
         "size": "Größe",
+        "weight": "Gewicht",
         "verified": "Verifiziert",
         "new": "NEU",
         "sale": "SALE",
@@ -163,11 +167,13 @@
         "recipient": "Empfänger",
         "recipientName": "Name des Empfängers",
         "phone": "Telefonnummer",
+        "phoneNumber": "Telefonnummer",
         "province": "Provinz",
         "city": "Stadt",
         "district": "Bezirk",
         "street": "Straße",
         "address": "Adresse",
+        "addressPlaceholder": "Geben Sie Ihre vollständige Lieferadresse ein",
         "postalCode": "Postleitzahl",
         "deliveryFee": "Liefergebühr",
         "cod": "Nachnahme",
@@ -177,7 +183,13 @@
         "addNewAddress": "Neue Adresse hinzufügen",
         "orderConfirmed": "Bestellung bestätigt!",
         "thankYou": "Danke für Ihre Bestellung. Wir liefern sie bald.",
-        "orderDetails": "Bestelldetails"
+        "orderDetails": "Bestelldetails",
+        "delivery": "Lieferung",
+        "payment": "Zahlung",
+        "confirm": "Bestätigen",
+        "deliveryInfo": "Lieferinformationen",
+        "deliveryNotes": "Lieferhinweise",
+        "notesPlaceholder": "Besondere Anweisungen für den Kurier?"
     },
     "profile": {
         "title": "Mein Profil",
@@ -186,6 +198,8 @@
         "orders": "Meine Bestellungen",
         "settings": "Einstellungen",
         "name": "Name",
+        "firstName": "Vorname",
+        "lastName": "Nachname",
         "email": "E-Mail",
         "phone": "Telefon",
         "password": "Passwort",
@@ -379,11 +393,19 @@
     "login": {
         "welcomeBack": "Willkommen zurück",
         "subtitle": "Melden Sie sich an, um weiter einzukaufen",
+        "passwordPlaceholder": "Geben Sie Ihr Passwort ein",
         "demoAccount": "Demo-Konto",
         "demoEmail": "E-Mail: demo@dookan.af",
         "demoPassword": "Passwort: demo123",
+        "useDemo": "Demo-Konto verwenden",
+        "noAccount": "Noch kein Konto?",
+        "registerHere": "Hier registrieren",
         "createAccount": "Konto erstellen",
-        "joinDookan": "Treten Sie Dookan bei und beginnen Sie mit dem Einkaufen"
+        "joinDookan": "Treten Sie Dookan bei und beginnen Sie mit dem Einkaufen",
+        "passwordHint": "Passwort muss mindestens 6 Zeichen lang sein",
+        "creatingAccount": "Konto wird erstellt...",
+        "alreadyHaveAccount": "Bereits ein Konto?",
+        "loginHere": "Hier anmelden"
     },
     "messages": {
         "addedToCart": "Zum Warenkorb hinzugefügt!",
@@ -395,6 +417,8 @@
         "accountCreated": "Konto erfolgreich erstellt!",
         "registrationFailed": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
         "orderPlaced": "Bestellung erfolgreich aufgegeben!",
+        "orderSuccess": "Bestellung erfolgreich aufgegeben!",
+        "orderError": "Bestellung fehlgeschlagen. Bitte versuchen Sie es erneut.",
         "productUpdated": "Produkt erfolgreich aktualisiert",
         "productCreated": "Produkt erfolgreich erstellt",
         "error": "Etwas ist schief gelaufen",
@@ -431,5 +455,9 @@
             "location": "Herat, Afghanistan",
             "comment": "Sehr zuverlässiger Service. Produkte sind immer frisch und gut verpackt. Tolle Preise auch!"
         }
+    },
+    "support": {
+        "whatsapp": "WhatsApp-Support",
+        "whatsappMessage": "Hallo Dookan Support, ich benötige Hilfe bei..."
     }
 }

@@ -4,19 +4,20 @@
     
     <!-- Hero Section -->
     <section class="hero py-5 position-relative overflow-hidden">
+      <HeroBackground />
       <div class="container position-relative" style="z-index: 2;">
         <div class="row align-items-center min-vh-60">
-          <div class="col-lg-6 col-md-6 col-12 text-center text-md-start">
+          <div class="col-lg-6 col-md-6 col-12" :class="{ 'text-center text-md-start': !languageStore.isRTL }">
             <h1 class="display-4 fw-bold mb-4 fade-in-up delay-1">{{ $t('home.hero.title') }}</h1>
             <p class="lead text-muted mb-5 fade-in-up delay-2">
               {{ $t('home.hero.description') }}
             </p>
             <div class="d-flex gap-3 justify-content-center justify-content-md-start flex-wrap fade-in-up delay-3">
-              <router-link to="/shop" class="btn btn-primary btn-lg">
-                <i class="bi bi-bag me-2"></i>{{ $t('home.hero.shopNow') }}
+              <router-link to="/shop" class="btn btn-primary btn-lg d-inline-flex align-items-center gap-2">
+                <i class="bi bi-bag"></i>{{ $t('home.hero.shopNow') }}
               </router-link>
-              <router-link to="/tracking" class="btn btn-outline-secondary btn-lg">
-                <i class="bi bi-box-seam me-2"></i>{{ $t('home.hero.learnMore') }}
+              <router-link to="/tracking" class="btn btn-outline-secondary btn-lg d-inline-flex align-items-center gap-2">
+                <i class="bi bi-box-seam"></i>{{ $t('home.hero.learnMore') }}
               </router-link>
             </div>
           </div>
@@ -118,6 +119,7 @@ import AppFooter from '@/components/common/AppFooter.vue'
 import NewsTicker from '@/components/common/NewsTicker.vue'
 import TestimonialsSection from '@/components/common/TestimonialsSection.vue'
 import ProductCard from '@/components/product/ProductCard.vue'
+import HeroBackground from '@/components/common/HeroBackground.vue'
 
 const productsStore = useProductsStore()
 const languageStore = useLanguageStore()
@@ -202,6 +204,7 @@ onMounted(async () => {
   background: linear-gradient(90deg, transparent 0%, rgba(231, 111, 26, 0.2) 20%, rgba(47, 157, 82, 0.2) 80%, transparent 100%);
   margin: 0;
 }
+
 
 .category-card {
   transition: all 0.3s ease;

@@ -35,10 +35,11 @@
             <h1 class="mb-3">{{ languageStore.getLocalizedName(product) }}</h1>
             
             <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
-              <div class="d-flex gap-2 align-items-center">
+              <div v-if="product.rating && product.rating > 0" class="d-flex gap-2 align-items-center">
                 <span class="text-warning fw-semibold"><i class="bi bi-star-fill"></i> {{ formattedRating }}</span>
                 <span class="text-muted small">({{ product.review_count }} {{ $t('product.reviews') }})</span>
               </div>
+              <div v-else></div>
               <span class="fw-semibold" :class="product.stock > 0 ? 'text-success' : 'text-danger'">
                 {{ product.stock > 0 ? `${$t('product.inStock')} (${product.stock})` : $t('product.outOfStock') }}
               </span>
@@ -60,6 +61,10 @@
               <div class="d-flex justify-content-between py-2 border-bottom">
                 <span class="fw-semibold">{{ $t('product.size') }}:</span>
                 <span>{{ product.size || 'Standard' }}</span>
+              </div>
+              <div v-if="product.weight" class="d-flex justify-content-between py-2 border-bottom">
+                <span class="fw-semibold">{{ $t('product.weight') }}:</span>
+                <span>{{ product.weight }}</span>
               </div>
               <div class="d-flex justify-content-between py-2 border-bottom">
                 <span class="fw-semibold">{{ $t('product.supplier') }}:</span>

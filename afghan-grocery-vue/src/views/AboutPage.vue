@@ -103,15 +103,15 @@
           <h2 class="text-center mb-5">{{ $t('about.impactTitle') }}</h2>
           <div class="row g-4 text-center">
             <div class="col-lg-3 col-md-6 col-6">
-              <div class="display-4 fw-bold text-primary mb-2">5,000+</div>
+              <div class="display-4 fw-bold text-primary mb-2">{{ $t('about.familiesServedCount') }}</div>
               <div class="fw-semibold text-muted">{{ $t('about.familiesServed') }}</div>
             </div>
             <div class="col-lg-3 col-md-6 col-6">
-              <div class="display-4 fw-bold text-primary mb-2">15,000+</div>
+              <div class="display-4 fw-bold text-primary mb-2">{{ $t('about.ordersDeliveredCount') }}</div>
               <div class="fw-semibold text-muted">{{ $t('about.ordersDelivered') }}</div>
             </div>
             <div class="col-lg-3 col-md-6 col-6">
-              <div class="display-4 fw-bold text-primary mb-2">6</div>
+              <div class="display-4 fw-bold text-primary mb-2">1</div>
               <div class="fw-semibold text-muted">{{ $t('about.citiesCovered') }}</div>
             </div>
             <div class="col-lg-3 col-md-6 col-6">
@@ -128,27 +128,14 @@
       <!-- Coverage Section -->
       <section class="mb-5">
         <div class="card border-0 shadow-sm">
-          <div class="card-body p-4 p-md-5">
+          <div class="card-body p-4 p-md-5 text-center">
             <h2 class="mb-4">{{ $t('about.deliveryTitle') }}</h2>
-            <p class="mb-4">{{ $t('about.deliveryText') }}</p>
-            <div class="row g-3">
-              <div class="col-lg-4 col-md-6 col-sm-6 col-12">
-                <div class="p-3 bg-light rounded text-center fw-semibold">📍 Kabul</div>
-              </div>
-              <div class="col-lg-4 col-md-6 col-sm-6 col-12">
-                <div class="p-3 bg-light rounded text-center fw-semibold">📍 Herat</div>
-              </div>
-              <div class="col-lg-4 col-md-6 col-sm-6 col-12">
-                <div class="p-3 bg-light rounded text-center fw-semibold">📍 Mazar-i-Sharif</div>
-              </div>
-              <div class="col-lg-4 col-md-6 col-sm-6 col-12">
-                <div class="p-3 bg-light rounded text-center fw-semibold">📍 Kandahar</div>
-              </div>
-              <div class="col-lg-4 col-md-6 col-sm-6 col-12">
-                <div class="p-3 bg-light rounded text-center fw-semibold">📍 Jalalabad</div>
-              </div>
-              <div class="col-lg-4 col-md-6 col-sm-6 col-12">
-                <div class="p-3 bg-light rounded text-center fw-semibold">📍 {{ $t('about.moreCities') }}</div>
+            <p class="lead mb-4">{{ $t('about.deliveryText') }}</p>
+            <div class="row justify-content-center g-3">
+              <div class="col-lg-6 col-md-8 col-12">
+                <div class="p-3 bg-primary text-white rounded shadow-sm text-center fw-bold" style="font-size: 1.5rem;">
+                  📍 Kandahar City
+                </div>
               </div>
             </div>
 

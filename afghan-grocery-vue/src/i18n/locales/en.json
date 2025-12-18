@@ -4,7 +4,6 @@
         "cart": "Cart",
         "wishlist": "Wishlist",
         "profile": "Profile",
-        "login": "Login",
         "logout": "Logout",
         "register": "Register",
         "admin": "Admin Panel",
@@ -28,6 +27,7 @@
         "afn": "AFN",
         "name": "Name",
         "email": "Email",
+        "password": "Password",
         "phone": "Phone",
         "description": "Description",
         "category": "Category",
@@ -45,7 +45,10 @@
         "browseShop": "Browse Shop",
         "goBack": "Go Back",
         "popularPages": "Popular Pages",
-        "products": "products"
+        "products": "products",
+        "or": "or",
+        "loggingIn": "Logging in...",
+        "login": "Login"
     },
     "header": {
         "searchPlaceholder": "Search for Afghan groceries...",
@@ -83,6 +86,32 @@
         "testimonials": {
             "title": "What Our Customers Say",
             "subtitle": "Trusted by thousands of Afghan families worldwide"
+        },
+        "news": {
+            "item1": {
+                "title": "50% OFF Rice",
+                "subtitle": "Premium Basmati Special",
+                "description": "Experience the authentic taste of Afghanistan with our premium aged Basmati rice. Perfect for Pulao and Biryani. Limited time offer!",
+                "tag": "Special Offer"
+            },
+            "item2": {
+                "title": "Free Delivery",
+                "subtitle": "On orders over 5000 AFN",
+                "description": "Shop to your heart's content! We are offering free delivery on all orders exceeding 5000 AFN. Send love to your family without extra costs.",
+                "tag": "Limited Time"
+            },
+            "item3": {
+                "title": "New Arrival",
+                "subtitle": "Fresh Saffron from Herat",
+                "description": "Directly from the fields of Herat, our new stock of premium Saffron is here. Known for its vibrant color and unmatched aroma.",
+                "tag": "New In"
+            },
+            "item4": {
+                "title": "Bulk Discount",
+                "subtitle": "Save 20% on Oil & Flour",
+                "description": "Stock up on essentials! Get a flat 20% discount when you buy cooking oil and wheat flour in bulk. Ideal for large families.",
+                "tag": "Bulk Save"
+            }
         }
     },
     "shop": {
@@ -129,6 +158,7 @@
         "relatedProducts": "Related Products",
         "quantity": "Quantity",
         "size": "Size",
+        "weight": "Weight",
         "verified": "Verified",
         "new": "NEW",
         "sale": "SALE",
@@ -163,11 +193,13 @@
         "recipient": "Recipient",
         "recipientName": "Recipient Name",
         "phone": "Phone Number",
+        "phoneNumber": "Phone Number",
         "province": "Province",
         "city": "City",
         "district": "District",
         "street": "Street Address",
         "address": "Address",
+        "addressPlaceholder": "Enter your full delivery address",
         "postalCode": "Postal Code",
         "deliveryFee": "Delivery Fee",
         "cod": "Cash on Delivery",
@@ -177,7 +209,14 @@
         "addNewAddress": "Add New Address",
         "orderConfirmed": "Order Confirmed!",
         "thankYou": "Thank you for your order. We'll deliver it soon.",
-        "orderDetails": "Order Details"
+        "orderDetails": "Order Details",
+        "delivery": "Delivery",
+        "payment": "Payment",
+        "confirm": "Confirm",
+        "deliveryInfo": "Delivery Information",
+        "deliveryNotes": "Delivery Notes",
+        "notesPlaceholder": "Any special instructions for the courier?",
+        "deliveryAddress": "Delivery Address"
     },
     "profile": {
         "title": "My Profile",
@@ -186,8 +225,11 @@
         "orders": "My Orders",
         "settings": "Settings",
         "name": "Name",
+        "firstName": "First Name",
+        "lastName": "Last Name",
         "email": "Email",
         "phone": "Phone",
+        "deliveryAddress": "Delivery Address",
         "password": "Password",
         "changePassword": "Change Password",
         "currentPassword": "Current Password",
@@ -290,11 +332,14 @@
         "impactTitle": "Our Impact",
         "familiesServed": "Families Served",
         "ordersDelivered": "Orders Delivered",
+        "familiesServedCount": "50+",
+        "ordersDeliveredCount": "70+",
         "citiesCovered": "Cities Covered",
         "customerSatisfaction": "Customer Satisfaction",
         "deliveryTitle": "Where We Deliver",
-        "deliveryText": "We currently serve the following cities across Afghanistan:",
-        "moreCities": "And more cities",
+        "deliveryText": "We currently operate exclusively in Kandahar city. More cities are planned for the future!",
+        "deliveryZoneMap": "Our Delivery Zone in Kandahar",
+        "moreCities": "Future Expansions",
         "ctaTitle": "Ready to Send Love Home?",
         "ctaText": "Start shopping and deliver quality groceries to your family today.",
         "startShopping": "Start Shopping",
@@ -315,15 +360,15 @@
         "sending": "Sending...",
         "sendMessage": "Send Message",
         "quickContact": "Quick Contact",
-        "businessHours": "Business Hours",
-        "weekdays": "Saturday - Thursday",
-        "friday": "Friday",
-        "closed": "Closed",
+        "businessHours": "Support Available",
+        "weekdays": "24/7 Service",
+        "friday": "Always Open",
+        "closed": "Support 24/7",
         "faq": "Common Questions",
         "faq1Q": "How long does delivery take?",
         "faq1A": "Typically 2-3 business days within major cities.",
         "faq2Q": "Do you deliver to all cities?",
-        "faq2A": "We deliver to Kabul, Herat, Mazar, Kandahar, Jalalabad, and more.",
+        "faq2A": "We currently serve Kandahar city, with more locations coming soon.",
         "faq3Q": "What payment methods do you accept?",
         "faq3A": "We accept online payments and cash on delivery.",
         "followUs": "Follow Us",
@@ -379,11 +424,19 @@
     "login": {
         "welcomeBack": "Welcome Back",
         "subtitle": "Login to your account to continue shopping",
+        "passwordPlaceholder": "Enter your password",
         "demoAccount": "Demo Account",
         "demoEmail": "Email: demo@dookan.af",
         "demoPassword": "Password: demo123",
+        "useDemo": "Use Demo Account",
+        "noAccount": "Don't have an account?",
+        "registerHere": "Register here",
         "createAccount": "Create Account",
-        "joinDookan": "Join Dookan today and start shopping"
+        "joinDookan": "Join Dookan today and start shopping",
+        "passwordHint": "Password must be at least 6 characters",
+        "creatingAccount": "Creating account...",
+        "alreadyHaveAccount": "Already have an account?",
+        "loginHere": "Login here"
     },
     "messages": {
         "addedToCart": "Added to cart!",
@@ -395,6 +448,8 @@
         "accountCreated": "Account created successfully!",
         "registrationFailed": "Registration failed. Please try again.",
         "orderPlaced": "Order placed successfully!",
+        "orderSuccess": "Order placed successfully!",
+        "orderError": "Failed to place order. Please try again.",
         "productUpdated": "Product updated successfully",
         "productCreated": "Product created successfully",
         "error": "Something went wrong",
@@ -431,5 +486,9 @@
             "location": "Herat, Afghanistan",
             "comment": "Very reliable service. Products are always fresh and well-packaged. Great prices too!"
         }
+    },
+    "support": {
+        "whatsapp": "WhatsApp Support",
+        "whatsappMessage": "Hi Dookan Support, I need help with..."
     }
 }

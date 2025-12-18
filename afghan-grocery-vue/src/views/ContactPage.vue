@@ -73,21 +73,21 @@
                 <div style="font-size: 2rem;">📧</div>
                 <div>
                   <div class="small text-muted mb-1">{{ $t('common.email') }}</div>
-                  <a href="mailto:info@dookan.af" class="text-decoration-none fw-semibold">info@dookan.af</a>
+                  <a :href="`mailto:${supportEmail}`" class="text-decoration-none fw-semibold">{{ supportEmail }}</a>
                 </div>
               </div>
               <div class="d-flex gap-3 p-3 bg-light rounded mb-3">
                 <div style="font-size: 2rem;">📱</div>
                 <div>
                   <div class="small text-muted mb-1">{{ $t('common.phone') }}</div>
-                  <a href="tel:+93700123456" class="text-decoration-none fw-semibold">+93 700 123 456</a>
+                  <a :href="`tel:${supportPhone.replace(/\s/g, '')}`" class="text-decoration-none fw-semibold">{{ supportPhone }}</a>
                 </div>
               </div>
               <div class="d-flex gap-3 p-3 bg-light rounded">
                 <div style="font-size: 2rem;">💬</div>
                 <div>
                   <div class="small text-muted mb-1">WhatsApp</div>
-                  <a href="https://wa.me/93700123456" class="text-decoration-none fw-semibold" target="_blank">+93 700 123 456</a>
+                  <a :href="`https://wa.me/${whatsappNumber}`" class="text-decoration-none fw-semibold" target="_blank">{{ supportPhone }}</a>
                 </div>
               </div>
             </div>
@@ -100,11 +100,11 @@
               <div class="mb-3">
                 <div class="d-flex justify-content-between py-2 border-bottom">
                   <span>{{ $t('contact.weekdays') }}</span>
-                  <span class="fw-semibold">9:00 AM - 6:00 PM</span>
+                  <span class="fw-semibold">{{ $t('contact.closed') }}</span>
                 </div>
                 <div class="d-flex justify-content-between py-2">
                   <span>{{ $t('contact.friday') }}</span>
-                  <span class="fw-semibold">{{ $t('contact.closed') }}</span>
+                  <span class="fw-semibold">{{ $t('contact.friday') }}</span>
                 </div>
               </div>
               <p class="text-center text-muted small mb-0">Afghanistan Time (AFT)</p>
@@ -163,6 +163,11 @@ import AppFooter from '@/components/common/AppFooter.vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
+
+// Support contact details from environment variables
+const supportEmail = import.meta.env.VITE_SUPPORT_EMAIL || 'info@dookan.af'
+const supportPhone = import.meta.env.VITE_SUPPORT_PHONE || '+93 700 123 456'
+const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '93700123456'
 
 const formData = ref({
   name: '',

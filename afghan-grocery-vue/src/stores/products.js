@@ -56,8 +56,24 @@ export const useProductsStore = defineStore('products', () => {
         loading.value = true
         error.value = null
         try {
-            const response = await productService.getFeatured(limit)
-            featuredProducts.value = Array.isArray(response) ? response : []
+            let products = await productService.getFeatured(limit)
+
+            // If we have fewer featured products than requested, fill with newest products
+            if (products.length < limit) {
+                const additionalNeeded = limit - products.length
+                const { products: newestProducts } = await productService.getAll({
+                    limit: additionalNeeded * 2, // Fetch a bit more to filter out duplicates
+                    page: 1
+                })
+
+                if (newestProducts && newestProducts.length > 0) {
+                    const featuredIds = new Set(products.map(p => p.id))
+                    const filteredNewest = newestProducts.filter(p => !featuredIds.has(p.id))
+                    products = [...products, ...filteredNewest.slice(0, additionalNeeded)]
+                }
+            }
+
+            featuredProducts.value = products
             return featuredProducts.value
         } catch (err) {
             console.error('Error fetching featured products:', err)

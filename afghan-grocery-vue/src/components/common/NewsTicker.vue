@@ -1,7 +1,7 @@
 <template>
   <div class="news-ticker py-5 bg-light border-bottom overflow-hidden">
     <div class="container-fluid p-0">
-      <div v-if="!loading" class="ticker-track d-flex gap-4" :style="{ transform: `translateX(-${offset}px)` }">
+      <div v-if="!loading" class="ticker-track d-flex gap-4" :style="{ transform: `translateX(${languageStore.isRTL ? offset : -offset}px)` }">
         <!-- Original Items -->
         <div
           v-for="(item, index) in items"
@@ -79,8 +79,12 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/services/api'
 import { getImageUrl } from '@/services/imageService'
+import { useLanguageStore } from '@/stores/language'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
+const { t } = useI18n()
+const languageStore = useLanguageStore()
 
 const items = ref([])
 const loading = ref(true)
@@ -108,37 +112,37 @@ function getDefaultNewsItems() {
   return [
     {
       id: 1,
-      title: '50% OFF Rice',
-      subtitle: 'Premium Basmati Special',
-      description: 'Experience the authentic taste of Afghanistan with our premium aged Basmati rice. Perfect for Pulao and Biryani. Limited time offer!',
-      tag: 'Special Offer',
+      title: t('home.news.item1.title'),
+      subtitle: t('home.news.item1.subtitle'),
+      description: t('home.news.item1.description'),
+      tag: t('home.news.item1.tag'),
       image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&q=80&w=400',
       bg_class: 'bg-gradient-success'
     },
     {
       id: 2,
-      title: 'Free Delivery',
-      subtitle: 'On orders over 5000 AFN',
-      description: 'Shop to your heart\'s content! We are offering free delivery on all orders exceeding 5000 AFN. Send love to your family without extra costs.',
-      tag: 'Limited Time',
+      title: t('home.news.item2.title'),
+      subtitle: t('home.news.item2.subtitle'),
+      description: t('home.news.item2.description'),
+      tag: t('home.news.item2.tag'),
       image: 'https://images.unsplash.com/photo-1620916297397-a4a5402a3c6c?auto=format&fit=crop&q=80&w=400',
       bg_class: 'bg-gradient-primary'
     },
     {
       id: 3,
-      title: 'New Arrival',
-      subtitle: 'Fresh Saffron from Herat',
-      description: 'Directly from the fields of Herat, our new stock of premium Saffron is here. Known for its vibrant color and unmatched aroma.',
-      tag: 'New In',
+      title: t('home.news.item3.title'),
+      subtitle: t('home.news.item3.subtitle'),
+      description: t('home.news.item3.description'),
+      tag: t('home.news.item3.tag'),
       image: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&q=80&w=400',
       bg_class: 'bg-gradient-danger'
     },
     {
       id: 4,
-      title: 'Bulk Discount',
-      subtitle: 'Save 20% on Oil & Flour',
-      description: 'Stock up on essentials! Get a flat 20% discount when you buy cooking oil and wheat flour in bulk. Ideal for large families.',
-      tag: 'Bulk Save',
+      title: t('home.news.item4.title'),
+      subtitle: t('home.news.item4.subtitle'),
+      description: t('home.news.item4.description'),
+      tag: t('home.news.item4.tag'),
       image: 'https://images.unsplash.com/photo-1620916297397-a4a5402a3c6c?auto=format&fit=crop&q=80&w=400',
       bg_class: 'bg-gradient-warning'
     }
