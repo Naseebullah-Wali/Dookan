@@ -138,6 +138,15 @@
               <ProductCard :product="product" />
             </div>
           </div>
+
+          <!-- Pagination -->
+          <div class="mt-5">
+            <PaginationComponent 
+              :currentPage="productsStore.pagination.page"
+              :totalPages="productsStore.pagination.totalPages"
+              @page-change="handlePageChange"
+            />
+          </div>
         </div>
       </div>
 
@@ -218,11 +227,14 @@ import AppFooter from '@/components/common/AppFooter.vue'
 import ProductCard from '@/components/product/ProductCard.vue'
 import PriceRangeFilter from '@/components/filters/PriceRangeFilter.vue'
 import RatingFilter from '@/components/filters/RatingFilter.vue'
+import PaginationComponent from '@/components/common/PaginationComponent.vue'
+import { useAnalytics } from '@/composables/useAnalytics'
 
 const route = useRoute()
 const router = useRouter()
 const productsStore = useProductsStore()
 const languageStore = useLanguageStore()
+const analytics = useAnalytics()
 
 const searchQuery = ref('')
 const selectedCategory = ref(null)
@@ -270,9 +282,12 @@ const handleSearch = () => {
   }, 500)
 }
 
-async function fetchFilteredProducts() {
+async function fetchFilteredProducts(page = 1) {
   loading.value = true
-  const filters = {}
+  const filters = {
+    page,
+    limit: 20
+  }
   
   if (selectedCategory.value) filters.category = selectedCategory.value
   if (searchQuery.value) filters.search = searchQuery.value
@@ -281,6 +296,13 @@ async function fetchFilteredProducts() {
   
   await productsStore.fetchProducts(filters)
   loading.value = false
+  
+  // Scroll to top of product grid
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+function handlePageChange(page) {
+  fetchFilteredProducts(page)
 }
 
 function clearFilters() {
@@ -302,6 +324,7 @@ onMounted(async () => {
     selectedCategory.value = parseInt(route.query.category)
   }
   
+  analytics.trackPageView('Shop Page', route.fullPath)
   await fetchFilteredProducts()
 })
 

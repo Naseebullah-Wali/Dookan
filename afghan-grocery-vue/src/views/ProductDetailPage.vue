@@ -164,12 +164,14 @@ import WishlistButton from '@/components/common/WishlistButton.vue'
 import StarRating from '@/components/common/StarRating.vue'
 import ReviewForm from '@/components/product/ReviewForm.vue'
 import RelatedProducts from '@/components/product/RelatedProducts.vue'
+import { useAnalytics } from '@/composables/useAnalytics'
 
 const route = useRoute()
 const cartStore = useCartStore()
 const productsStore = useProductsStore()
 const reviewsStore = useReviewsStore()
 const languageStore = useLanguageStore()
+const analytics = useAnalytics()
 const { t } = useI18n()
 
 const product = ref(null)
@@ -198,6 +200,8 @@ async function loadProduct(productId) {
   
   if (product.value) {
     await reviewsStore.fetchProductReviews(productId)
+    analytics.trackPageView(`Product: ${product.value.name_en}`, route.fullPath)
+    analytics.trackProductView(product.value)
   }
   
   loading.value = false
@@ -233,6 +237,7 @@ function getCategoryName(categoryId) {
 
 function handleAddToCart() {
   cartStore.addToCart(product.value, quantity.value)
+  analytics.trackAddToCart(product.value, quantity.value)
   window.showToast(t('messages.addedToCart'), 'success')
   quantity.value = 1
 }
