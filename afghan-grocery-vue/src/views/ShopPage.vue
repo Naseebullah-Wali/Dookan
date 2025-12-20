@@ -286,7 +286,7 @@ async function fetchFilteredProducts(page = 1) {
   loading.value = true
   const filters = {
     page,
-    limit: 20
+    limit: 40
   }
   
   if (selectedCategory.value) filters.category = selectedCategory.value

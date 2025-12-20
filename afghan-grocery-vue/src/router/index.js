@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useAnalytics } from '@/composables/useAnalytics'
 
 const routes = [
     {
@@ -120,8 +121,13 @@ const router = createRouter({
 })
 
 // Navigation guards
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore()
+
+    // Ensure auth is initialized before any route check
+    if (!authStore.initialized) {
+        await authStore.initialize()
+    }
 
     // Update page title
     document.title = to.meta.title || 'Afghan Grocery'
@@ -137,6 +143,12 @@ router.beforeEach((to, from, next) => {
     else {
         next()
     }
+})
+
+// Track page views
+router.afterEach((to) => {
+    const { trackPageView } = useAnalytics()
+    trackPageView(to.meta.title || 'Afghan Grocery', to.fullPath)
 })
 
 export default router

@@ -81,6 +81,12 @@
                   <span class="fw-bold">{{ $t('admin.users') }}</span>
                 </button>
               </div>
+              <div class="col-md-3">
+                <button @click="activeTab = 'settings'" class="btn btn-outline-primary w-100 py-4 h-100 d-flex flex-column align-items-center justify-content-center gap-2" :class="{ active: activeTab === 'settings' }">
+                  <span class="fs-4">⚙️</span>
+                  <span class="fw-bold">{{ $t('admin.settings') || 'Settings' }}</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -282,6 +288,41 @@
             </div>
           </div>
         </div>
+
+        <!-- Settings Management -->
+        <div v-if="activeTab === 'settings'" class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-4">Currency Exchange Rates (Relative to AFN)</h2>
+            <div class="row g-4">
+              <div class="col-md-4" v-for="currency in currencyStore.currencies" :key="currency.code">
+                <div class="card bg-light border-0">
+                  <div class="card-body">
+                    <label class="form-label fw-bold">{{ currency.code }} - {{ currency.name }}</label>
+                    <div class="input-group">
+                      <input 
+                        type="number" 
+                        v-model="tempRates[currency.code]" 
+                        class="form-control" 
+                        step="0.01"
+                        :disabled="currency.code === 'AFN'"
+                      >
+                      <span class="input-group-text">AFN</span>
+                    </div>
+                    <small class="text-muted" v-if="currency.code !== 'AFN'">
+                      1 {{ currency.code }} = {{ tempRates[currency.code] }} AFN
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4">
+              <button class="btn btn-primary" @click="saveRates" :disabled="saving">
+                <span v-if="saving" class="spinner-border spinner-border-sm me-2"></span>
+                Save Rates
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -312,11 +353,15 @@ import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import ProductModal from '@/components/admin/ProductModal.vue'
 import CategoryModal from '@/components/admin/CategoryModal.vue'
+import { useCurrencyStore } from '@/stores/currency'
+import { settingsService } from '@/services/settingsService'
 import api from '@/services/api'
+import { supabase } from '@/lib/supabase'
 
 const authStore = useAuthStore()
 const productsStore = useProductsStore()
 const languageStore = useLanguageStore()
+const currencyStore = useCurrencyStore()
 const { t } = useI18n()
 
 const activeTab = ref('products')
@@ -327,9 +372,11 @@ const productModalRef = ref(null)
 const selectedProduct = ref(null)
 const categoryModalRef = ref(null)
 const selectedCategory = ref(null)
+const tempRates = ref({})
+const saving = ref(false)
 
 const isAdmin = computed(() => {
-  return authStore.user?.role === 'admin'
+  return authStore.isAdmin
 })
 
 const stats = computed(() => {
@@ -344,6 +391,8 @@ const stats = computed(() => {
 onMounted(async () => {
   if (isAdmin.value) {
     await loadData()
+    // Initialize temp rates
+    tempRates.value = { ...currencyStore.rates }
   }
 })
 
@@ -355,13 +404,29 @@ async function loadData() {
     }
     await productsStore.fetchProducts()
     
-    const [ordersRes, usersRes] = await Promise.all([
-      api.get('/orders'),
-      api.get('/auth/users')
-    ])
+    await productsStore.fetchProducts()
     
-    orders.value = ordersRes.data.data || ordersRes.data
-    users.value = usersRes.data.data || usersRes.data
+    // Fetch Orders from Supabase
+    const { data: ordersData, error: ordersError } = await  supabase
+        .from('orders')
+        .select(`
+            *,
+            items:order_items(*)
+        `)
+        .order('created_at', { ascending: false })
+            
+    if (ordersError) throw ordersError
+    orders.value = ordersData || []
+
+    // Fetch Users from Supabase (Profiles)
+    const { data: usersData, error: usersError } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false })
+        
+    if (usersError) throw usersError
+    users.value = usersData || []
+
   } catch (error) {
     console.error('Failed to load admin data:', error)
   } finally {
@@ -374,41 +439,58 @@ function openProductModal(product) {
   productModalRef.value.show()
 }
 
+
+// Helper for safe toast
+function safeShowToast(message, type = 'success') {
+  if (typeof window.showToast === 'function') {
+    window.showToast(message, type)
+  } else {
+    console.warn('Toast not available:', message)
+    // Fallback if needed, or just log
+    if (type === 'error') alert(message)
+  }
+}
+
 async function handleSaveProduct(productData) {
+  loading.value = true
   try {
     if (productData.id) {
       await productsStore.updateProduct(productData.id, productData)
-      window.showToast(t('messages.productUpdated'), 'success')
+      safeShowToast(t('messages.productUpdated'), 'success')
     } else {
       await productsStore.createProduct(productData)
-      window.showToast(t('messages.productCreated'), 'success')
+      safeShowToast(t('messages.productCreated'), 'success')
     }
-    productModalRef.value.hide()
   } catch (error) {
     console.error('Failed to save product:', error)
-    window.showToast('Failed to save product', 'error')
+    safeShowToast('Failed to save product', 'error')
+  } finally {
+    loading.value = false
+    if (productModalRef.value) {
+      productModalRef.value.hide()
+    }
   }
 }
 
 async function handleDeleteProduct(id) {
-  if (!confirm('Are you sure you want to delete this product?')) return
+  if (!confirm(t('messages.confirmDelete') || 'Are you sure?')) return
   
   try {
     await productsStore.deleteProduct(id)
-    window.showToast(t('messages.productDeleted'), 'success')
+    safeShowToast(t('messages.productDeleted'), 'success')
   } catch (error) {
     console.error('Failed to delete product:', error)
-    window.showToast(t('messages.error'), 'error')
+    safeShowToast(t('messages.error'), 'error')
   }
 }
 
 async function updateOrderStatus(order) {
   try {
     await api.put(`/orders/${order.id}`, { status: order.status })
-    window.showToast(t('messages.statusUpdated'), 'success')
+    safeShowToast(t('messages.statusUpdated'), 'success')
   } catch (error) {
     console.error('Failed to update status:', error)
-    window.showToast(t('messages.error'), 'error')
+    safeShowToast(t('messages.error'), 'error')
   }
 }
 
@@ -436,37 +518,54 @@ async function handleSaveCategory(categoryData) {
   try {
     if (categoryData.id) {
       await productsStore.updateCategory(categoryData.id, categoryData)
-      window.showToast(t('messages.categoryUpdated'), 'success')
+      safeShowToast(t('messages.categoryUpdated'), 'success')
     } else {
       await productsStore.createCategory(categoryData)
-      window.showToast(t('messages.categoryCreated'), 'success')
+      safeShowToast(t('messages.categoryCreated'), 'success')
     }
-    categoryModalRef.value.hide()
   } catch (error) {
     console.error('Failed to save category:', error)
-    window.showToast('Failed to save category', 'error')
+    safeShowToast('Failed to save category', 'error')
+  } finally {
+    if (categoryModalRef.value) {
+      categoryModalRef.value.hide()
+    }
   }
 }
 
 async function handleDeleteCategory(id) {
-  if (!confirm('Are you sure you want to delete this category?')) return
+  if (!confirm(t('messages.confirmDelete') || 'Are you sure?')) return
   
   try {
     await productsStore.deleteCategory(id)
-    window.showToast(t('messages.categoryDeleted'), 'success')
+    safeShowToast(t('messages.categoryDeleted'), 'success')
   } catch (error) {
     console.error('Failed to delete category:', error)
-    window.showToast(t('messages.error'), 'error')
+    safeShowToast(t('messages.error'), 'error')
   }
 }
 
 async function updateUserRole(user) {
   try {
     await api.put(`/auth/users/${user.id}`, { role: user.role })
-    window.showToast(t('messages.roleUpdated'), 'success')
+    safeShowToast(t('messages.roleUpdated'), 'success')
   } catch (error) {
     console.error('Failed to update user role:', error)
-    window.showToast(t('messages.error'), 'error')
+    safeShowToast(t('messages.error'), 'error')
+  }
+}
+
+async function saveRates() {
+  saving.value = true
+  try {
+    await settingsService.updateSettings('exchange_rates', tempRates.value)
+    currencyStore.rates = { ...tempRates.value }
+    safeShowToast('Exchange rates updated successfully', 'success')
+  } catch (error) {
+    console.error('Failed to save rates:', error)
+    safeShowToast('Failed to save exchange rates', 'error')
+  } finally {
+    saving.value = false
   }
 }
 </script>

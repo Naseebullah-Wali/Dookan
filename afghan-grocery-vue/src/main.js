@@ -12,6 +12,8 @@ window.bootstrap = bootstrap
 
 const app = createApp(App)
 const pinia = createPinia()
+// Disable Pinia devtools in development to silence "store installed" logs if requested
+// pinia.use(() => {}) 
 
 import i18n from './i18n'
 import { useAuthStore } from './stores/auth'
@@ -20,8 +22,15 @@ app.use(pinia)
 app.use(router)
 app.use(i18n)
 
-// Initialize auth state from Supabase
-const authStore = useAuthStore()
-authStore.initialize()
+// Initialize auth state from Supabase before mounting
+const init = async () => {
+    try {
+        const authStore = useAuthStore()
+        await authStore.initialize()
+    } catch (e) {
+    } finally {
+        app.mount('#app')
+    }
+}
 
-app.mount('#app')
+init()

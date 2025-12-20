@@ -7,7 +7,7 @@ export const useOrdersStore = defineStore('orders', () => {
     const currentOrder = ref(null)
     const pagination = ref({
         page: 1,
-        limit: 20,
+        limit: 40,
         total: 0,
         totalPages: 0
     })
@@ -35,12 +35,17 @@ export const useOrdersStore = defineStore('orders', () => {
         try {
             const response = await orderService.getMyOrders(params)
 
-            // Handle paginated response
-            if (response.data && response.pagination) {
-                orders.value = response.data
-                pagination.value = response.pagination
+            // Handle response format: { orders, total, page, limit, totalPages }
+            if (response.orders) {
+                orders.value = response.orders
+                pagination.value = {
+                    page: response.page,
+                    limit: response.limit,
+                    total: response.total,
+                    totalPages: response.totalPages
+                }
             } else {
-                orders.value = Array.isArray(response) ? response : response.data || []
+                orders.value = Array.isArray(response) ? response : []
             }
 
             return orders.value
@@ -74,12 +79,17 @@ export const useOrdersStore = defineStore('orders', () => {
         try {
             const response = await orderService.getAll(filters)
 
-            // Handle paginated response
-            if (response.data && response.pagination) {
-                orders.value = response.data
-                pagination.value = response.pagination
+            // Handle response format: { orders, total, page, limit, totalPages }
+            if (response.orders) {
+                orders.value = response.orders
+                pagination.value = {
+                    page: response.page,
+                    limit: response.limit,
+                    total: response.total,
+                    totalPages: response.totalPages
+                }
             } else {
-                orders.value = Array.isArray(response) ? response : response.data || []
+                orders.value = Array.isArray(response) ? response : []
             }
 
             return orders.value
@@ -123,7 +133,7 @@ export const useOrdersStore = defineStore('orders', () => {
         currentOrder.value = null
         pagination.value = {
             page: 1,
-            limit: 20,
+            limit: 40,
             total: 0,
             totalPages: 0
         }

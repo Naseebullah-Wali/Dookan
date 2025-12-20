@@ -9,54 +9,40 @@ export const useAuthStore = defineStore('auth', () => {
     const session = ref(null)
     const loading = ref(false)
     const error = ref(null)
+    const initialized = ref(false)
 
     const isAuthenticated = computed(() => !!session.value)
     const isAdmin = computed(() => profile.value?.role === 'admin')
 
     // Initialize auth state from Supabase
     async function initialize() {
-        console.log('🔄 Initializing auth store...')
+        if (initialized.value) return
+
         loading.value = true
         try {
-            const currentSession = await authService.getSession()
-            console.log('Session from Supabase:', {
-                hasSession: !!currentSession,
-                session: currentSession
-            })
+            // Get initial session
+            const { data: { session: initialSession } } = await supabase.auth.getSession()
 
-            if (currentSession) {
-                session.value = currentSession
-                user.value = currentSession.user
-                console.log('✅ Session loaded, fetching profile...')
+            if (initialSession) {
+                session.value = initialSession
+                user.value = initialSession.user
                 await fetchProfile()
-                console.log('✅ Auth initialized:', {
-                    isAuthenticated: !!session.value,
-                    userName: profile.value?.name
-                })
-            } else {
-                console.log('❌ No session found')
             }
         } catch (err) {
-            console.error('Auth initialization error:', err)
         } finally {
             loading.value = false
+            initialized.value = true
         }
 
         // Listen to auth changes
         authService.onAuthStateChange(async (event, newSession) => {
-            console.log('🔔 Auth state changed:', {
-                event,
-                hasSession: !!newSession,
-                userId: newSession?.user?.id,
-                timestamp: new Date().toISOString()
-            })
-
-            session.value = newSession
-            user.value = newSession?.user || null
-
-            if (newSession?.user) {
+            if (newSession) {
+                session.value = newSession
+                user.value = newSession.user
                 await fetchProfile()
             } else {
+                session.value = null
+                user.value = null
                 profile.value = null
             }
         })
@@ -68,45 +54,15 @@ export const useAuthStore = defineStore('auth', () => {
         try {
             const response = await authService.register(userData)
 
-            console.log('Auth store - Registration response:', {
-                hasUser: !!response.user,
-                hasSession: !!response.session,
-                userId: response.user?.id,
-                userEmail: response.user?.email
-            })
-
             user.value = response.user
             session.value = response.session
 
             // Fetch profile after registration
             if (user.value && response.session) {
-                console.log('Fetching profile for user:', user.value.id)
                 await fetchProfile()
-                console.log('Profile fetched:', profile.value)
-                console.log('✅ Profile loaded successfully')
-
-                // Manually persist session to localStorage to avoid setSession hang
-                // Key format: sb-<project-ref>-auth-token
-                const projectRef = 'vmkicfgzgwdfpdnisarn' // From previous logs
-                const storageKey = `sb-${projectRef}-auth-token`
-
-                try {
-                    console.log('💾 Manually persisting session to localStorage...')
-                    localStorage.setItem(storageKey, JSON.stringify(response.session))
-                    console.log('✅ Session manually persisted to', storageKey)
-
-                    // Also notify Supabase client if possible, but manual storage should be enough
-                    // for the next page load to pick it up
-                } catch (e) {
-                    console.error('❌ Failed to manually persist session:', e)
-                }
-            } else {
-                console.warn('No session created - email confirmation may be required')
             }
-
             return true
         } catch (err) {
-            console.error('Registration error in store:', err)
             error.value = err.message || 'Registration failed'
             return false
         } finally {
@@ -160,7 +116,6 @@ export const useAuthStore = defineStore('auth', () => {
             profile.value = userData
             return true
         } catch (err) {
-            console.error('Error fetching profile:', err)
             error.value = err.message || 'Failed to fetch profile'
             return false
         } finally {
@@ -203,6 +158,7 @@ export const useAuthStore = defineStore('auth', () => {
         session,
         loading,
         error,
+        initialized,
         isAuthenticated,
         isAdmin,
         initialize,

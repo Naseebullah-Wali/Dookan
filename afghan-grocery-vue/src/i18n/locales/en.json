@@ -180,7 +180,10 @@
     "wishlist": {
         "title": "My Wishlist",
         "empty": "Your wishlist is empty",
+        "emptyDesc": "Start adding products to your wishlist to see them here!",
         "addToCart": "Add to Cart",
+        "addToWishlist": "Add to Wishlist",
+        "removeFromWishlist": "Remove from Wishlist",
         "remove": "Remove",
         "itemsInWishlist": "{count} items in wishlist"
     },
@@ -295,7 +298,23 @@
         "userRole": {
             "customer": "Customer",
             "admin": "Admin"
-        }
+        },
+        "accessRequired": "Admin Access Required",
+        "loginRequired": "Please login with an administrator account to access this page.",
+        "quickActions": "Quick Actions",
+        "settings": "Settings",
+        "productsManagement": "Product Management",
+        "ordersManagement": "Order Management",
+        "categoriesManagement": "Category Management",
+        "usersManagement": "User Management",
+        "productUpdated": "Product updated successfully",
+        "productCreated": "Product created successfully",
+        "productDeleted": "Product deleted successfully",
+        "categoryUpdated": "Category updated successfully",
+        "categoryCreated": "Category created successfully",
+        "categoryDeleted": "Category deleted successfully",
+        "statusUpdated": "Status updated successfully",
+        "roleUpdated": "User role updated successfully"
     },
     "auth": {
         "login": "Login",
@@ -443,6 +462,7 @@
         "addedToWishlist": "Added to wishlist!",
         "removedFromWishlist": "Removed from wishlist",
         "loginRequired": "Please login to continue",
+        "loginToViewWishlist": "Please login to view and manage your wishlist.",
         "loginSuccess": "Login successful!",
         "loginFailed": "Login failed. Please check your credentials.",
         "accountCreated": "Account created successfully!",
@@ -489,6 +509,11 @@
     },
     "support": {
         "whatsapp": "WhatsApp Support",
-        "whatsappMessage": "Hi Dookan Support, I need help with..."
+        "whatsappMessage": "Hi Dookan Support, I need help with...",
+        "whatsappOrder": {
+            "header": "New Order",
+            "total": "Total",
+            "footer": "Please confirm availability and payment details."
+        }
     }
 }

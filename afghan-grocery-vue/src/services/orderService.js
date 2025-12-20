@@ -22,7 +22,25 @@ export const orderService = {
         const user = await getCurrentUser()
         if (!user) throw new Error('Not authenticated')
 
-        const { items, ...orderInfo } = orderData
+        let { items, address, ...orderInfo } = orderData
+
+        // If address is an object, create it first
+        if (address && typeof address === 'object') {
+            const { addressService } = await import('./addressService')
+            const newAddress = await addressService.create({
+                full_name: address.recipient_name || address.full_name,
+                phone: address.phone,
+                street: address.street,
+                city: address.city,
+                state: address.province || address.state,
+                zip: address.zip || '00000',
+                country: address.country || 'Afghanistan',
+                is_default: address.is_default || false
+            })
+            orderInfo.address_id = newAddress.id
+        } else if (orderData.address_id) {
+            orderInfo.address_id = orderData.address_id
+        }
 
         // Calculate total
         const total = orderInfo.subtotal +
@@ -31,10 +49,16 @@ export const orderService = {
             (orderInfo.discount || 0)
 
         // Create order
+        const allowedMethods = ['cod', 'card', 'bank_transfer', 'paypal']
+        const dbPaymentMethod = allowedMethods.includes(orderInfo.payment_method)
+            ? orderInfo.payment_method
+            : 'cod'
+
         const { data: order, error: orderError } = await supabase
             .from('orders')
             .insert({
                 ...orderInfo,
+                payment_method: dbPaymentMethod,
                 user_id: user.id,
                 total,
                 status: 'pending',
@@ -85,7 +109,7 @@ export const orderService = {
 
         const { data, error, count } = await supabase
             .from('orders')
-            .select('*, addresses(*)', { count: 'exact' })
+            .select('*, addresses(*), order_items(*)', { count: 'exact' })
             .eq('user_id', user.id)
             .order('created_at', { ascending: false })
             .range(from, to)

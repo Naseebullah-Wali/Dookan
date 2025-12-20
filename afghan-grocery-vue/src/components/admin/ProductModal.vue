@@ -162,7 +162,26 @@ onMounted(() => {
 watch(() => props.product, (newVal) => {
   if (newVal) {
     isEditing.value = true
-    formData.value = { ...newVal }
+    // Map product fields to form data
+    formData.value = {
+      name: newVal.name_en || newVal.name || '', // Prefer English name for editing
+      category_id: newVal.category_id,
+      price: newVal.price,
+      original_price: newVal.compare_at_price,
+      stock: newVal.stock,
+      size: newVal.size || '', // Assuming size is a direct field now, or extract from attributes
+      sale_percentage: 0, // Calculate if needed: ((original - price) / original) * 100
+      is_new: newVal.tags && newVal.tags.includes('new'),
+      description: newVal.description_en || newVal.description || '',
+      image: newVal.image,
+      supplier: newVal.supplier || ''
+    }
+    
+    // Calculate sale percentage if not explicitly stored but implied by prices
+    if (formData.value.original_price > formData.value.price) {
+        formData.value.sale_percentage = Math.round(((formData.value.original_price - formData.value.price) / formData.value.original_price) * 100)
+    }
+
     imagePreview.value = null
     selectedFile.value = null
   } else {

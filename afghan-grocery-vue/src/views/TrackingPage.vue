@@ -15,7 +15,7 @@
                   v-model="orderId"
                   type="text"
                   class="form-control form-control-lg"
-                  placeholder="Enter your order ID (e.g., 1)"
+                  placeholder="Enter your order ID or number (e.g., ORD-20251220-000002)"
                   required
                 />
                 <button type="submit" class="btn btn-primary btn-lg px-4">
@@ -180,7 +180,7 @@
 import { ref } from 'vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
-import api from '@/services/api'
+import { supabase } from '@/lib/supabase'
 
 const orderId = ref('')
 const order = ref(null)
@@ -195,8 +195,51 @@ async function handleSearch() {
   order.value = null
   
   try {
-    const response = await api.get(`/orders/${orderId.value}`)
-    order.value = response.data
+    // Check if input is numeric (ID) or string (order_number)
+    const isNumeric = /^\d+$/.test(orderId.value)
+    
+    let query = supabase
+      .from('orders')
+      .select('*, addresses(*), order_items(*)')
+    
+    if (isNumeric) {
+      // Search by numeric ID
+      query = query.eq('id', parseInt(orderId.value))
+    } else {
+      // Search by order_number string
+      query = query.eq('order_number', orderId.value)
+    }
+    
+    const { data, error } = await query.maybeSingle()
+    
+    if (error) throw error
+    
+    if (data) {
+      // Map Supabase data to expected format
+      order.value = {
+        id: data.id,
+        order_number: data.order_number,
+        status: data.status,
+        createdAt: data.created_at,
+        subtotal: data.subtotal,
+        deliveryFee: data.shipping_fee || 0,
+        total: data.total,
+        delivery: data.addresses ? {
+          recipientName: data.addresses.full_name,
+          phone: data.addresses.phone,
+          city: data.addresses.city,
+          address: `${data.addresses.street}, ${data.addresses.city}, ${data.addresses.state || ''}`
+        } : null,
+        items: (data.order_items || []).map(item => ({
+          id: item.id,
+          name: item.product_name,
+          image: item.product_image || '/placeholder.jpg',
+          size: item.sku || 'N/A',
+          quantity: item.quantity,
+          price: item.price
+        }))
+      }
+    }
   } catch (error) {
     console.error('Order not found:', error)
   }

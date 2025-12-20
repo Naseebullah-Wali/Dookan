@@ -31,7 +31,7 @@ export const productService = {
             maxPrice,
             featured,
             page = 1,
-            limit = 20,
+            limit = 40,
             lang = 'en'
         } = filters
 

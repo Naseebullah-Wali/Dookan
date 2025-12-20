@@ -32,6 +32,7 @@
 
           <!-- Actions -->
           <div class="d-flex align-items-center gap-3">
+            <CurrencySwitcher />
             <LanguageSwitcher />
             <template v-if="authStore.isAuthenticated">
               <router-link to="/wishlist" class="btn btn-link text-decoration-none p-0 position-relative hover-scale" title="Wishlist" style="color: var(--bs-primary);">
@@ -107,7 +108,8 @@
 
         <!-- Mobile User Section -->
         <div class="mt-auto pt-4 border-top">
-          <div class="mb-3 d-flex justify-content-center">
+          <div class="mb-3 d-flex justify-content-center gap-3">
+            <CurrencySwitcher />
             <LanguageSwitcher />
           </div>
           <template v-if="authStore.isAuthenticated">
@@ -159,11 +161,14 @@ import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import { useWishlistStore } from '@/stores/wishlist'
 import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
+import CurrencySwitcher from '@/components/common/CurrencySwitcher.vue'
+import { useCurrencyStore } from '@/stores/currency'
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const wishlistStore = useWishlistStore()
+const currencyStore = useCurrencyStore()
 
 const isScrolled = ref(false)
 let offcanvasInstance = null

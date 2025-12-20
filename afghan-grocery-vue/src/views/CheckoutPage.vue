@@ -43,12 +43,7 @@
                 <div class="mb-3">
                   <label class="form-label fw-semibold">{{ $t('checkout.city') }}</label>
                   <select v-model="formData.city" class="form-select form-select-lg" required @change="updateDeliveryFee">
-                    <option value="kabul">Kabul</option>
-                    <option value="herat">Herat</option>
-                    <option value="mazar">Mazar-i-Sharif</option>
                     <option value="kandahar">Kandahar</option>
-                    <option value="jalalabad">Jalalabad</option>
-                    <option value="other">Other</option>
                   </select>
                 </div>
                 <div class="mb-3">
@@ -89,7 +84,7 @@
                         <div class="fw-semibold">Crypto (USDT TRC20)</div>
                         <small class="text-muted">Tron Network</small>
                         <div v-if="formData.paymentMethod === 'trc20'" class="mt-3 p-3 bg-light rounded" @click.stop>
-                            <p class="mb-1 small">Send <strong>{{ formatPrice(total) }} AFN</strong> (approx {{ (total / 70).toFixed(2) }} USDT) to:</p>
+                            <p class="mb-1 small">Send <strong>{{ currencyStore.formatPrice(total) }}</strong> (approx {{ totalInUsd }} USDT) to:</p>
                             <div class="input-group mb-2">
                                 <input type="text" class="form-control form-control-sm" value="T..." readonly>
                                 <button class="btn btn-outline-secondary btn-sm" type="button">Copy</button>
@@ -116,7 +111,7 @@
                         <div class="fw-semibold">Crypto (Arbitrum USDT)</div>
                         <small class="text-muted">Arbitrum One Network</small>
                         <div v-if="formData.paymentMethod === 'arbitrum'" class="mt-3 p-3 bg-light rounded" @click.stop>
-                             <p class="mb-1 small">Send <strong>{{ formatPrice(total) }} AFN</strong> (approx {{ (total / 70).toFixed(2) }} USDT) to:</p>
+                             <p class="mb-1 small">Send <strong>{{ currencyStore.formatPrice(total) }}</strong> (approx {{ totalInUsd }} USDT) to:</p>
                              <div class="input-group mb-2">
                                 <input type="text" class="form-control form-control-sm" value="0x..." readonly>
                                 <button class="btn btn-outline-secondary btn-sm" type="button">Copy</button>
@@ -150,7 +145,7 @@
             </div>
 
             <button type="submit" class="btn btn-primary btn-lg w-100">
-              <i class="bi bi-check-circle me-2"></i>{{ $t('checkout.placeOrder') }} - {{ formatPrice(total) }} {{ $t('common.afn') }}
+              <i class="bi bi-check-circle me-2"></i>{{ $t('checkout.placeOrder') }} - {{ currencyStore.formatPrice(total) }}
             </button>
           </form>
         </div>
@@ -163,22 +158,22 @@
               <div class="mb-3">
                 <div v-for="item in cartStore.items" :key="item.id" class="d-flex justify-content-between mb-2 small">
                   <span>{{ languageStore.getLocalizedName(item) }} × {{ item.quantity }}</span>
-                  <span>{{ formatPrice(item.price * item.quantity) }} {{ $t('common.afn') }}</span>
+                  <span>{{ currencyStore.formatPrice(item.price * item.quantity) }}</span>
                 </div>
               </div>
               <hr>
               <div class="d-flex justify-content-between mb-2">
                 <span>{{ $t('cart.subtotal') }}</span>
-                <span>{{ formatPrice(cartStore.subtotal) }} {{ $t('common.afn') }}</span>
+                <span>{{ currencyStore.formatPrice(cartStore.subtotal) }}</span>
               </div>
               <div class="d-flex justify-content-between mb-3">
                 <span>{{ $t('cart.shipping') }}</span>
-                <span>{{ formatPrice(deliveryFee) }} {{ $t('common.afn') }}</span>
+                <span>{{ currencyStore.formatPrice(deliveryFee) }}</span>
               </div>
               <hr>
               <div class="d-flex justify-content-between fs-5 fw-bold text-primary">
                 <span>{{ $t('cart.total') }}</span>
-                <span>{{ formatPrice(total) }} {{ $t('common.afn') }}</span>
+                <span>{{ currencyStore.formatPrice(total) }}</span>
               </div>
             </div>
           </div>
@@ -196,6 +191,7 @@ import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useAuthStore } from '@/stores/auth'
 import { useLanguageStore } from '@/stores/language'
+import { useCurrencyStore } from '@/stores/currency'
 import { useI18n } from 'vue-i18n'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
@@ -208,6 +204,7 @@ const cartStore = useCartStore()
 const authStore = useAuthStore()
 const ordersStore = useOrdersStore()
 const languageStore = useLanguageStore()
+const currencyStore = useCurrencyStore()
 const { t } = useI18n()
 
 // Payment State
@@ -219,12 +216,12 @@ const paypalLoaded = ref(false);
 const paymentOptions = {
     trc20: {
         name: 'Crypto (TRC20 USDT)',
-        address: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t', // Example, should come from env but hardcoding for UI demo or fetch from config
+        address: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t',
         network: 'Tron (TRC20)'
     },
     arbitrum: {
         name: 'Crypto (Arbitrum USDT)',
-        address: '0x...', // Example
+        address: '0x...', 
         network: 'Arbitrum One'
     }
 };
@@ -232,24 +229,25 @@ const paymentOptions = {
 const formData = ref({
   recipientName: '',
   phone: '',
-  city: 'kabul',
+  city: 'kandahar',
   address: '',
   notes: '',
-  paymentMethod: 'online'
+  paymentMethod: 'whatsapp'
 })
 
 const deliveryFees = {
-  kabul: 200,
-  herat: 300,
-  mazar: 350,
-  kandahar: 400,
-  jalalabad: 350,
-  other: 500
+  kandahar: 400
 }
 
-const deliveryFee = ref(200)
+const deliveryFee = ref(400)
 
 const total = computed(() => cartStore.subtotal + deliveryFee.value)
+
+// Helper for crypto amount (approximate in USD)
+const totalInUsd = computed(() => {
+    const rate = currencyStore.rates.USD || 70
+    return (total.value / rate).toFixed(2)
+})
 
 onMounted(() => {
   if (cartStore.items.length === 0) {
@@ -267,10 +265,6 @@ function updateDeliveryFee() {
   deliveryFee.value = deliveryFees[formData.value.city] || 500
 }
 
-function formatPrice(price) {
-  return price.toLocaleString()
-}
-
 // Watch for payment method change to load PayPal
 import { watch } from 'vue';
 
@@ -280,10 +274,10 @@ watch(() => formData.value.paymentMethod, async (newMethod) => {
             const paypal = await loadScript({ "clientId": "test", currency: "USD" }); // client-id from config? For now use 'test' or get from backend config endpoint if strictly needed, but public key is usually safe.
             if (paypal && paypal.Buttons) {
                 await paypal.Buttons({
-                    createOrder: async (data, actions) => {
+                     createOrder: async (data, actions) => {
                          // Call backend to create order
-                         return PaymentService.createPayPalOrder(total.value / 70, 'USD').then(order => order.id);
-                    },
+                         return PaymentService.createPayPalOrder(totalInUsd.value, 'USD').then(order => order.id);
+                     },
                     onApprove: async (data, actions) => {
                         // Capture order
                         await PaymentService.capturePayPalOrder(data.orderID);
@@ -303,7 +297,7 @@ async function verifyCrypto(type) {
     if (!cryptoTxHash.value) return;
     isVerifyingCrypto.value = true;
     try {
-        const result = await PaymentService.verifyCryptoPayment(type, cryptoTxHash.value, total.value / 70); // approx conversion
+        const result = await PaymentService.verifyCryptoPayment(type, cryptoTxHash.value, totalInUsd.value);
         if (result.verified) {
             cryptoVerified.value = true;
             window.showToast('Payment Verified Successfully!', 'success');
@@ -334,10 +328,12 @@ async function handleCheckout() {
     user_id: authStore.user.id,
     items: cartStore.items.map(item => ({
         product_id: item.id,
-        product_name: item.name,
+        name: languageStore.getLocalizedName(item),
         product_image: item.image,
         quantity: item.quantity,
-        price: item.price
+        price: item.price,
+        weight: item.weight,
+        size: item.size
     })),
     address: {
         recipient_name: formData.value.recipientName,
@@ -358,7 +354,7 @@ async function handleCheckout() {
   try {
       // If WhatsApp, just redirect
     if (formData.value.paymentMethod === 'whatsapp') {
-         const waData = await PaymentService.getWhatsAppLink('PENDING', total.value, cartStore.items); // Should backend generate ID? Or pass temp?
+         // const waData = await PaymentService.getWhatsAppLink('PENDING', total.value, cartStore.items); 
          // For now, let's create a pending order in DB first, then redirect.
     }
 
@@ -366,7 +362,14 @@ async function handleCheckout() {
     cartStore.clearCart()
     
     if (formData.value.paymentMethod === 'whatsapp') {
-        const waData = await PaymentService.getWhatsAppLink(order.id, total.value, orderData.items);
+        const waOptions = {
+            header: t('support.whatsappOrder.header'),
+            totalLabel: t('support.whatsappOrder.total'),
+            currency: currencyStore.selectedCurrency.symbol,
+            footer: t('support.whatsappOrder.footer')
+        }
+        const convertedTotal = currencyStore.convert(total.value)
+        const waData = await PaymentService.getWhatsAppLink(order.id, convertedTotal, orderData.items, waOptions);
         if (waData && waData.link) {
             window.location.href = waData.link;
             return;

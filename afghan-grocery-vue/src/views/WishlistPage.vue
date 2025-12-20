@@ -112,17 +112,10 @@ async function handleRemove(productId) {
 
 async function handleClearAll() {
   if (confirm(t('messages.confirmDelete'))) {
-    try {
-      // Create a copy of items to avoid mutation during iteration
-      const itemsToRemove = [...wishlistStore.items]
-      
-      // Delete all items from backend
-      for (const item of itemsToRemove) {
-        await wishlistStore.removeFromWishlist(item.productId)
-      }
-      
+    const success = await wishlistStore.clearWishlist()
+    if (success) {
       window.showToast(t('messages.success'), 'success')
-    } catch (error) {
+    } else {
       window.showToast(t('messages.error'), 'error')
     }
   }

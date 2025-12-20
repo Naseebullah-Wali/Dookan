@@ -12,7 +12,7 @@ export const useWishlistStore = defineStore('wishlist', () => {
     const itemCount = computed(() => items.value.length)
 
     const isInWishlist = (productId) => {
-        return items.value.some(item => item.product_id === productId)
+        return items.value.some(item => item.productId === productId)
     }
 
     async function fetchWishlist() {
@@ -30,30 +30,22 @@ export const useWishlistStore = defineStore('wishlist', () => {
                     id,
                     product_id,
                     created_at,
-                    products (
-                        id,
-                        name,
-                        price,
-                        image,
-                        stock,
-                        category_id
-                    )
+                    products (*)
                 `)
                 .eq('user_id', authStore.user.id)
                 .order('created_at', { ascending: false })
 
             if (fetchError) throw fetchError
 
-            // Transform Supabase response to match app structure
+            // Transform Supabase response to match app structure (camelCase)
             items.value = data.map(item => ({
                 id: item.id,
-                product_id: item.product_id,
-                created_at: item.created_at,
-                product: item.products // Supabase returns the joined relation as 'products'
+                productId: item.product_id,
+                createdAt: item.created_at,
+                product: item.products
             }))
         } catch (err) {
             error.value = err.message
-            console.error('Failed to fetch wishlist:', err)
         } finally {
             loading.value = false
         }
@@ -87,16 +79,15 @@ export const useWishlistStore = defineStore('wishlist', () => {
             // Add to local state
             items.value.unshift({
                 id: data.id,
-                product_id: product.id,
-                created_at: data.created_at,
-                product: product // Use the product object passed in for immediate UI update
+                productId: product.id,
+                createdAt: data.created_at,
+                product: product
             })
 
             window.showToast('Added to wishlist!', 'success')
             return true
         } catch (err) {
             error.value = err.message
-            console.error('Failed to add to wishlist:', err)
             window.showToast('Failed to add to wishlist', 'error')
             return false
         } finally {
@@ -105,7 +96,7 @@ export const useWishlistStore = defineStore('wishlist', () => {
     }
 
     async function removeFromWishlist(productId) {
-        const item = items.value.find(i => i.product_id === productId)
+        const item = items.value.find(i => i.productId === productId)
         if (!item) return false
 
         loading.value = true
@@ -119,14 +110,37 @@ export const useWishlistStore = defineStore('wishlist', () => {
             if (deleteError) throw deleteError
 
             // Remove from local state
-            items.value = items.value.filter(i => i.product_id !== productId)
+            items.value = items.value.filter(i => i.productId !== productId)
 
             window.showToast('Removed from wishlist', 'info')
             return true
         } catch (err) {
             error.value = err.message
-            console.error('Failed to remove from wishlist:', err)
             window.showToast('Failed to remove from wishlist', 'error')
+            return false
+        } finally {
+            loading.value = false
+        }
+    }
+
+    async function clearWishlist() {
+        if (!authStore.isAuthenticated || !authStore.user) return false
+
+        loading.value = true
+        error.value = null
+        try {
+            const { error: deleteError } = await supabase
+                .from('wishlists')
+                .delete()
+                .eq('user_id', authStore.user.id)
+
+            if (deleteError) throw deleteError
+
+            items.value = []
+            return true
+        } catch (err) {
+            error.value = err.message
+            window.showToast('Failed to clear wishlist', 'error')
             return false
         } finally {
             loading.value = false
@@ -135,16 +149,11 @@ export const useWishlistStore = defineStore('wishlist', () => {
 
     async function toggleWishlist(product) {
         const wasInWishlist = isInWishlist(product.id)
-
         if (wasInWishlist) {
             return await removeFromWishlist(product.id)
         } else {
             return await addToWishlist(product)
         }
-    }
-
-    function clearWishlist() {
-        items.value = []
     }
 
     return {

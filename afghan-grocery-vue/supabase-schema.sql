@@ -511,3 +511,39 @@ CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders
 
 CREATE TRIGGER update_cart_items_updated_at BEFORE UPDATE ON cart_items
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- =====================================================
+-- SITE SETTINGS TABLE
+-- =====================================================
+CREATE TABLE site_settings (
+    key TEXT PRIMARY KEY,
+    value JSONB NOT NULL,
+    description TEXT,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Enable RLS
+ALTER TABLE site_settings ENABLE ROW LEVEL SECURITY;
+
+-- Site settings policies
+CREATE POLICY "Site settings are viewable by everyone"
+    ON site_settings FOR SELECT
+    USING (true);
+
+CREATE POLICY "Only admins can manage site settings"
+    ON site_settings FOR ALL
+    USING (EXISTS (
+        SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin'
+    ));
+
+-- Add trigger for updated_at
+CREATE TRIGGER update_site_settings_updated_at BEFORE UPDATE ON site_settings
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Initial data for exchange rates
+INSERT INTO site_settings (key, value, description)
+VALUES (
+    'exchange_rates', 
+    '{"USD": 70, "EUR": 75, "AFN": 1}', 
+    'Exchange rates relative to AFN'
+);

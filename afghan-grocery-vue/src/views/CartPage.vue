@@ -45,7 +45,7 @@
                   <div class="col">
                     <h5 class="card-title mb-2">{{ languageStore.getLocalizedName(item) }}</h5>
                     <p class="text-muted small mb-2">{{ item.size }}</p>
-                    <p class="text-primary fw-bold mb-0">{{ formatPrice(item.price) }} {{ $t('common.afn') }}</p>
+                    <p class="text-primary fw-bold mb-0">{{ currencyStore.formatPrice(item.price) }}</p>
                     <p v-if="item.stock" class="text-muted small mb-0">{{ $t('product.stock') }}: {{ item.stock }}</p>
                     <p v-else class="text-warning small mb-0">⚠️ {{ $t('messages.error') }}</p>
                   </div>
@@ -80,7 +80,7 @@
                   
                   <!-- Item Total (Desktop) -->
                   <div class="col-auto d-none d-md-block" style="min-width: 120px;">
-                    <h5 class="text-primary mb-0 text-end">{{ formatPrice(item.price * item.quantity) }} {{ $t('common.afn') }}</h5>
+                    <h5 class="text-primary mb-0 text-end">{{ currencyStore.formatPrice(item.price * item.quantity) }}</h5>
                   </div>
                   
                   <!-- Mobile Actions -->
@@ -112,7 +112,7 @@
                       </button>
                     </div>
                     <div class="d-flex justify-content-end mt-2">
-                      <h5 class="text-primary mb-0">{{ formatPrice(item.price * item.quantity) }} {{ $t('common.afn') }}</h5>
+                      <h5 class="text-primary mb-0">{{ currencyStore.formatPrice(item.price * item.quantity) }}</h5>
                     </div>
                   </div>
                 </div>
@@ -129,19 +129,19 @@
               
               <div class="d-flex justify-content-between mb-3">
                 <span>{{ $t('cart.subtotal') }}</span>
-                <span class="fw-semibold">{{ formatPrice(cartStore.subtotal) }} {{ $t('common.afn') }}</span>
+                <span class="fw-semibold">{{ currencyStore.formatPrice(cartStore.subtotal) }}</span>
               </div>
               
               <div class="d-flex justify-content-between mb-3">
                 <span>{{ $t('cart.shipping') }}</span>
-                <span class="fw-semibold">{{ formatPrice(cartStore.deliveryFee) }} {{ $t('common.afn') }}</span>
+                <span class="fw-semibold">{{ currencyStore.formatPrice(cartStore.deliveryFee) }}</span>
               </div>
               
               <hr class="my-3">
               
               <div class="d-flex justify-content-between mb-4">
                 <span class="fs-5 fw-bold">{{ $t('cart.total') }}</span>
-                <span class="fs-5 fw-bold text-primary">{{ formatPrice(cartStore.total) }} {{ $t('common.afn') }}</span>
+                <span class="fs-5 fw-bold text-primary">{{ currencyStore.formatPrice(cartStore.total) }}</span>
               </div>
               
               <div class="d-grid gap-2">
@@ -165,17 +165,15 @@
 <script setup>
 import { useCartStore } from '@/stores/cart'
 import { useLanguageStore } from '@/stores/language'
+import { useCurrencyStore } from '@/stores/currency'
 import { useI18n } from 'vue-i18n'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 
 const cartStore = useCartStore()
 const languageStore = useLanguageStore()
+const currencyStore = useCurrencyStore()
 const { t } = useI18n()
-
-function formatPrice(price) {
-  return price?.toLocaleString() || '0'
-}
 
 function removeItem(item) {
   cartStore.removeFromCart(item.id)

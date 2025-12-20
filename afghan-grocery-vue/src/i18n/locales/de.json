@@ -154,7 +154,10 @@
     "wishlist": {
         "title": "Meine Wunschliste",
         "empty": "Ihre Wunschliste ist leer",
+        "emptyDesc": "Fügen Sie Produkte zu Ihrer Wunschliste hinzu, um sie hier zu sehen!",
         "addToCart": "In den Warenkorb",
+        "addToWishlist": "Zur Wunschliste hinzufügen",
+        "removeFromWishlist": "Von der Wunschliste entfernen",
         "remove": "Entfernen",
         "itemsInWishlist": "{count} Artikel auf der Wunschliste"
     },
@@ -412,6 +415,7 @@
         "addedToWishlist": "Zur Wunschliste hinzugefügt!",
         "removedFromWishlist": "Von der Wunschliste entfernt",
         "loginRequired": "Bitte melden Sie sich an, um fortzufahren",
+        "loginToViewWishlist": "Bitte melden Sie sich an, um Ihre Wunschliste zu sehen und zu verwalten.",
         "loginSuccess": "Anmeldung erfolgreich!",
         "loginFailed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten.",
         "accountCreated": "Konto erfolgreich erstellt!",
@@ -458,6 +462,11 @@
     },
     "support": {
         "whatsapp": "WhatsApp-Support",
-        "whatsappMessage": "Hallo Dookan Support, ich benötige Hilfe bei..."
+        "whatsappMessage": "Hallo Dookan Support, ich benötige Hilfe bei...",
+        "whatsappOrder": {
+            "header": "Neue Bestellung",
+            "total": "Gesamt",
+            "footer": "Bitte bestätigen Sie die Verfügbarkeit und die Zahlungsdetails."
+        }
     }
 }

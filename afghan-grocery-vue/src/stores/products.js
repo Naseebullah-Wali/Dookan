@@ -8,7 +8,7 @@ export const useProductsStore = defineStore('products', () => {
     const featuredProducts = ref([])
     const pagination = ref({
         page: 1,
-        limit: 20,
+        limit: 40,
         total: 0,
         totalPages: 0
     })
@@ -43,7 +43,6 @@ export const useProductsStore = defineStore('products', () => {
 
             return products.value
         } catch (err) {
-            console.error('Error fetching products:', err)
             error.value = err.message
             products.value = []
             return []
@@ -76,7 +75,6 @@ export const useProductsStore = defineStore('products', () => {
             featuredProducts.value = products
             return featuredProducts.value
         } catch (err) {
-            console.error('Error fetching featured products:', err)
             error.value = err.message
             featuredProducts.value = []
             return []
@@ -92,7 +90,6 @@ export const useProductsStore = defineStore('products', () => {
             const product = await productService.getById(id)
             return product
         } catch (err) {
-            console.error('Error fetching product by ID:', err)
             error.value = err.message
             return null
         } finally {
@@ -106,7 +103,6 @@ export const useProductsStore = defineStore('products', () => {
             categories.value = Array.isArray(response) ? response : []
             return categories.value
         } catch (err) {
-            console.error('Error fetching categories:', err)
             error.value = err.message
             categories.value = []
             return []
@@ -119,7 +115,6 @@ export const useProductsStore = defineStore('products', () => {
             categories.value = Array.isArray(response) ? response : []
             return categories.value
         } catch (err) {
-            console.error('Error fetching categories with counts:', err)
             error.value = err.message
             categories.value = []
             return []
@@ -137,7 +132,7 @@ export const useProductsStore = defineStore('products', () => {
         products.value = []
         pagination.value = {
             page: 1,
-            limit: 20,
+            limit: 40,
             total: 0,
             totalPages: 0
         }

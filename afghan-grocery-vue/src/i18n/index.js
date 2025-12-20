@@ -21,7 +21,9 @@ const i18n = createI18n({
     locale: savedLocale,
     fallbackLocale: 'en',
     messages,
-    globalInjection: true
+    globalInjection: true,
+    silentTranslationWarn: true,
+    silentFallbackWarn: true
 })
 
 export default i18n

@@ -161,15 +161,25 @@ export class PaymentService {
     // ==========================================
     // WHATSAPP
     // ==========================================
-    static getWhatsAppLink(orderId: string, total: number, items: any[]) {
+    static getWhatsAppLink(orderId: string, total: number, items: any[], options: any = {}) {
         const adminNumber = paymentConfig.whatsapp.adminNumber;
         if (!adminNumber) return null;
 
-        let text = `New Order #${orderId} - Total: $${total}\n`;
+        const {
+            header = `New Order #${orderId}`,
+            totalLabel = 'Total',
+            currency = '$',
+            footer = 'Please confirm availability and payment details.'
+        } = options;
+
+        let text = `${header}\n${totalLabel}: ${total} ${currency}\n\n`;
         items.forEach(item => {
-            text += `- ${item.name} x${item.quantity}\n`;
+            let itemDetail = `- ${item.name} x${item.quantity}`;
+            if (item.weight) itemDetail += ` (${item.weight})`;
+            else if (item.size) itemDetail += ` (${item.size})`;
+            text += `${itemDetail}\n`;
         });
-        text += `Please confirm availability and payment details.`;
+        text += `\n${footer}`;
 
         const encoded = encodeURIComponent(text);
         return `https://wa.me/${adminNumber}?text=${encoded}`;

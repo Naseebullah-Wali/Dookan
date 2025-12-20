@@ -34,9 +34,9 @@
         <!-- <span class="text-muted small">({{ product.reviewCount }})</span> -->
       </div>
       <div class="d-flex align-items-center gap-2 mb-3">
-        <span class="fs-5 fw-bold text-primary">{{ formatPrice(product.price) }} {{ $t('common.afn') }}</span>
+        <span class="fs-5 fw-bold text-primary">{{ currencyStore.formatPrice(product.price) }}</span>
         <span v-if="product.compareAtPrice" class="text-muted text-decoration-line-through small">
-          {{ formatPrice(product.compareAtPrice) }} {{ $t('common.afn') }}
+          {{ currencyStore.formatPrice(product.compareAtPrice) }}
         </span>
       </div>
       <button class="btn btn-primary w-100 mt-auto" @click="handleAddToCart">
@@ -50,6 +50,8 @@
 import { computed } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import { useLanguageStore } from '@/stores/language'
+import { useCurrencyStore } from '@/stores/currency'
+import { useAnalytics } from '@/composables/useAnalytics'
 import WishlistButton from '@/components/common/WishlistButton.vue'
 import { getImageUrl } from '@/services/imageService'
 import { useI18n } from 'vue-i18n'
@@ -63,6 +65,8 @@ const props = defineProps({
 
 const cartStore = useCartStore()
 const languageStore = useLanguageStore()
+const currencyStore = useCurrencyStore()
+const analytics = useAnalytics()
 const { t } = useI18n()
 
 // Computed property for product image URL
@@ -80,6 +84,7 @@ function formatPrice(price) {
 
 function handleAddToCart() {
   cartStore.addToCart(props.product)
+  analytics.trackAddToCart(props.product)
   window.showToast(t('messages.addedToCart'), 'success')
 }
 

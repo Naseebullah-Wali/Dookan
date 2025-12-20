@@ -32,15 +32,9 @@ export const authService = {
             })
 
             if (authError) {
-                console.error('Registration auth error:', authError)
                 throw authError
             }
 
-            console.log('Registration successful:', {
-                user: authData.user?.id,
-                session: authData.session ? 'Session created' : 'No session (email confirmation required)',
-                email: authData.user?.email
-            })
 
             // Profile is created by database trigger
             // Wait longer and retry if needed
@@ -55,11 +49,9 @@ export const authService = {
                     try {
                         profile = await getUserProfile(authData.user.id)
                         if (profile) {
-                            console.log('Profile found:', profile)
                             break
                         }
                     } catch (err) {
-                        console.log(`Profile fetch attempt ${4 - retries} failed, retrying...`)
                     }
                     retries--
                     if (retries > 0) {
@@ -68,7 +60,6 @@ export const authService = {
                 }
 
                 if (!profile) {
-                    console.warn('Profile not found after retries, will be fetched on next login')
                 }
             }
 
@@ -77,7 +68,6 @@ export const authService = {
                 session: authData.session
             }
         } catch (error) {
-            console.error('Registration failed:', error)
             throw error
         }
     },
@@ -114,14 +104,9 @@ export const authService = {
         const { data: { session }, error } = await supabase.auth.getSession()
 
         if (error) {
-            console.error('Error getting session:', error)
             return null
         }
 
-        console.log('getSession result:', {
-            hasSession: !!session,
-            userId: session?.user?.id
-        })
 
         return session
     },
@@ -201,16 +186,6 @@ export const authService = {
         if (error) throw error
 
         return { message: 'Password updated successfully' }
-    },
-
-    /**
-     * Get current session
-     * @returns {Promise<Object>} Current session
-     */
-    async getSession() {
-        const { data: { session }, error } = await supabase.auth.getSession()
-        if (error) throw error
-        return session
     },
 
     /**

@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
@@ -21,8 +22,8 @@ export const PaymentService = {
     },
 
     // WhatsApp
-    async getWhatsAppLink(orderId: string, total: number, items: any[]) {
-        const response = await axios.post(`${API_URL}/payments/whatsapp/link`, { orderId, total, items });
+    async getWhatsAppLink(orderId: string, total: number, items: any[], options: any = {}) {
+        const response = await axios.post(`${API_URL}/payments/whatsapp/link`, { orderId, total, items, options });
         return response.data;
     }
 };

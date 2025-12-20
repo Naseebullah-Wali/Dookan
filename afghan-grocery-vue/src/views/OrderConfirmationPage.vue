@@ -25,14 +25,14 @@
           
           <div class="d-flex justify-content-between py-3">
             <span class="text-muted">{{ $t('cart.total') }}:</span>
-            <span class="fw-bold text-primary fs-5">{{ formatPrice(order.total) }} {{ $t('common.afn') }}</span>
+            <span class="fw-bold text-primary fs-5">{{ currencyStore.formatPrice(order.total) }}</span>
           </div>
 
           <div v-if="order.items && order.items.length > 0" class="mt-3">
             <h5 class="fw-semibold mb-3">{{ $t('admin.items') }}:</h5>
             <div v-for="item in order.items" :key="item.id" class="d-flex justify-content-between py-2 border-bottom">
               <span>{{ item.product_name }} × {{ item.quantity }}</span>
-              <span>{{ formatPrice(item.subtotal) }} {{ $t('common.afn') }}</span>
+              <span>{{ currencyStore.formatPrice(item.subtotal) }}</span>
             </div>
           </div>
 
@@ -56,21 +56,25 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useOrdersStore } from '@/stores/orders'
+import { useCurrencyStore } from '@/stores/currency'
+import { useAnalytics } from '@/composables/useAnalytics'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 
 const route = useRoute()
 const ordersStore = useOrdersStore()
+const currencyStore = useCurrencyStore()
+const analytics = useAnalytics()
 const order = ref(null)
 
 onMounted(async () => {
   const orderId = route.params.orderId
   order.value = await ordersStore.fetchOrderById(orderId)
+  
+  if (order.value) {
+    analytics.trackPurchase(order.value)
+  }
 })
-
-function formatPrice(price) {
-  return price?.toLocaleString() || '0'
-}
 </script>
 
 <style scoped>
