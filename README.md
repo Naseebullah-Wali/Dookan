@@ -216,6 +216,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## 📚 Additional Documentation
 
 - [Docker Deployment Guide](DOCKER_DEPLOYMENT.md) - Complete Docker deployment instructions
+- [Hosting Platforms Guide](HOSTING_PLATFORMS.md) - Step-by-step guides for Railway, Render, Fly.io, AWS, GCP, Azure, and more
+- [Troubleshooting Guide](TROUBLESHOOTING.md) - Solutions for common Docker deployment issues
 - [Backend README](backend-afghan-grocery/README.md) - Backend-specific documentation
 - [Database Migration Guide](DATABASE_MIGRATION.md) - Database migration information
 - [Project Summary](PROJECT_SUMMARY.md) - Detailed project overview

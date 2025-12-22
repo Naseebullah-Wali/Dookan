@@ -23,11 +23,18 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-# Check if Docker Compose is installed
-if ! command -v docker-compose &> /dev/null; then
+# Check if Docker Compose is installed (v1 or v2)
+if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
     echo -e "${RED}Error: Docker Compose is not installed${NC}"
     echo "Please install Docker Compose from https://docs.docker.com/compose/install/"
     exit 1
+fi
+
+# Use docker compose (v2) if available, otherwise use docker-compose (v1)
+if docker compose version &> /dev/null; then
+    DOCKER_COMPOSE="docker compose"
+else
+    DOCKER_COMPOSE="docker-compose"
 fi
 
 echo -e "${GREEN}✓ Docker and Docker Compose are installed${NC}"
@@ -78,7 +85,7 @@ read -p "Enter your choice (1-5): " action
 case $action in
     1)
         echo -e "${GREEN}Building and starting services...${NC}"
-        docker-compose -f $COMPOSE_FILE up -d --build
+        $DOCKER_COMPOSE -f $COMPOSE_FILE up -d --build
         echo ""
         echo -e "${GREEN}✓ Services started successfully!${NC}"
         echo ""
@@ -86,18 +93,18 @@ case $action in
         echo "  Frontend: http://localhost"
         echo "  Backend API: http://localhost:3000"
         echo ""
-        echo "View logs with: docker-compose -f $COMPOSE_FILE logs -f"
+        echo "View logs with: $DOCKER_COMPOSE -f $COMPOSE_FILE logs -f"
         ;;
     2)
         echo -e "${YELLOW}Stopping services...${NC}"
-        docker-compose -f $COMPOSE_FILE down
+        $DOCKER_COMPOSE -f $COMPOSE_FILE down
         echo -e "${GREEN}✓ Services stopped${NC}"
         ;;
     3)
         echo -e "${RED}WARNING: This will delete all data including database and uploads!${NC}"
         read -p "Are you sure? (yes/no): " confirm
         if [ "$confirm" = "yes" ]; then
-            docker-compose -f $COMPOSE_FILE down -v
+            $DOCKER_COMPOSE -f $COMPOSE_FILE down -v
             echo -e "${GREEN}✓ Services stopped and data removed${NC}"
         else
             echo "Cancelled"
@@ -105,12 +112,12 @@ case $action in
         ;;
     4)
         echo -e "${GREEN}Showing logs (Ctrl+C to exit)...${NC}"
-        docker-compose -f $COMPOSE_FILE logs -f
+        $DOCKER_COMPOSE -f $COMPOSE_FILE logs -f
         ;;
     5)
         echo -e "${YELLOW}Rebuilding and restarting services...${NC}"
-        docker-compose -f $COMPOSE_FILE down
-        docker-compose -f $COMPOSE_FILE up -d --build --force-recreate
+        $DOCKER_COMPOSE -f $COMPOSE_FILE down
+        $DOCKER_COMPOSE -f $COMPOSE_FILE up -d --build --force-recreate
         echo -e "${GREEN}✓ Services rebuilt and restarted${NC}"
         ;;
     *)

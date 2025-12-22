@@ -115,38 +115,21 @@ Many platforms support docker-compose.yml files directly:
 - **Fly.io**: Convert docker-compose to fly.toml with `flyctl launch`
 - **Heroku**: Supports Docker deployments via Container Registry
 
-### Platform-Specific Instructions
+## Platform-Specific Instructions
 
-#### Railway.app
-1. Create a new project on [Railway](https://railway.app)
-2. Connect your GitHub repository
-3. Railway will auto-detect the docker-compose.yml
-4. Add environment variables in the Railway dashboard
-5. Deploy!
+For detailed step-by-step instructions for your specific hosting platform, see:
 
-#### Render.com
-1. Create a new Web Service on [Render](https://render.com)
-2. Connect your GitHub repository
-3. Select "Docker" as the environment
-4. Configure environment variables
-5. Deploy!
+📖 **[HOSTING_PLATFORMS.md](HOSTING_PLATFORMS.md)** - Complete guides for:
+- Railway.app
+- Render.com
+- DigitalOcean
+- Fly.io
+- AWS
+- Google Cloud Platform
+- Azure
+- Heroku
 
-#### DigitalOcean
-1. Create a new App on [DigitalOcean App Platform](https://www.digitalocean.com/products/app-platform)
-2. Connect your repository
-3. Select Docker as the source
-4. Configure environment variables
-5. Deploy!
-
-#### Fly.io
-1. Install flyctl: `curl -L https://fly.io/install.sh | sh`
-2. Login: `flyctl auth login`
-3. Generate fly.toml from docker-compose:
-   ```bash
-   flyctl launch
-   ```
-4. Set secrets: `flyctl secrets set JWT_SECRET=your-secret`
-5. Deploy: `flyctl deploy`
+Each guide includes specific commands, configuration examples, and platform-specific tips.
 
 ## Data Persistence
 
@@ -199,6 +182,22 @@ docker-compose up -d --scale backend=3
 To use PostgreSQL or MySQL instead of SQLite, update the backend code and docker-compose.yml to add a database service.
 
 ## Troubleshooting
+
+Having issues? Check our comprehensive troubleshooting guide:
+
+📖 **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Solutions for:
+- Container startup issues
+- Frontend/Backend connection problems
+- Database issues
+- Build failures
+- File upload problems
+- Memory issues
+- SSL/HTTPS configuration
+- Environment variables
+- Networking issues
+- Data persistence
+
+### Quick Debugging Commands
 
 ### Container Won't Start
 
