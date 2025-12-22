@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # Backend API Service
+  backend:
+    build:
+      context: ./backend-afghan-grocery
+      dockerfile: Dockerfile
+    container_name: dookan-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - API_VERSION=v1
+      - DB_PATH=/app/db/database.sqlite
+      - JWT_SECRET=${JWT_SECRET:-your-secret-key-change-in-production}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-your-refresh-secret-key}
+      - JWT_EXPIRES_IN=7d
+      - JWT_REFRESH_EXPIRES_IN=30d
+      - CORS_ORIGIN=http://localhost:80,http://localhost:5173,http://frontend
+      - RATE_LIMIT_WINDOW_MS=900000
+      - RATE_LIMIT_MAX_REQUESTS=1000
+      - MAX_FILE_SIZE=5242880
+      # Optional: Add these if you're using Supabase
+      # - SUPABASE_URL=${SUPABASE_URL}
+      # - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      # - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      # Optional: Add PayPal credentials if using payment features
+      # - PAYPAL_CLIENT_ID=${PAYPAL_CLIENT_ID}
+      # - PAYPAL_CLIENT_SECRET=${PAYPAL_CLIENT_SECRET}
+      # - PAYPAL_MODE=${PAYPAL_MODE:-sandbox}
+    volumes:
+      # Persist database
+      - backend-db:/app/db
+      # Persist uploaded files
+      - backend-uploads:/app/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+    networks:
+      - dookan-network
+
+  # Frontend Service
+  frontend:
+    build:
+      context: ./afghan-grocery-vue
+      dockerfile: Dockerfile
+      args:
+        # Build-time environment variables for Vite
+        - VITE_API_BASE_URL=http://localhost:3000
+        - VITE_SUPPORT_EMAIL=info@dookan.af
+        - VITE_SUPPORT_PHONE=4915217735657
+        - VITE_WHATSAPP_NUMBER=4915217735657
+    container_name: dookan-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - dookan-network
+
+volumes:
+  # Named volumes for data persistence
+  backend-db:
+    driver: local
+  backend-uploads:
+    driver: local
+
+networks:
+  dookan-network:
+    driver: bridge
