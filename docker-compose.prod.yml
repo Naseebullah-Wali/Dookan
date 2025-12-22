@@ -1,0 +1,89 @@
+# Production Docker Compose Configuration
+# Use this for production deployments with custom domain
+
+services:
+  # Backend API Service
+  backend:
+    build:
+      context: ./backend-afghan-grocery
+      dockerfile: Dockerfile
+    container_name: dookan-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - API_VERSION=v1
+      - DB_PATH=/app/db/database.sqlite
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-7d}
+      - JWT_REFRESH_EXPIRES_IN=${JWT_REFRESH_EXPIRES_IN:-30d}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+      - RATE_LIMIT_WINDOW_MS=${RATE_LIMIT_WINDOW_MS:-900000}
+      - RATE_LIMIT_MAX_REQUESTS=${RATE_LIMIT_MAX_REQUESTS:-1000}
+      - MAX_FILE_SIZE=${MAX_FILE_SIZE:-5242880}
+      - SUPABASE_URL=${SUPABASE_URL:-}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY:-}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY:-}
+      - PAYPAL_CLIENT_ID=${PAYPAL_CLIENT_ID:-}
+      - PAYPAL_CLIENT_SECRET=${PAYPAL_CLIENT_SECRET:-}
+      - PAYPAL_MODE=${PAYPAL_MODE:-live}
+    volumes:
+      - backend-db:/app/db
+      - backend-uploads:/app/uploads
+    restart: always
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+    networks:
+      - dookan-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Frontend Service
+  frontend:
+    build:
+      context: ./afghan-grocery-vue
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:3000}
+        - VITE_SUPPORT_EMAIL=${VITE_SUPPORT_EMAIL:-info@dookan.af}
+        - VITE_SUPPORT_PHONE=${VITE_SUPPORT_PHONE:-4915217735657}
+        - VITE_WHATSAPP_NUMBER=${VITE_WHATSAPP_NUMBER:-4915217735657}
+    container_name: dookan-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    networks:
+      - dookan-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  backend-db:
+    driver: local
+  backend-uploads:
+    driver: local
+
+networks:
+  dookan-network:
+    driver: bridge
