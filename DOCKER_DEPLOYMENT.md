@@ -85,6 +85,14 @@ For production deployment, make sure to:
    ```yaml
    - VITE_API_BASE_URL=https://api.yourdomain.com
    ```
+   
+   **Important Note**: 
+   - For **local development** with `docker-compose.yml`: Use `http://localhost:3000` (default)
+   - For **production** with cloud hosting: Use your actual backend URL (e.g., `https://api.yourdomain.com`)
+   - The frontend is built at build-time, so changes to `VITE_API_BASE_URL` require rebuilding:
+     ```bash
+     docker compose up -d --build frontend
+     ```
 
 4. **Enable HTTPS**: Use a reverse proxy like Nginx or Traefik with Let's Encrypt for SSL certificates
 

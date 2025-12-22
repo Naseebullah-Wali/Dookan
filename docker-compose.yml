@@ -50,6 +50,8 @@ services:
       dockerfile: Dockerfile
       args:
         # Build-time environment variables for Vite
+        # Note: For local development, you can keep localhost:3000
+        # For production/cloud deployment, change this to your backend URL
         - VITE_API_BASE_URL=http://localhost:3000
         - VITE_SUPPORT_EMAIL=info@dookan.af
         - VITE_SUPPORT_PHONE=4915217735657
