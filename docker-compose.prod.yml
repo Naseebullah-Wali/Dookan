@@ -53,7 +53,7 @@ services:
       context: ./afghan-grocery-vue
       dockerfile: Dockerfile
       args:
-        - VITE_API_BASE_URL=${VITE_API_BASE_URL}
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:3000}
         - VITE_SUPPORT_EMAIL=${VITE_SUPPORT_EMAIL:-info@dookan.af}
         - VITE_SUPPORT_PHONE=${VITE_SUPPORT_PHONE:-4915217735657}
         - VITE_WHATSAPP_NUMBER=${VITE_WHATSAPP_NUMBER:-4915217735657}
