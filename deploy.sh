@@ -62,7 +62,7 @@ if [ "$mode" = "2" ]; then
     echo -e "${YELLOW}Using production configuration${NC}"
     
     # Check if required production env vars are set with sufficient length
-    if ! grep -q "^JWT_SECRET=.\{20,\}" .env || ! grep -q "^CORS_ORIGIN=.\{5,\}" .env; then
+    if ! grep -q "^JWT_SECRET=.\{20,\}" .env || ! grep -q "^JWT_REFRESH_SECRET=.\{20,\}" .env || ! grep -q "^CORS_ORIGIN=.\{5,\}" .env; then
         echo -e "${RED}Error: Required production environment variables not set or too short${NC}"
         echo "Please ensure:"
         echo "  - JWT_SECRET is set and at least 20 characters long"
