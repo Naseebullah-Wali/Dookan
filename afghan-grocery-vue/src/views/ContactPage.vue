@@ -161,6 +161,8 @@ import { ref } from 'vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import { useI18n } from 'vue-i18n'
+import { getRecaptchaToken } from '@/utils/recaptcha'
+import api from '@/services/api'
 
 const { t } = useI18n()
 
@@ -181,11 +183,44 @@ const loading = ref(false)
 
 async function handleSubmit() {
   loading.value = true
-  
-  // Simulate sending message
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  
-  window.showToast(t('contact.messageSent'), 'success')
+  try {
+    // Build a plain-text message for WhatsApp with form details
+    const msgParts = []
+    msgParts.push(`Name: ${formData.value.name || 'N/A'}`)
+    msgParts.push(`Email: ${formData.value.email || 'N/A'}`)
+    msgParts.push(`Phone: ${formData.value.phone || 'N/A'}`)
+    msgParts.push(`Subject: ${formData.value.subject || 'N/A'}`)
+    msgParts.push(`Message: ${formData.value.message || ''}`)
+    const messageText = msgParts.join('\n')
+
+    // Open WhatsApp (mobile app or web) with prefilled message so you receive it directly.
+    // `whatsappNumber` is expected in international format without plus/signs when configured.
+    try {
+      const cleaned = (whatsappNumber || '').toString().replace(/[^0-9]/g, '')
+      if (cleaned) {
+        const url = `https://wa.me/${cleaned}?text=${encodeURIComponent(messageText)}`
+        window.open(url, '_blank')
+        window.showToast(t('contact.messageSentViaWhatsApp') || 'Opened WhatsApp with your message', 'success')
+      } else {
+        window.showToast(t('contact.whatsappNotConfigured') || 'WhatsApp number not configured', 'warning')
+      }
+    } catch (e) {
+      console.warn('Failed to open WhatsApp:', e)
+      window.showToast(t('contact.sendFailed') || 'Failed to open WhatsApp', 'error')
+    }
+
+    // Also attempt to send to backend support endpoint (optional fallback/logging)
+    const token = await getRecaptchaToken('contact')
+    const payload = { ...formData.value, recaptchaToken: token }
+    try {
+      await api.post('/support/contact', payload)
+    } catch (err) {
+      console.warn('Support API failed (non-blocking):', err?.message || err)
+    }
+  } catch (err) {
+    console.error('Contact form error:', err)
+    window.showToast(t('contact.sendFailed') || 'Failed to send message', 'error')
+  }
   
   // Reset form
   formData.value = {

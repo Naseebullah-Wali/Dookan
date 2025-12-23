@@ -12,6 +12,7 @@
         "about": "Über uns",
         "contact": "Kontakt",
         "loading": "Laden...",
+        "saving": "Wird gespeichert...",
         "error": "Fehler",
         "success": "Erfolg",
         "cancel": "Abbrechen",
@@ -101,6 +102,7 @@
         "clearFilters": "Filter löschen",
         "productsFound": "{count} Produkte gefunden",
         "noProducts": "Keine Produkte gefunden",
+        "noReviews": "Keine Bewertungen vorhanden",
         "sortOptions": {
             "featured": "Empfohlen",
             "priceLowHigh": "Preis: Niedrig bis Hoch",
@@ -118,25 +120,31 @@
         "stars": "Sterne",
         "allRatings": "Alle Bewertungen"
     },
-    "product": {
-        "addToCart": "In den Warenkorb",
-        "addToWishlist": "Zur Wunschliste hinzufügen",
-        "removeFromWishlist": "Von der Wunschliste entfernen",
-        "outOfStock": "Nicht vorrätig",
-        "inStock": "Vorrätig",
-        "stock": "Bestand",
-        "price": "Preis",
-        "description": "Beschreibung",
-        "reviews": "Bewertungen",
-        "specifications": "Spezifikationen",
-        "relatedProducts": "Ähnliche Produkte",
+    "profile": {
+        "title": "Mein Profil",
+        "personalInfo": "Persönliche Informationen",
+        "addresses": "Meine Adressen",
+        "orders": "Meine Bestellungen",
+        "settings": "Einstellungen",
+        "name": "Name",
+        "firstName": "Vorname",
+        "lastName": "Nachname",
+        "email": "E-Mail",
+        "phone": "Telefon",
+        "deliveryAddress": "Lieferadresse",
+        "deliveryAddresses": "Lieferadressen",
+        "savedAddresses": "Gespeicherte Adressen",
+        "addNewAddress": "Neue Adresse hinzufügen",
+        "noAddresses": "Keine gespeicherten Adressen",
+        "addFirstAddress": "Fügen Sie Ihre erste Adresse hinzu",
         "quantity": "Menge",
         "size": "Größe",
         "weight": "Gewicht",
         "verified": "Verifiziert",
         "new": "NEU",
         "sale": "SALE",
-        "off": "RABATT"
+        "off": "RABATT",
+        "supplier": "Lieferant"
     },
     "cart": {
         "title": "Warenkorb",
@@ -162,6 +170,9 @@
         "itemsInWishlist": "{count} Artikel auf der Wunschliste"
     },
     "checkout": {
+        "processing": "Wird verarbeitet...",
+        "whatsappUnavailable": "WhatsApp-Bestellungen sind nicht konfiguriert",
+        "whatsappError": "Fehler beim Erstellen des WhatsApp-Links",
         "title": "Kasse",
         "shippingAddress": "Lieferadresse",
         "paymentMethod": "Zahlungsmethode",
@@ -408,7 +419,10 @@
         "passwordHint": "Passwort muss mindestens 6 Zeichen lang sein",
         "creatingAccount": "Konto wird erstellt...",
         "alreadyHaveAccount": "Bereits ein Konto?",
-        "loginHere": "Hier anmelden"
+        "loginHere": "Hier anmelden",
+        "signInWithGoogle": "Mit Google anmelden",
+        "signUpWithGoogle": "Mit Google registrieren",
+        "continueWithGoogle": "Mit Google fortfahren"
     },
     "messages": {
         "addedToCart": "Zum Warenkorb hinzugefügt!",
@@ -425,6 +439,8 @@
         "orderError": "Bestellung fehlgeschlagen. Bitte versuchen Sie es erneut.",
         "productUpdated": "Produkt erfolgreich aktualisiert",
         "productCreated": "Produkt erfolgreich erstellt",
+        "profileUpdated": "Profil erfolgreich aktualisiert",
+        "logoutSuccess": "Erfolgreich abgemeldet",
         "error": "Etwas ist schief gelaufen",
         "success": "Vorgang erfolgreich",
         "confirmDelete": "Sind Sie sicher, dass Sie diesen Artikel löschen möchten?",

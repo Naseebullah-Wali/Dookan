@@ -3,6 +3,7 @@
  * Handles all category-related database operations
  */
 import { supabase } from '../lib/supabase'
+import { cacheManager } from '../utils/cacheManager'
 
 export const categoryService = {
     /**
@@ -12,6 +13,14 @@ export const categoryService = {
      * @returns {Promise<Array>} Categories list
      */
     async getAll(activeOnly = true, lang = 'en') {
+        const cacheKey = cacheManager.getCacheKeys().CATEGORIES
+
+        // Check cache first
+        const cached = cacheManager.getCache(cacheKey)
+        if (cached && Array.isArray(cached)) {
+            return activeOnly ? cached.filter(c => c.active) : cached
+        }
+
         let query = supabase
             .from('categories')
             .select('*')
@@ -24,6 +33,9 @@ export const categoryService = {
         const { data, error } = await query
 
         if (error) throw error
+
+        // Cache the result
+        cacheManager.setCache(cacheKey, data)
         return data
     },
 
@@ -50,6 +62,19 @@ export const categoryService = {
      * @returns {Promise<Array>} Categories with counts
      */
     async getWithCounts(lang = 'en') {
+        const cacheKey = cacheManager.getCacheKeys().CATEGORIES
+
+        // Check cache first
+        const cached = cacheManager.getCache(cacheKey)
+        if (cached && Array.isArray(cached)) {
+            return cached
+                .filter(c => c.active)
+                .map(category => ({
+                    ...category,
+                    product_count: category.product_count || 0
+                }))
+        }
+
         const { data, error } = await supabase
             .from('categories')
             .select('*, products(count)')
@@ -59,10 +84,14 @@ export const categoryService = {
         if (error) throw error
 
         // Transform the data to include product count
-        return data.map(category => ({
+        const transformed = data.map(category => ({
             ...category,
             product_count: category.products?.[0]?.count || 0
         }))
+
+        // Cache the result
+        cacheManager.setCache(cacheKey, data)
+        return transformed
     },
 
     /**

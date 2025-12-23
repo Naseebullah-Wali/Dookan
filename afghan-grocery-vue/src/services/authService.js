@@ -195,7 +195,36 @@ export const authService = {
      */
     onAuthStateChange(callback) {
         return supabase.auth.onAuthStateChange(callback)
+    },
+
+    /**
+     * Sign in with Google OAuth
+     * @param {Object} options - Configuration options
+     * @returns {Promise<Object>} Auth response
+     */
+    async signInWithGoogle(options = {}) {
+        const { data, error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: options.redirectTo || `${window.location.origin}/`,
+                queryParams: {
+                    access_type: 'offline',
+                    prompt: 'consent'
+                }
+            }
+        })
+
+        if (error) throw error
+        return data
+    },
+
+    /**
+     * Sign up with Google OAuth
+     * @param {Object} options - Configuration options
+     * @returns {Promise<Object>} Auth response
+     */
+    async signUpWithGoogle(options = {}) {
+        // In Supabase, signUpWithOAuth and signInWithOAuth are the same
+        return this.signInWithGoogle(options)
     }
 }
-
-export default authService

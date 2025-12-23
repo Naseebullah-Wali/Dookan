@@ -181,6 +181,7 @@ import { ref } from 'vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import { supabase } from '@/lib/supabase'
+import { getImageUrl } from '@/services/imageService'
 
 const orderId = ref('')
 const order = ref(null)
@@ -233,7 +234,7 @@ async function handleSearch() {
         items: (data.order_items || []).map(item => ({
           id: item.id,
           name: item.product_name,
-          image: item.product_image || '/placeholder.jpg',
+          image: getImageUrl(item.product_image),
           size: item.sku || 'N/A',
           quantity: item.quantity,
           price: item.price

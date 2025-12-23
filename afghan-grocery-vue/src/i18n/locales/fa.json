@@ -12,6 +12,7 @@
         "about": "درباره ما",
         "contact": "تماس با ما",
         "loading": "در حال بارگذاری...",
+        "saving": "در حال ذخیره کردن...",
         "error": "خطا",
         "success": "موفقیت",
         "cancel": "لغو",
@@ -127,6 +128,7 @@
         "clearFilters": "پاک کردن فیلترها",
         "productsFound": "{count} محصول یافت شد",
         "noProducts": "هیچ محصولی یافت نشد",
+        "noReviews": "هنوز نظری ارسال نشده است",
         "sortOptions": {
             "featured": "ویژه",
             "priceLowHigh": "قیمت: کم به زیاد",
@@ -162,7 +164,8 @@
         "verified": "تایید شده",
         "new": "جدید",
         "sale": "حراج",
-        "off": "تخفیف"
+        "off": "تخفیف",
+        "supplier": "تامین کننده"
     },
     "cart": {
         "title": "سبد خرید",
@@ -188,6 +191,9 @@
         "itemsInWishlist": "{count} آیتم در لیست علاقه‌مندی‌ها"
     },
     "checkout": {
+        "processing": "در حال پردازش...",
+        "whatsappUnavailable": "سفارش از طریق WhatsApp پیکربندی نشده است",
+        "whatsappError": "خطا در ایجاد لینک WhatsApp",
         "title": "تسویه حساب",
         "shippingAddress": "آدرس ارسال",
         "paymentMethod": "روش پرداخت",
@@ -233,6 +239,11 @@
         "email": "ایمیل",
         "phone": "تلفن",
         "deliveryAddress": "آدرس تحویل",
+        "deliveryAddresses": "آدرس‌های تحویل",
+        "savedAddresses": "آدرس‌های ذخیره‌شده",
+        "addNewAddress": "افزودن آدرس جدید",
+        "noAddresses": "هیچ آدرسی ذخیره نشده است",
+        "addFirstAddress": "اولین آدرس خود را اضافه کنید",
         "password": "رمز عبور",
         "changePassword": "تغییر رمز عبور",
         "currentPassword": "رمز عبور فعلی",
@@ -439,7 +450,10 @@
         "passwordHint": "رمز عبور باید حداقل ۶ کاراکتر باشد",
         "creatingAccount": "در حال ایجاد حساب کاربری...",
         "alreadyHaveAccount": "قبلاً حساب کاربری دارید؟",
-        "loginHere": "اینجا وارد شوید"
+        "loginHere": "اینجا وارد شوید",
+        "signInWithGoogle": "ورود با Google",
+        "signUpWithGoogle": "ثبت نام با Google",
+        "continueWithGoogle": "ادامه با Google"
     },
     "messages": {
         "addedToCart": "به سبد خرید اضافه شد!",
@@ -456,6 +470,8 @@
         "orderError": "خطا در ثبت سفارش. لطفاً دوباره تلاش کنید.",
         "productUpdated": "محصول با موفقیت بروزرسانی شد",
         "productCreated": "محصول با موفقیت ایجاد شد",
+        "profileUpdated": "پروفایل با موفقیت بروزرسانی شد",
+        "logoutSuccess": "خروج موفقیت‌آمیز بود",
         "error": "مشکلی پیش آمد",
         "success": "عملیات موفقیت‌آمیز",
         "confirmDelete": "آیا مطمئن هستید که می‌خواهید این مورد را حذف کنید؟",

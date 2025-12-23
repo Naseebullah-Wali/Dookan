@@ -3,6 +3,7 @@
  * Handles all product-related database operations
  */
 import { supabase } from '../lib/supabase'
+import { cacheManager } from '../utils/cacheManager'
 
 // Helper to get localized field based on current language
 const getLocalizedField = (obj, field, lang = 'en') => {
@@ -34,6 +35,29 @@ export const productService = {
             limit = 40,
             lang = 'en'
         } = filters
+
+        // Only use cache for unfiltered requests on page 1
+        const cacheKey = cacheManager.getCacheKeys().PRODUCTS
+        const shouldUseCache = !category && !search && minPrice === undefined && maxPrice === undefined && !featured && page === 1
+
+        if (shouldUseCache) {
+            const cached = cacheManager.getCache(cacheKey)
+            if (cached && cached.products) {
+                // Defensive check: if cached product array looks unexpectedly small
+                // compared to the recorded total or requested limit, invalidate it
+                const cachedCount = Array.isArray(cached.products) ? cached.products.length : 0
+                const expected = Math.min(limit, cached.total || limit)
+                if (cachedCount > 0 && cachedCount < expected) {
+                    // Cache appears incomplete/outdated (e.g. contains only 4 items)
+                    console.warn('[productService] Invalid product cache detected (cachedCount:', cachedCount, 'expected:', expected, '). Clearing cache and refetching.')
+                    cacheManager.clearCache(cacheKey)
+                } else {
+                    // Fetch fresh data for stock/price updates in background
+                    this.refreshProductCache()
+                    return cached
+                }
+            }
+        }
 
         let query = supabase
             .from('products')
@@ -73,12 +97,53 @@ export const productService = {
 
         if (error) throw error
 
-        return {
+        const response = {
             products: data,
             total: count,
             page,
             limit,
             totalPages: Math.ceil(count / limit)
+        }
+
+        // Cache only unfiltered, paginated results
+        if (shouldUseCache) {
+            cacheManager.setCache(cacheKey, response)
+        }
+
+        return response
+    },
+
+    /**
+     * Refresh product cache with fresh stock/price data
+     * @private
+     */
+    async refreshProductCache() {
+        try {
+            const cached = cacheManager.getCache(cacheManager.getCacheKeys().PRODUCTS)
+            if (!cached || !cached.products || cached.products.length === 0) return
+
+            // Fetch only stock and price for cached products
+            const productIds = cached.products.map(p => p.id).slice(0, 40) // Only refresh first 40
+
+            const { data: freshData, error } = await supabase
+                .from('products')
+                .select('id, stock, price, compareAtPrice, is_active')
+                .in('id', productIds)
+
+            if (error || !freshData) return
+
+            // Merge updates
+            const updated = cacheManager.mergeProductUpdates(freshData, cached.products)
+
+            // Save updated cache
+            const updatedCache = {
+                ...cached,
+                products: updated
+            }
+            cacheManager.setCache(cacheManager.getCacheKeys().PRODUCTS, updatedCache)
+        } catch (error) {
+            // Silently fail cache refresh
+            console.debug('Cache refresh failed:', error)
         }
     },
 
@@ -89,6 +154,16 @@ export const productService = {
      * @returns {Promise<Array>} Featured products
      */
     async getFeatured(limit = 8, lang = 'en') {
+        const cacheKey = cacheManager.getCacheKeys().FEATURED
+
+        // Check cache first
+        const cached = cacheManager.getCache(cacheKey)
+        if (cached && Array.isArray(cached)) {
+            // Refresh stock/price in background
+            this.refreshFeaturedCache()
+            return cached
+        }
+
         const { data, error } = await supabase
             .from('products')
             .select('*, categories(id, name_en, name_de, name_fr, name_ps, name_fa, slug)')
@@ -98,7 +173,41 @@ export const productService = {
             .limit(limit)
 
         if (error) throw error
+
+        // Cache the result
+        cacheManager.setCache(cacheKey, data)
         return data
+    },
+
+    /**
+     * Refresh featured products cache with fresh data
+     * @private
+     */
+    async refreshFeaturedCache() {
+        try {
+            const cacheKey = cacheManager.getCacheKeys().FEATURED
+            const cached = cacheManager.getCache(cacheKey)
+            if (!cached || !Array.isArray(cached)) return
+
+            // Fetch only stock and price for cached products
+            const productIds = cached.map(p => p.id)
+
+            const { data: freshData, error } = await supabase
+                .from('products')
+                .select('id, stock, price, compareAtPrice, is_active')
+                .in('id', productIds)
+
+            if (error || !freshData) return
+
+            // Merge updates
+            const updated = cacheManager.mergeProductUpdates(freshData, cached)
+
+            // Save updated cache
+            cacheManager.setCache(cacheKey, updated)
+        } catch (error) {
+            // Silently fail cache refresh
+            console.debug('Featured cache refresh failed:', error)
+        }
     },
 
     /**
@@ -131,6 +240,11 @@ export const productService = {
             .single()
 
         if (error) throw error
+
+        // Invalidate product caches
+        cacheManager.clearCache(cacheManager.getCacheKeys().PRODUCTS)
+        cacheManager.clearCache(cacheManager.getCacheKeys().FEATURED)
+
         return data
     },
 
@@ -149,6 +263,12 @@ export const productService = {
             .single()
 
         if (error) throw error
+
+        // Invalidate product caches
+        cacheManager.clearCache(cacheManager.getCacheKeys().PRODUCTS)
+        cacheManager.clearCache(cacheManager.getCacheKeys().FEATURED)
+        cacheManager.clearCache(cacheManager.getCacheKeys().PRODUCT_DETAILS)
+
         return data
     },
 
@@ -164,6 +284,12 @@ export const productService = {
             .eq('id', id)
 
         if (error) throw error
+
+        // Invalidate product caches
+        cacheManager.clearCache(cacheManager.getCacheKeys().PRODUCTS)
+        cacheManager.clearCache(cacheManager.getCacheKeys().FEATURED)
+        cacheManager.clearCache(cacheManager.getCacheKeys().PRODUCT_DETAILS)
+
         return { message: 'Product deleted successfully' }
     }
 }

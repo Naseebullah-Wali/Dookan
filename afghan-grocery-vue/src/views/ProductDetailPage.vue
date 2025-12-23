@@ -78,12 +78,12 @@
 
             <div class="d-flex gap-3 flex-wrap">
               <div class="btn-group" role="group">
-                <button class="btn btn-outline-secondary" @click="quantity > 1 && quantity--">
+                <button type="button" class="btn btn-outline-secondary" @click="decreaseQuantity">
                   <i class="bi bi-dash"></i>
                 </button>
                 <input v-model.number="quantity" type="number" min="1" :max="product.stock" 
-                       class="form-control text-center fw-semibold" style="width: 80px;" />
-                <button class="btn btn-outline-secondary" @click="quantity < product.stock && quantity++">
+                       class="form-control text-center fw-semibold" style="width: 80px;" @change="validateQuantity" />
+                <button type="button" class="btn btn-outline-secondary" @click="increaseQuantity">
                   <i class="bi bi-plus"></i>
                 </button>
               </div>
@@ -240,6 +240,24 @@ function handleAddToCart() {
   analytics.trackAddToCart(product.value, quantity.value)
   window.showToast(t('messages.addedToCart'), 'success')
   quantity.value = 1
+}
+
+function decreaseQuantity() {
+  if (quantity.value > 1) {
+    quantity.value--
+  }
+}
+
+function increaseQuantity() {
+  if (quantity.value < product.value.stock) {
+    quantity.value++
+  }
+}
+
+function validateQuantity() {
+  // Ensure quantity is within valid range
+  if (quantity.value < 1) quantity.value = 1
+  if (quantity.value > product.value.stock) quantity.value = product.value.stock
 }
 
 function handleReviewSubmitted(newReview) {

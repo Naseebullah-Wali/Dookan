@@ -12,6 +12,7 @@
         "about": "À propos",
         "contact": "Contact",
         "loading": "Chargement...",
+        "saving": "Enregistrement en cours...",
         "error": "Erreur",
         "success": "Succès",
         "cancel": "Annuler",
@@ -101,6 +102,7 @@
         "clearFilters": "Effacer les filtres",
         "productsFound": "{count} produits trouvés",
         "noProducts": "Aucun produit trouvé",
+        "noReviews": "Aucun avis pour le moment",
         "sortOptions": {
             "featured": "En vedette",
             "priceLowHigh": "Prix : Bas à Élevé",
@@ -118,25 +120,31 @@
         "stars": "Étoiles",
         "allRatings": "Toutes les notes"
     },
-    "product": {
-        "addToCart": "Ajouter au panier",
-        "addToWishlist": "Ajouter à la liste de souhaits",
-        "removeFromWishlist": "Retirer de la liste de souhaits",
-        "outOfStock": "Rupture de stock",
-        "inStock": "En stock",
-        "stock": "Stock",
-        "price": "Prix",
-        "description": "Description",
-        "reviews": "Avis",
-        "specifications": "Spécifications",
-        "relatedProducts": "Produits connexes",
+    "profile": {
+        "title": "Mon Profil",
+        "personalInfo": "Informations personnelles",
+        "addresses": "Mes adresses",
+        "orders": "Mes commandes",
+        "settings": "Paramètres",
+        "name": "Nom",
+        "firstName": "Prénom",
+        "lastName": "Nom de famille",
+        "email": "Email",
+        "phone": "Téléphone",
+        "deliveryAddress": "Adresse de livraison",
+        "deliveryAddresses": "Adresses de livraison",
+        "savedAddresses": "Adresses enregistrées",
+        "addNewAddress": "Ajouter une nouvelle adresse",
+        "noAddresses": "Aucune adresse enregistrée",
+        "addFirstAddress": "Ajoutez votre première adresse",
         "quantity": "Quantité",
         "size": "Taille",
         "weight": "Poids",
         "verified": "Vérifié",
         "new": "NOUVEAU",
         "sale": "SOLDES",
-        "off": "DE RABAIS"
+        "off": "DE RABAIS",
+        "supplier": "Fournisseur"
     },
     "cart": {
         "title": "Panier",
@@ -162,6 +170,9 @@
         "itemsInWishlist": "{count} articles dans la liste de souhaits"
     },
     "checkout": {
+        "processing": "Traitement en cours...",
+        "whatsappUnavailable": "La commande WhatsApp n'est pas configurée",
+        "whatsappError": "Échec de la création du lien WhatsApp",
         "title": "Caisse",
         "shippingAddress": "Adresse de livraison",
         "paymentMethod": "Méthode de paiement",
@@ -408,7 +419,10 @@
         "passwordHint": "Le mot de passe doit comporter au moins 6 caractères",
         "creatingAccount": "Création du compte...",
         "alreadyHaveAccount": "Vous avez déjà un compte ?",
-        "loginHere": "Connectez-vous ici"
+        "loginHere": "Connectez-vous ici",
+        "signInWithGoogle": "Se connecter avec Google",
+        "signUpWithGoogle": "S'inscrire avec Google",
+        "continueWithGoogle": "Continuer avec Google"
     },
     "messages": {
         "addedToCart": "Ajouté au panier !",
@@ -425,6 +439,8 @@
         "orderError": "Échec de la commande. Veuillez réessayer.",
         "productUpdated": "Produit mis à jour avec succès",
         "productCreated": "Produit créé avec succès",
+        "profileUpdated": "Profil mis à jour avec succès",
+        "logoutSuccess": "Déconnexion réussie",
         "error": "Quelque chose s'est mal passé",
         "success": "Opération réussie",
         "confirmDelete": "Êtes-vous sûr de vouloir supprimer cet élément ?",

@@ -53,9 +53,9 @@
               <div class="dropdown">
                 <button class="btn btn-link text-decoration-none text-dark dropdown-toggle d-flex align-items-center gap-2 p-0" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                   <div class="user-avatar rounded-circle text-white d-flex align-items-center justify-content-center fw-bold" style="width: 36px; height: 36px; background-color: var(--bs-primary);">
-                    {{ authStore.user?.firstName?.charAt(0) || 'U' }}
+                    {{ (authStore.user?.name || 'U').charAt(0).toUpperCase() }}
                   </div>
-                  <span class="d-none d-lg-block fw-semibold">{{ authStore.user?.firstName || 'User' }}</span>
+                  <span class="d-none d-lg-block fw-semibold">{{ authStore.user?.name || 'User' }}</span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2" aria-labelledby="userDropdown">
                   <li><router-link to="/profile" class="dropdown-item d-flex align-items-center gap-2 py-2"><i class="bi bi-person"></i> {{ $t('common.profile') }}</router-link></li>
@@ -64,6 +64,10 @@
                   <li><button @click="handleLogout" class="dropdown-item d-flex align-items-center gap-2 py-2 text-danger"><i class="bi bi-box-arrow-right"></i> {{ $t('common.logout') }}</button></li>
                 </ul>
               </div>
+              <!-- Dev Tools (visible to dev users only) -->
+              <template v-if="authStore.user?.role === 'dev'">
+                <button @click="clearCaches" class="btn btn-outline-secondary btn-sm ms-2">Clear Cache</button>
+              </template>
             </template>
             <template v-else>
               <router-link to="/cart" class="btn btn-link text-decoration-none p-0 position-relative hover-scale me-2" style="color: var(--bs-primary);">
@@ -115,10 +119,10 @@
           <template v-if="authStore.isAuthenticated">
             <div class="d-flex align-items-center gap-3 mb-4 p-3 bg-light rounded-3">
               <div class="user-avatar rounded-circle text-white d-flex align-items-center justify-content-center fw-bold" style="width: 48px; height: 48px; background-color: var(--bs-primary); font-size: 1.25rem;">
-                {{ authStore.user?.firstName?.charAt(0) || 'U' }}
+                {{ (authStore.user?.name || 'U').charAt(0).toUpperCase() }}
               </div>
               <div>
-                <div class="fw-bold">{{ authStore.user?.firstName || 'User' }}</div>
+                <div class="fw-bold">{{ authStore.user?.name || 'User' }}</div>
                 <div class="small text-muted">{{ authStore.user?.email }}</div>
               </div>
             </div>
@@ -160,6 +164,8 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cart'
 import { useWishlistStore } from '@/stores/wishlist'
+import { cacheManager } from '@/utils/cacheManager'
+import { indexedCache } from '@/utils/indexedCache'
 import LanguageSwitcher from '@/components/common/LanguageSwitcher.vue'
 import CurrencySwitcher from '@/components/common/CurrencySwitcher.vue'
 import { useCurrencyStore } from '@/stores/currency'
@@ -177,13 +183,31 @@ function handleScroll() {
   isScrolled.value = window.scrollY > 20
 }
 
-function handleLogout() {
+async function handleLogout() {
   // Close mobile menu if open
   closeMobileMenu()
   
-  authStore.logout()
-  router.push('/')
-  window.showToast('Logged out successfully', 'success')
+  // Await the logout operation before navigating
+  const success = await authStore.logout()
+  if (success) {
+    // Ensure state is cleared before routing
+    await router.push('/')
+    window.showToast('Logged out successfully', 'success')
+  } else {
+    window.showToast('Logout failed', 'error')
+  }
+}
+
+async function clearCaches() {
+  try {
+    cacheManager.clearAllCaches()
+    // also clear indexdb explicitly
+    await indexedCache.clearAll()
+    window.showToast('Caches cleared', 'success')
+  } catch (e) {
+    console.error('Failed to clear caches', e)
+    window.showToast('Failed to clear caches', 'error')
+  }
 }
 
 function closeMobileMenu() {

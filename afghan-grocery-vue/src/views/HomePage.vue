@@ -111,7 +111,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useProductsStore } from '@/stores/products'
 import { useLanguageStore } from '@/stores/language'
 import AppHeader from '@/components/common/AppHeader.vue'
@@ -126,6 +126,19 @@ const languageStore = useLanguageStore()
 const featuredProducts = ref([])
 const categories = ref([])
 const loading = ref(true)
+let refreshInterval = null
+
+// Refresh featured products every 5 minutes (300000 ms)
+const REFRESH_INTERVAL = 5 * 60 * 1000
+
+async function loadFeaturedProducts() {
+  try {
+    await productsStore.fetchFeaturedProducts(4)
+    featuredProducts.value = productsStore.featuredProducts
+  } catch (error) {
+    console.error('Error loading featured products:', error)
+  }
+}
 
 onMounted(async () => {
   try {
@@ -136,9 +149,8 @@ onMounted(async () => {
       count: cat.product_count || 0
     }))
     
-    // Fetch featured products
-    await productsStore.fetchFeaturedProducts(4)
-    featuredProducts.value = productsStore.featuredProducts
+    // Fetch featured products on mount
+    await loadFeaturedProducts()
   } catch (error) {
     console.error('Error loading homepage data:', error)
     // Set empty arrays on error so page still renders
@@ -146,6 +158,18 @@ onMounted(async () => {
     featuredProducts.value = []
   } finally {
     loading.value = false
+  }
+
+  // Set up interval to refresh featured products
+  refreshInterval = setInterval(() => {
+    loadFeaturedProducts()
+  }, REFRESH_INTERVAL)
+})
+
+onUnmounted(() => {
+  // Clean up the interval when component is unmounted
+  if (refreshInterval) {
+    clearInterval(refreshInterval)
   }
 })
 </script>

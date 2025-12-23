@@ -114,6 +114,13 @@ export const useAuthStore = defineStore('auth', () => {
         try {
             const userData = await authService.getProfile()
             profile.value = userData
+
+            // Ensure auth user object mirrors profile fields used in UI
+            if (user.value) {
+                // Supabase auth user may not include profile.name or phone
+                if (userData.name) user.value.name = userData.name
+                if (userData.phone) user.value.phone = userData.phone
+            }
             return true
         } catch (err) {
             error.value = err.message || 'Failed to fetch profile'
@@ -129,6 +136,14 @@ export const useAuthStore = defineStore('auth', () => {
         try {
             const updatedProfile = await authService.updateProfile(data)
             profile.value = updatedProfile
+            
+            // Also update user object so name change is reflected
+            if (user.value) {
+                user.value.name = data.name
+                if (data.phone) {
+                    user.value.phone = data.phone
+                }
+            }
             return true
         } catch (err) {
             error.value = err.message || 'Update failed'
@@ -152,6 +167,38 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    async function signInWithGoogle(redirectTo) {
+        loading.value = true
+        error.value = null
+        try {
+            await authService.signInWithGoogle({
+                redirectTo: redirectTo || `${window.location.origin}/`
+            })
+            return true
+        } catch (err) {
+            error.value = err.message || 'Google sign-in failed'
+            return false
+        } finally {
+            loading.value = false
+        }
+    }
+
+    async function signUpWithGoogle(redirectTo) {
+        loading.value = true
+        error.value = null
+        try {
+            await authService.signUpWithGoogle({
+                redirectTo: redirectTo || `${window.location.origin}/`
+            })
+            return true
+        } catch (err) {
+            error.value = err.message || 'Google sign-up failed'
+            return false
+        } finally {
+            loading.value = false
+        }
+    }
+
     return {
         user,
         profile,
@@ -167,6 +214,8 @@ export const useAuthStore = defineStore('auth', () => {
         logout,
         fetchProfile,
         updateProfile,
-        changePassword
+        changePassword,
+        signInWithGoogle,
+        signUpWithGoogle
     }
 })

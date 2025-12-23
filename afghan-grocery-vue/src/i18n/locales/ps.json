@@ -12,6 +12,7 @@
         "about": "زموږ په اړه",
         "contact": "اړیکه",
         "loading": "بارول...",
+        "saving": "ساتل...",
         "error": "تېروتنه",
         "success": "بریالیتوب",
         "cancel": "لغوه کول",
@@ -127,6 +128,7 @@
         "clearFilters": "فلټرونه پاک کړئ",
         "productsFound": "{count} محصولات وموندل شول",
         "noProducts": "هیڅ محصول ونه موندل شو",
+        "noReviews": "هنوز هیچ نظر نیست",
         "sortOptions": {
             "featured": "ځانګړي",
             "priceLowHigh": "قیمت: له ټیټ څخه لوړ ته",
@@ -144,25 +146,31 @@
         "stars": "ستوري",
         "allRatings": "ټولې نمرې"
     },
-    "product": {
-        "addToCart": "کڅوړې ته اضافه کول",
-        "addToWishlist": "د خوښې لیست ته اضافه کول",
-        "removeFromWishlist": "د خوښې لیست څخه لرې کول",
-        "outOfStock": "نشته",
-        "inStock": "شته",
-        "stock": "موجوديت",
-        "price": "نرخ",
-        "description": "تشریح",
-        "reviews": "نظرات",
-        "specifications": "مشخصات",
-        "relatedProducts": "اړوند محصولات",
+    "profile": {
+        "title": "زما پروفایل",
+        "personalInfo": "شخصي معلومات",
+        "addresses": "زما پته گانې",
+        "orders": "زما فرمایشونه",
+        "settings": "تنظیمات",
+        "name": "نوم",
+        "firstName": "لومړی نوم",
+        "lastName": "تخلص",
+        "email": "بریښنالیک",
+        "phone": "تلیفون",
+        "deliveryAddress": "د تحویل پته",
+        "deliveryAddresses": "د تحویلي پتې",
+        "savedAddresses": "خوندي شوې پتې",
+        "addNewAddress": "نوې پته اضافه کړئ",
+        "noAddresses": "هیڅ خوندي پته نشته",
+        "addFirstAddress": "خپله لومړۍ پته اضافه کړئ",
         "quantity": "تعداد",
         "size": "اندازه",
         "weight": "وزن",
         "verified": "تایید شوی",
         "new": "نوی",
         "sale": "حراج",
-        "off": "تخفیف"
+        "off": "تخفیف",
+        "supplier": "تأمین کننده"
     },
     "cart": {
         "title": "د پیرودلو کڅوړه",
@@ -188,6 +196,9 @@
         "itemsInWishlist": "{count} توکي د خوښې په لیست کې"
     },
     "checkout": {
+        "processing": "په جریان کې...",
+        "whatsappUnavailable": "د WhatsApp سفارش بندوبست شوی نه دی",
+        "whatsappError": "د WhatsApp لینک د جوړولو په وخت کې ستونزه",
         "title": "تادیه",
         "shippingAddress": "د لیږلو پته",
         "paymentMethod": "د تادیې طریقه",
@@ -439,7 +450,10 @@
         "passwordHint": "پټنوم باید لږترلږه ۶ حروف وي",
         "creatingAccount": "د حساب جوړولو په حال کې ده...",
         "alreadyHaveAccount": "دمخه حساب لرئ؟",
-        "loginHere": "دلته ننوځئ"
+        "loginHere": "دلته ننوځئ",
+        "signInWithGoogle": "Google سره ننوځئ",
+        "signUpWithGoogle": "Google سره نوم لیکنه وکړئ",
+        "continueWithGoogle": "Google سره دوام ورکړئ"
     },
     "messages": {
         "addedToCart": "کڅوړې ته اضافه شول!",
@@ -456,6 +470,8 @@
         "orderError": "سپارښتنه ناکامه شوه. مهرباني وکړئ بیا هڅه وکړئ.",
         "productUpdated": "محصول په بریالیتوب سره تازه شو",
         "productCreated": "محصول په بریالیتوب سره جوړ شو",
+        "profileUpdated": "پروفایل په بریالیتوب سره تازه شو",
+        "logoutSuccess": "خروج بریالي وو",
         "error": "څه ستونزه رامنځته شوه",
         "success": "عملیه بریالۍ وه",
         "confirmDelete": "ایا تاسو ډاډه یاست چې غواړئ دا توکی حذف کړئ؟",

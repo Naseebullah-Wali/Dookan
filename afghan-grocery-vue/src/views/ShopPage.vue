@@ -270,6 +270,7 @@ const filteredProducts = computed(() => {
     products.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
   }
 
+  // Return the products (already paginated by server)
   return products
 })
 
@@ -286,7 +287,7 @@ async function fetchFilteredProducts(page = 1) {
   loading.value = true
   const filters = {
     page,
-    limit: 40
+    limit: 40  // show 40 products per page
   }
   
   if (selectedCategory.value) filters.category = selectedCategory.value

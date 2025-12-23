@@ -96,13 +96,15 @@ const formData = ref({
 })
 
 onMounted(() => {
-  if (authStore.user) {
-    const names = (authStore.user.name || '').split(' ')
+  // Prefer profile data (from profiles table); fall back to auth user
+  const src = authStore.profile || authStore.user
+  if (src) {
+    const names = (src.name || '').split(' ')
     formData.value = {
       firstName: names[0] || '',
       lastName: names.slice(1).join(' ') || '',
-      email: authStore.user.email,
-      phone: authStore.user.phone || ''
+      email: src.email || (authStore.user && authStore.user.email) || '',
+      phone: src.phone || (authStore.user && authStore.user.phone) || ''
     }
   }
 })
@@ -116,6 +118,17 @@ async function handleUpdate() {
   
   const success = await authStore.updateProfile(updateData)
   if (success) {
+    // Sync form with updated profile from store (prefer profile)
+    const src = authStore.profile || authStore.user
+    if (src) {
+      const names = (src.name || '').split(' ')
+      formData.value = {
+        firstName: names[0] || '',
+        lastName: names.slice(1).join(' ') || '',
+        email: src.email || (authStore.user && authStore.user.email) || '',
+        phone: src.phone || (authStore.user && authStore.user.phone) || ''
+      }
+    }
     window.showToast(t('messages.profileUpdated'), 'success')
   } else {
     window.showToast(t('messages.error'), 'error')

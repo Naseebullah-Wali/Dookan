@@ -144,8 +144,10 @@
               </div>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-lg w-100">
-              <i class="bi bi-check-circle me-2"></i>{{ $t('checkout.placeOrder') }} - {{ currencyStore.formatPrice(total) }}
+            <button type="submit" class="btn btn-primary btn-lg w-100" :disabled="isProcessing">
+              <span v-if="isProcessing" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              <i v-else class="bi bi-check-circle me-2"></i>
+              {{ isProcessing ? $t('checkout.processing') || 'Processing...' : ($t('checkout.placeOrder') || 'Place Order') }} - {{ currencyStore.formatPrice(total) }}
             </button>
           </form>
         </div>
@@ -198,6 +200,7 @@ import AppFooter from '@/components/common/AppFooter.vue'
 import { useOrdersStore } from '@/stores/orders'
 import { loadScript } from "@paypal/paypal-js";
 import { PaymentService } from '@/services/PaymentService';
+import { getRecaptchaToken } from '@/utils/recaptcha'
 
 const router = useRouter()
 const cartStore = useCartStore()
@@ -212,6 +215,7 @@ const cryptoTxHash = ref('');
 const isVerifyingCrypto = ref(false);
 const cryptoVerified = ref(false);
 const paypalLoaded = ref(false);
+const isProcessing = ref(false);
 
 const paymentOptions = {
     trc20: {
@@ -324,6 +328,8 @@ async function handleCheckout() {
       return;
   }
 
+  isProcessing.value = true
+
   const orderData = {
     user_id: authStore.user.id,
     items: cartStore.items.map(item => ({
@@ -352,6 +358,11 @@ async function handleCheckout() {
   }
 
   try {
+      // If reCAPTCHA is configured, get a token and attach to orderData
+      const recaptchaToken = await getRecaptchaToken('create_order')
+      if (recaptchaToken) {
+        orderData.recaptchaToken = recaptchaToken
+      }
       // If WhatsApp, just redirect
     if (formData.value.paymentMethod === 'whatsapp') {
          // const waData = await PaymentService.getWhatsAppLink('PENDING', total.value, cartStore.items); 
@@ -362,18 +373,26 @@ async function handleCheckout() {
     cartStore.clearCart()
     
     if (formData.value.paymentMethod === 'whatsapp') {
-        const waOptions = {
-            header: t('support.whatsappOrder.header'),
-            totalLabel: t('support.whatsappOrder.total'),
-            currency: currencyStore.selectedCurrency.symbol,
-            footer: t('support.whatsappOrder.footer')
-        }
-        const convertedTotal = currencyStore.convert(total.value)
+      const waOptions = {
+        header: t('support.whatsappOrder.header'),
+        totalLabel: t('support.whatsappOrder.total'),
+        currency: currencyStore.selectedCurrency.symbol,
+        footer: t('support.whatsappOrder.footer')
+      }
+      const convertedTotal = currencyStore.convert(total.value)
+      try {
         const waData = await PaymentService.getWhatsAppLink(order.id, convertedTotal, orderData.items, waOptions);
         if (waData && waData.link) {
-            window.location.href = waData.link;
-            return;
+          window.location.href = waData.link;
+          return;
+        } else {
+          const msg = waData?.message || t('checkout.whatsappUnavailable') || 'WhatsApp ordering not available'
+          window.showToast(msg, 'error')
         }
+      } catch (err) {
+        const msg = err?.response?.data?.message || err?.message || t('checkout.whatsappError') || 'Failed to create WhatsApp link'
+        window.showToast(msg, 'error')
+      }
     }
 
     router.push(`/confirmation/${order.id}`)
@@ -381,6 +400,8 @@ async function handleCheckout() {
   } catch (error) {
     console.error('Checkout error:', error)
     window.showToast(t('messages.orderError'), 'error')
+  } finally {
+    isProcessing.value = false
   }
 }
 </script>
