@@ -1,4 +1,4 @@
-import DatabaseConnection from '../db/connection';
+import supabase from '../lib/supabaseClient';
 import { NotFoundError } from '../utils/errors';
 
 export interface Testimonial {
@@ -27,96 +27,85 @@ export interface CreateTestimonialData {
 export interface UpdateTestimonialData extends Partial<CreateTestimonialData> { }
 
 class TestimonialModel {
-    private async getDb() {
-        return await DatabaseConnection.getInstance();
-    }
-
     async create(data: CreateTestimonialData): Promise<Testimonial> {
-        const db = await this.getDb();
+        const payload: any = {
+            user_name: data.user_name,
+            user_name_de: null,
+            user_name_fr: null,
+            user_name_ps: null,
+            user_name_fa: null,
+            location: data.location || null,
+            rating: data.rating,
+            comment: data.comment,
+            comment_de: null,
+            comment_fr: null,
+            comment_ps: null,
+            comment_fa: null,
+            avatar: data.avatar || null,
+            gender: data.gender || null,
+            is_active: data.is_active !== undefined ? data.is_active : true
+        };
 
-        const result = await db.run(`
-      INSERT INTO testimonials (
-        user_name, location, rating, comment, avatar, gender, is_active
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `,
-            data.user_name,
-            data.location || null,
-            data.rating,
-            data.comment,
-            data.avatar || null,
-            data.gender || null,
-            data.is_active ? 1 : 1
-        );
+        const { data: created, error } = await supabase
+            .from('testimonials')
+            .insert(payload)
+            .select()
+            .single();
 
-        return (await this.findById(result.lastID!))!;
+        if (error) throw error;
+        return created as Testimonial;
     }
 
     async findById(id: number): Promise<Testimonial | null> {
-        const db = await this.getDb();
-        return await db.get<Testimonial>('SELECT * FROM testimonials WHERE id = ?', id) || null;
+        const { data, error } = await supabase
+            .from('testimonials')
+            .select('*')
+            .eq('id', id)
+            .maybeSingle();
+
+        if (error) throw error;
+        return (data as Testimonial) || null;
     }
 
     async update(id: number, data: UpdateTestimonialData): Promise<Testimonial> {
-        const db = await this.getDb();
-        const testimonial = await this.findById(id);
-        if (!testimonial) {
-            throw new NotFoundError('Testimonial not found');
-        }
+        const existing = await this.findById(id);
+        if (!existing) throw new NotFoundError('Testimonial not found');
 
-        const updates: string[] = [];
-        const values: any[] = [];
+        const payload: any = { ...data };
+        if (payload.is_active !== undefined) payload.is_active = !!payload.is_active;
 
-        const fields = ['user_name', 'location', 'rating', 'comment', 'avatar', 'gender'];
+        const { data: updated, error } = await supabase
+            .from('testimonials')
+            .update(payload)
+            .eq('id', id)
+            .select()
+            .single();
 
-        fields.forEach((field) => {
-            if (data[field as keyof UpdateTestimonialData] !== undefined) {
-                updates.push(`${field} = ?`);
-                values.push(data[field as keyof UpdateTestimonialData]);
-            }
-        });
-
-        if (data.is_active !== undefined) {
-            updates.push('is_active = ?');
-            values.push(data.is_active ? 1 : 0);
-        }
-
-        if (updates.length === 0) {
-            return testimonial;
-        }
-
-        updates.push('updated_at = CURRENT_TIMESTAMP');
-        values.push(id);
-
-        await db.run(`
-      UPDATE testimonials
-      SET ${updates.join(', ')}
-      WHERE id = ?
-    `, ...values);
-
-        return (await this.findById(id))!;
+        if (error) throw error;
+        return updated as Testimonial;
     }
 
     async delete(id: number): Promise<void> {
-        const db = await this.getDb();
-        const result = await db.run('DELETE FROM testimonials WHERE id = ?', id);
+        const { data, error } = await supabase
+            .from('testimonials')
+            .delete()
+            .eq('id', id)
+            .select();
 
-        if (result.changes === 0) {
+        if (error) throw error;
+        if (!data || (Array.isArray(data) && data.length === 0)) {
             throw new NotFoundError('Testimonial not found');
         }
     }
 
     async getAll(activeOnly: boolean = true): Promise<Testimonial[]> {
-        const db = await this.getDb();
-        let query = 'SELECT * FROM testimonials';
+        let query = supabase.from('testimonials').select('*');
 
-        if (activeOnly) {
-            query += ' WHERE is_active = 1';
-        }
+        if (activeOnly) query = query.eq('is_active', true);
 
-        query += ' ORDER BY created_at DESC';
-
-        return await db.all<Testimonial[]>(query);
+        const { data, error } = await query.order('created_at', { ascending: false });
+        if (error) throw error;
+        return (data as Testimonial[]) || [];
     }
 }
 

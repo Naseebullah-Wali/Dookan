@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useAuthStore } from './auth'
-import { supabase } from '@/lib/supabase'
+import api from '@/services/api'
 
 export const useWishlistStore = defineStore('wishlist', () => {
     const authStore = useAuthStore()
@@ -24,28 +24,21 @@ export const useWishlistStore = defineStore('wishlist', () => {
         loading.value = true
         error.value = null
         try {
-            const { data, error: fetchError } = await supabase
-                .from('wishlists')
-                .select(`
-                    id,
-                    product_id,
-                    created_at,
-                    products (*)
-                `)
-                .eq('user_id', authStore.user.id)
-                .order('created_at', { ascending: false })
-
-            if (fetchError) throw fetchError
-
-            // Transform Supabase response to match app structure (camelCase)
-            items.value = data.map(item => ({
-                id: item.id,
-                productId: item.product_id,
-                createdAt: item.created_at,
-                product: item.products
-            }))
+            const response = await api.get('/wishlist')
+            const data = response.data || []
+            // Backend returns wishlist items with nested products from join
+            items.value = data.map(item => {
+                // Supabase join returns products as nested array or object
+                const productData = item.products ? (Array.isArray(item.products) ? item.products[0] : item.products) : item.product
+                return {
+                    id: item.id,
+                    productId: item.product_id || item.productId,
+                    createdAt: item.created_at || item.createdAt,
+                    product: productData || item
+                }
+            })
         } catch (err) {
-            error.value = err.message
+            error.value = err.message || err
         } finally {
             loading.value = false
         }
@@ -65,29 +58,18 @@ export const useWishlistStore = defineStore('wishlist', () => {
         loading.value = true
         error.value = null
         try {
-            const { data, error: insertError } = await supabase
-                .from('wishlists')
-                .insert({
-                    user_id: authStore.user.id,
-                    product_id: product.id
-                })
-                .select()
-                .single()
-
-            if (insertError) throw insertError
-
-            // Add to local state
+            const res = await api.post('/wishlist', { product_id: product.id })
+            const data = res.data
             items.value.unshift({
                 id: data.id,
                 productId: product.id,
                 createdAt: data.created_at,
                 product: product
             })
-
             window.showToast('Added to wishlist!', 'success')
             return true
         } catch (err) {
-            error.value = err.message
+            error.value = err.message || err
             window.showToast('Failed to add to wishlist', 'error')
             return false
         } finally {
@@ -102,16 +84,9 @@ export const useWishlistStore = defineStore('wishlist', () => {
         loading.value = true
         error.value = null
         try {
-            const { error: deleteError } = await supabase
-                .from('wishlists')
-                .delete()
-                .eq('id', item.id)
-
-            if (deleteError) throw deleteError
-
+            await api.delete(`/wishlist/${item.id}`)
             // Remove from local state
             items.value = items.value.filter(i => i.productId !== productId)
-
             window.showToast('Removed from wishlist', 'info')
             return true
         } catch (err) {
@@ -129,13 +104,7 @@ export const useWishlistStore = defineStore('wishlist', () => {
         loading.value = true
         error.value = null
         try {
-            const { error: deleteError } = await supabase
-                .from('wishlists')
-                .delete()
-                .eq('user_id', authStore.user.id)
-
-            if (deleteError) throw deleteError
-
+            await api.delete('/wishlist')
             items.value = []
             return true
         } catch (err) {

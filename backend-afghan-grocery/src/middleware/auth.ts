@@ -17,16 +17,20 @@ export const authenticate = (
     next: NextFunction
 ): void => {
     try {
+        let token: string | undefined;
         const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            token = authHeader.substring(7);
+        } else if ((req as any).cookies && (req as any).cookies.accessToken) {
+            token = (req as any).cookies.accessToken;
+        }
 
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        if (!token) {
             throw new UnauthorizedError('No token provided');
         }
 
-        const token = authHeader.substring(7);
-        const decoded = verifyAccessToken(token);
-
-        req.user = decoded;
+        const decoded = verifyAccessToken(token as string);
+        req.user = decoded as JwtPayload;
         next();
     } catch (error: any) {
         if (error.name === 'JsonWebTokenError') {

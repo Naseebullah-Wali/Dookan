@@ -356,7 +356,6 @@ import CategoryModal from '@/components/admin/CategoryModal.vue'
 import { useCurrencyStore } from '@/stores/currency'
 import { settingsService } from '@/services/settingsService'
 import api from '@/services/api'
-import { supabase } from '@/lib/supabase'
 
 const authStore = useAuthStore()
 const productsStore = useProductsStore()
@@ -406,26 +405,13 @@ async function loadData() {
     
     await productsStore.fetchProducts()
     
-    // Fetch Orders from Supabase
-    const { data: ordersData, error: ordersError } = await  supabase
-        .from('orders')
-        .select(`
-            *,
-            items:order_items(*)
-        `)
-        .order('created_at', { ascending: false })
-            
-    if (ordersError) throw ordersError
-    orders.value = ordersData || []
+    // Fetch Orders from backend
+    const ordersRes = await api.get('/orders')
+    orders.value = ordersRes.data || []
 
-    // Fetch Users from Supabase (Profiles)
-    const { data: usersData, error: usersError } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false })
-        
-    if (usersError) throw usersError
-    users.value = usersData || []
+    // Fetch Users from backend
+    const usersRes = await api.get('/auth/users')
+    users.value = usersRes.data || []
 
   } catch (error) {
     console.error('Failed to load admin data:', error)

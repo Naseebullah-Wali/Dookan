@@ -1,0 +1,15 @@
+// Backup of removed file: afghan-grocery-vue/src/lib/supabase.js
+// Original content preserved for restore if needed
+export const supabase = (() => {
+    throw new Error('Frontend must not import Supabase client. Use backend API endpoints instead.')
+})();
+
+export const getCurrentUser = async () => {
+    throw new Error('Frontend must not call Supabase directly. Use backend auth endpoints.')
+}
+
+export const getUserProfile = async () => {
+    throw new Error('Frontend must not call Supabase directly. Use backend API endpoints.')
+}
+
+export default supabase

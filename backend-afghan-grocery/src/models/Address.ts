@@ -1,4 +1,4 @@
-import DatabaseConnection from '../db/connection';
+import supabase from '../lib/supabaseClient';
 import { NotFoundError, ForbiddenError } from '../utils/errors';
 
 export interface Address {
@@ -31,117 +31,71 @@ export interface CreateAddressData {
 export interface UpdateAddressData extends Partial<Omit<CreateAddressData, 'user_id'>> { }
 
 class AddressModel {
-    private async getDb() {
-        return await DatabaseConnection.getInstance();
-    }
-
     async create(data: CreateAddressData): Promise<Address> {
-        const db = await this.getDb();
-
-        // If this is the first address or set as default, handle default logic
+        // If default, clear others
         if (data.is_default) {
-            await db.run('UPDATE addresses SET is_default = 0 WHERE user_id = ?', data.user_id);
+            await supabase.from('addresses').update({ is_default: false }).eq('user_id', data.user_id);
         } else {
-            // Check if user has any addresses, if not, make this one default
-            const count = await db.get<{ count: number }>('SELECT COUNT(*) as count FROM addresses WHERE user_id = ?', data.user_id);
-            if (count?.count === 0) {
-                data.is_default = true;
-            }
+            const { count } = await supabase.from('addresses').select('id', { head: true, count: 'exact' }).eq('user_id', data.user_id);
+            if ((count || 0) === 0) data.is_default = true;
         }
 
-        const result = await db.run(`
-            INSERT INTO addresses (
-                user_id, recipient_name, phone, province, city, 
-                district, street, postal_code, is_default
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `,
-            data.user_id,
-            data.recipient_name,
-            data.phone,
-            data.province,
-            data.city,
-            data.district || null,
-            data.street,
-            data.postal_code || null,
-            data.is_default ? 1 : 0
-        );
-
-        return (await this.findById(result.lastID!))!;
+        const { data: created, error } = await supabase.from('addresses').insert({
+            user_id: data.user_id,
+            recipient_name: data.recipient_name,
+            phone: data.phone,
+            province: data.province,
+            city: data.city,
+            district: data.district || null,
+            street: data.street,
+            postal_code: data.postal_code || null,
+            is_default: data.is_default ? true : false
+        }).select().single();
+        if (error) throw error;
+        return created as Address;
     }
 
     async findById(id: number): Promise<Address | null> {
-        const db = await this.getDb();
-        return await db.get<Address>('SELECT * FROM addresses WHERE id = ?', id) || null;
+        const { data, error } = await supabase.from('addresses').select('*').eq('id', id).single();
+        if (error && error.code === 'PGRST116') return null;
+        if (error) throw error;
+        return data as Address | null;
     }
 
     async findByUserId(userId: number): Promise<Address[]> {
-        const db = await this.getDb();
-        return await db.all<Address[]>('SELECT * FROM addresses WHERE user_id = ? ORDER BY is_default DESC, created_at DESC', userId);
+        const { data, error } = await supabase.from('addresses').select('*').eq('user_id', userId).order('is_default', { ascending: false }).order('created_at', { ascending: false });
+        if (error) throw error;
+        return data || [];
     }
 
     async update(id: number, userId: number, data: UpdateAddressData): Promise<Address> {
-        const db = await this.getDb();
         const address = await this.findById(id);
+        if (!address) throw new NotFoundError('Address not found');
+        if (address.user_id !== userId) throw new ForbiddenError('Access denied');
 
-        if (!address) {
-            throw new NotFoundError('Address not found');
+        if ((data as any).is_default) {
+            await supabase.from('addresses').update({ is_default: false }).eq('user_id', userId);
         }
 
-        if (address.user_id !== userId) {
-            throw new ForbiddenError('Access denied');
-        }
-
-        // Handle default address logic
-        if (data.is_default) {
-            await db.run('UPDATE addresses SET is_default = 0 WHERE user_id = ?', userId);
-        }
-
-        const updates: string[] = [];
-        const values: any[] = [];
-
+        const payload: any = {};
         const fields = ['recipient_name', 'phone', 'province', 'city', 'district', 'street', 'postal_code'];
-
-        fields.forEach((field) => {
-            if (data[field as keyof UpdateAddressData] !== undefined) {
-                updates.push(`${field} = ?`);
-                values.push(data[field as keyof UpdateAddressData]);
-            }
+        fields.forEach((f) => {
+            if ((data as any)[f] !== undefined) payload[f] = (data as any)[f];
         });
+        if ((data as any).is_default !== undefined) payload.is_default = (data as any).is_default ? true : false;
 
-        if (data.is_default !== undefined) {
-            updates.push('is_default = ?');
-            values.push(data.is_default ? 1 : 0);
-        }
-
-        if (updates.length === 0) {
-            return address;
-        }
-
-        updates.push('updated_at = CURRENT_TIMESTAMP');
-        values.push(id);
-
-        await db.run(`
-            UPDATE addresses
-            SET ${updates.join(', ')}
-            WHERE id = ?
-        `, ...values);
-
-        return (await this.findById(id))!;
+        const { data: updated, error } = await supabase.from('addresses').update(payload).eq('id', id).select().single();
+        if (error) throw error;
+        return updated as Address;
     }
 
     async delete(id: number, userId: number): Promise<void> {
-        const db = await this.getDb();
         const address = await this.findById(id);
+        if (!address) throw new NotFoundError('Address not found');
+        if (address.user_id !== userId) throw new ForbiddenError('Access denied');
 
-        if (!address) {
-            throw new NotFoundError('Address not found');
-        }
-
-        if (address.user_id !== userId) {
-            throw new ForbiddenError('Access denied');
-        }
-
-        await db.run('DELETE FROM addresses WHERE id = ?', id);
+        const { error } = await supabase.from('addresses').delete().eq('id', id);
+        if (error) throw error;
     }
 }
 

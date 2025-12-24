@@ -13,9 +13,4 @@ coverage
 .DS_Store
 uploads/*
 !uploads/.gitkeep
-db/database.sqlite
-db/database.sqlite-shm
-db/database.sqlite-wal
-*.sqlite
-*.sqlite-shm
-*.sqlite-wal
+# sqlite files removed; keep patterns if needed

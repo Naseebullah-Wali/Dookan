@@ -180,7 +180,7 @@
 import { ref } from 'vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
-import { supabase } from '@/lib/supabase'
+import api from '@/services/api'
 import { getImageUrl } from '@/services/imageService'
 
 const orderId = ref('')
@@ -196,42 +196,25 @@ async function handleSearch() {
   order.value = null
   
   try {
-    // Check if input is numeric (ID) or string (order_number)
-    const isNumeric = /^\d+$/.test(orderId.value)
-    
-    let query = supabase
-      .from('orders')
-      .select('*, addresses(*), order_items(*)')
-    
-    if (isNumeric) {
-      // Search by numeric ID
-      query = query.eq('id', parseInt(orderId.value))
-    } else {
-      // Search by order_number string
-      query = query.eq('order_number', orderId.value)
-    }
-    
-    const { data, error } = await query.maybeSingle()
-    
-    if (error) throw error
-    
+    const q = encodeURIComponent(orderId.value)
+    const res = await api.get(`/orders/lookup?q=${q}`)
+    const data = res.data || null
     if (data) {
-      // Map Supabase data to expected format
       order.value = {
         id: data.id,
         order_number: data.order_number,
         status: data.status,
-        createdAt: data.created_at,
+        createdAt: data.created_at || data.createdAt,
         subtotal: data.subtotal,
         deliveryFee: data.shipping_fee || 0,
         total: data.total,
-        delivery: data.addresses ? {
-          recipientName: data.addresses.full_name,
-          phone: data.addresses.phone,
-          city: data.addresses.city,
-          address: `${data.addresses.street}, ${data.addresses.city}, ${data.addresses.state || ''}`
+        delivery: data.address ? {
+          recipientName: data.address.full_name || data.address.recipient_name,
+          phone: data.address.phone,
+          city: data.address.city,
+          address: `${data.address.street || ''}, ${data.address.city || ''}, ${data.address.state || ''}`
         } : null,
-        items: (data.order_items || []).map(item => ({
+        items: (data.items || []).map(item => ({
           id: item.id,
           name: item.product_name,
           image: getImageUrl(item.product_image),
@@ -241,8 +224,8 @@ async function handleSearch() {
         }))
       }
     }
-  } catch (error) {
-    console.error('Order not found:', error)
+  } catch (err) {
+    console.error('Order lookup failed:', err)
   }
   
   loading.value = false

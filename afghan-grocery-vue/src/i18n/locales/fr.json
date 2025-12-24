@@ -20,6 +20,8 @@
         "delete": "Supprimer",
         "edit": "Modifier",
         "add": "Ajouter",
+        "id": "ID",
+        "actions": "Actions",
         "update": "Mettre à jour",
         "close": "Fermer",
         "confirm": "Confirmer",
@@ -74,7 +76,8 @@
             "subtitle": "Livrés à votre porte",
             "description": "Découvrez la meilleure sélection de produits d'épicerie, d'épices et de produits traditionnels afghans",
             "shopNow": "Acheter maintenant",
-            "learnMore": "En savoir plus"
+            "learnMore": "En savoir plus",
+            "trackOrder": "Suivre votre commande"
         },
         "categories": {
             "title": "Acheter par catégorie",
@@ -141,7 +144,9 @@
         "size": "Taille",
         "weight": "Poids",
         "verified": "Vérifié",
+        "featured": "En vedette",
         "new": "NOUVEAU",
+        "onSale": "EN SOLDE",
         "sale": "SOLDES",
         "off": "DE RABAIS",
         "supplier": "Fournisseur"

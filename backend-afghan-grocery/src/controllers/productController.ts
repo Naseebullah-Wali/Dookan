@@ -20,6 +20,7 @@ export const getAllProducts = async (
             min_price: req.query.min_price ? parseFloat(req.query.min_price as string) : undefined,
             max_price: req.query.max_price ? parseFloat(req.query.max_price as string) : undefined,
             search: req.query.search as string,
+            ids: req.query.ids as string | undefined,
         };
 
         const products = await ProductModel.getAll(filters, limit, offset);

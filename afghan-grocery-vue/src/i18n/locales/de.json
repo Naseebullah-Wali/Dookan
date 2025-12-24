@@ -20,6 +20,8 @@
         "delete": "Löschen",
         "edit": "Bearbeiten",
         "add": "Hinzufügen",
+        "id": "ID",
+        "actions": "Aktionen",
         "update": "Aktualisieren",
         "close": "Schließen",
         "confirm": "Bestätigen",
@@ -74,7 +76,8 @@
             "subtitle": "Direkt zu Ihnen nach Hause geliefert",
             "description": "Entdecken Sie die feinste Auswahl an afghanischen Lebensmitteln, Gewürzen und traditionellen Produkten",
             "shopNow": "Jetzt einkaufen",
-            "learnMore": "Mehr erfahren"
+            "learnMore": "Mehr erfahren",
+            "trackOrder": "Bestellung verfolgen"
         },
         "categories": {
             "title": "Nach Kategorie einkaufen",
@@ -141,7 +144,9 @@
         "size": "Größe",
         "weight": "Gewicht",
         "verified": "Verifiziert",
+        "featured": "Empfohlen",
         "new": "NEU",
+        "onSale": "IM ANGEBOT",
         "sale": "SALE",
         "off": "RABATT",
         "supplier": "Lieferant"

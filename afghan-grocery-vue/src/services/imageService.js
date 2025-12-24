@@ -25,23 +25,8 @@ export function getImageUrl(imagePath) {
         return imagePath
     }
 
-    // Legacy/Local Backend Support: If path starts with /uploads, serve from Backend
-    if (imagePath.startsWith('/uploads/') || imagePath.startsWith('uploads/')) {
-        const path = imagePath.startsWith('/') ? imagePath : `/${imagePath}`
-        return `${BACKEND_URL}${path}`
-    }
-
-    // Supabase Storage Support
-    // If we have a Supabase URL and the path doesn't look like a local upload, 
-    // assume it's a file in the 'products' bucket.
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-    if (supabaseUrl) {
-        // Clean path
-        const cleanPath = imagePath.startsWith('/') ? imagePath.slice(1) : imagePath
-        return `${supabaseUrl}/storage/v1/object/public/products/${cleanPath}`
-    }
-
-    // Fallback to backend default behavior
+    // Serve all images through the backend (whether from local /uploads or Supabase Storage)
+    // The backend handles routing: /uploads/* for local files, or fetches from Supabase as needed
     const path = imagePath.startsWith('/') ? imagePath : `/${imagePath}`
     return `${BACKEND_URL}${path}`
 }

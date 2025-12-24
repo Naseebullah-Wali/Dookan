@@ -38,10 +38,23 @@ const changePasswordValidation = [
 // Routes
 router.post('/register', validate(registerValidation), authController.register);
 router.post('/login', validate(loginValidation), authController.login);
+// OAuth start endpoint (redirects user to Supabase Google consent)
+router.get('/oauth/google', authController.startGoogleOAuth);
+// OAuth fragment exchange: frontend posts access_token from URL fragment
+router.post('/oauth/exchange', authController.exchangeOAuth);
+// OAuth fallback script served to clients (avoids inline scripts so CSP doesn't block)
+router.get('/oauth/fallback.js', authController.oauthFallbackScript);
+// Get current authenticated user (via cookies or auth header)
+router.get('/me', authenticate, authController.getCurrentUser);
+// Logout: clear httpOnly cookies
+router.post('/logout', authController.logout);
 router.get('/profile', authenticate, authController.getProfile);
 router.put('/profile', authenticate, validate(updateProfileValidation), authController.updateProfile);
 router.post('/change-password', authenticate, validate(changePasswordValidation), authController.changePassword);
 router.get('/users', authenticate, authController.getAllUsers);
 router.put('/users/:id', authenticate, authController.adminUpdateUser);
+
+// OAuth server-side callback: Supabase redirects here with code
+router.get('/oauth/callback', authController.handleOAuthCallback);
 
 export default router;

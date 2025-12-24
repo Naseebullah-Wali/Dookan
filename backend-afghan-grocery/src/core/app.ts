@@ -19,6 +19,7 @@ import testimonialRoutes from '../routes/testimonialRoutes';
 import newsItemRoutes from '../routes/newsItemRoutes';
 import paymentRoutes from '../routes/paymentRoutes';
 import supportRoutes from '../routes/supportRoutes';
+import settingsRoutes from '../routes/settingsRoutes';
 import path from 'path';
 
 class App {
@@ -90,6 +91,7 @@ class App {
         this.app.use(`/api/${apiVersion}/addresses`, addressRoutes);
         this.app.use(`/api/${apiVersion}/testimonials`, testimonialRoutes);
         this.app.use(`/api/${apiVersion}/news`, newsItemRoutes);
+        this.app.use(`/api/${apiVersion}/settings`, settingsRoutes);
         this.app.use(`/api/${apiVersion}/payments`, paymentRoutes);
         this.app.use(`/api/${apiVersion}/support`, supportRoutes);
 

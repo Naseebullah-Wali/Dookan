@@ -1,14 +1,14 @@
-import DatabaseConnection from '../db/connection';
+import supabase from '../lib/supabaseClient';
 import { NotFoundError, ConflictError } from '../utils/errors';
 
 export interface User {
-    id: number;
+    id: string; // UUID from auth.users
     email: string;
     password: string;
     name: string;
     phone?: string;
     role: 'customer' | 'admin';
-    is_verified: number;
+    is_verified?: number;
     created_at: string;
     updated_at: string;
 }
@@ -19,6 +19,7 @@ export interface CreateUserData {
     name: string;
     phone?: string;
     role?: 'customer' | 'admin';
+    is_verified?: number;
 }
 
 export interface UpdateUserData {
@@ -29,115 +30,243 @@ export interface UpdateUserData {
 }
 
 class UserModel {
-    private async getDb() {
-        return await DatabaseConnection.getInstance();
-    }
-
+    /**
+     * Create a user profile in the profiles table.
+     * Note: For Google OAuth users, the auth.users entry is created by Supabase Auth,
+     * and this function creates the corresponding profile record.
+     */
     async create(data: CreateUserData): Promise<User> {
-        const db = await this.getDb();
-
         try {
-            const result = await db.run(`
-      INSERT INTO users (email, password, name, phone, role)
-      VALUES (?, ?, ?, ?, ?)
-    `,
-                data.email,
-                data.password,
-                data.name,
-                data.phone || null,
-                data.role || 'customer'
-            );
+            // For OAuth users, we don't create auth.users here (Supabase Auth does that).
+            // We just create/upsert a profile record.
+            // Use a generated UUID for local users, or use the provided id if from OAuth.
+            const userId = (data as any).id || this._generateUUID();
 
-            return (await this.findById(result.lastID!))!;
-        } catch (error: any) {
-            if (error.code === 'SQLITE_CONSTRAINT' || error.message?.includes('UNIQUE constraint')) {
-                throw new ConflictError('Email already exists');
+            const profilePayload: any = {
+                id: userId,
+                name: data.name,
+                phone: data.phone || null,
+                role: data.role || 'customer',
+            };
+
+            const { data: created, error } = await supabase
+                .from('profiles')
+                .upsert(profilePayload, { onConflict: 'id' })
+                .select()
+                .single();
+
+            if (error) {
+                console.error('Profile create/upsert error:', error);
+                throw error;
             }
-            throw error;
+
+            return {
+                id: created.id,
+                email: data.email,
+                password: data.password || '',
+                name: created.name,
+                phone: created.phone,
+                role: created.role,
+                created_at: created.created_at,
+                updated_at: created.updated_at,
+            };
+        } catch (err: any) {
+            console.error('UserModel.create error:', err);
+            throw err;
         }
     }
 
-    async findById(id: number): Promise<User | null> {
-        const db = await this.getDb();
-        return await db.get<User>('SELECT * FROM users WHERE id = ?', id) || null;
+    async findById(id: string): Promise<User | null> {
+        try {
+            const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', id)
+                .single();
+
+            if (profileError && profileError.code === 'PGRST116') return null;
+            if (profileError) throw profileError;
+
+            // Get email from auth.users via a join or fetch separately
+            let email = '';
+            try {
+                const { data: authUser } = await supabase.auth.admin.getUserById(id);
+                email = authUser?.user?.email || '';
+            } catch (err) {
+                // If we can't fetch from auth, that's okay; email will be empty
+            }
+
+            return {
+                id: profile.id,
+                email,
+                password: '',
+                name: profile.name,
+                phone: profile.phone,
+                role: profile.role,
+                created_at: profile.created_at,
+                updated_at: profile.updated_at,
+            };
+        } catch (err: any) {
+            console.error('UserModel.findById error:', err);
+            throw err;
+        }
     }
 
     async findByEmail(email: string): Promise<User | null> {
-        const db = await this.getDb();
-        return await db.get<User>('SELECT * FROM users WHERE email = ?', email) || null;
-    }
-
-    async update(id: number, data: UpdateUserData): Promise<User> {
-        const db = await this.getDb();
-        const user = await this.findById(id);
-        if (!user) {
-            throw new NotFoundError('User not found');
-        }
-
-        const updates: string[] = [];
-        const values: any[] = [];
-
-        if (data.name !== undefined) {
-            updates.push('name = ?');
-            values.push(data.name);
-        }
-        if (data.phone !== undefined) {
-            updates.push('phone = ?');
-            values.push(data.phone);
-        }
-        if (data.email !== undefined) {
-            updates.push('email = ?');
-            values.push(data.email);
-        }
-        if (data.password !== undefined) {
-            updates.push('password = ?');
-            values.push(data.password);
-        }
-
-        if (updates.length === 0) {
-            return user;
-        }
-
-        updates.push('updated_at = CURRENT_TIMESTAMP');
-        values.push(id);
-
         try {
-            await db.run(`
-      UPDATE users
-      SET ${updates.join(', ')}
-      WHERE id = ?
-    `, ...values);
-            return (await this.findById(id))!;
-        } catch (error: any) {
-            if (error.code === 'SQLITE_CONSTRAINT' || error.message?.includes('UNIQUE constraint')) {
-                throw new ConflictError('Email already exists');
-            }
-            throw error;
+            // Query auth.users by email, then fetch the corresponding profile
+            const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+            if (authError) throw authError;
+
+            const authUser = authUsers?.users?.find((u) => u.email === email);
+            if (!authUser) return null;
+
+            const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', authUser.id)
+                .single();
+
+            if (profileError && profileError.code === 'PGRST116') return null;
+            if (profileError) throw profileError;
+
+            return {
+                id: profile.id,
+                email,
+                password: '',
+                name: profile.name,
+                phone: profile.phone,
+                role: profile.role,
+                created_at: profile.created_at,
+                updated_at: profile.updated_at,
+            };
+        } catch (err: any) {
+            console.error('UserModel.findByEmail error:', err);
+            // If admin API is unavailable, fall back to a simple approach
+            return null;
         }
     }
 
-    async delete(id: number): Promise<void> {
-        const db = await this.getDb();
-        const result = await db.run('DELETE FROM users WHERE id = ?', id);
+    async update(id: string, data: UpdateUserData): Promise<User> {
+        try {
+            const existing = await this.findById(id);
+            if (!existing) throw new NotFoundError('User not found');
 
-        if (result.changes === 0) {
-            throw new NotFoundError('User not found');
+            const payload: any = {};
+            if (data.name !== undefined) payload.name = data.name;
+            if (data.phone !== undefined) payload.phone = data.phone;
+
+            // First check if profile exists in profiles table
+            const { data: profileExists, error: checkError } = await supabase
+                .from('profiles')
+                .select('id')
+                .eq('id', id)
+                .single();
+
+            if (!profileExists) {
+                // Profile doesn't exist, create it first
+                const { error: insertError } = await supabase
+                    .from('profiles')
+                    .insert({ id, ...payload });
+                if (insertError) throw insertError;
+                return {
+                    id,
+                    email: existing.email,
+                    password: '',
+                    name: data.name || null,
+                    phone: data.phone || null,
+                    role: 'user',
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                };
+            }
+
+            const { data: updated, error } = await supabase
+                .from('profiles')
+                .update(payload)
+                .eq('id', id)
+                .select();
+
+            if (error) throw error;
+            if (!updated || updated.length === 0) throw new NotFoundError('Failed to update user profile');
+
+            const profile = updated[0];
+            return {
+                id: profile.id,
+                email: existing.email,
+                password: '',
+                name: profile.name,
+                phone: profile.phone,
+                role: profile.role,
+                created_at: profile.created_at,
+                updated_at: profile.updated_at,
+            };
+        } catch (err: any) {
+            console.error('UserModel.update error:', err);
+            throw err;
+        }
+    }
+
+    async delete(id: string): Promise<void> {
+        try {
+            const { error } = await supabase.from('profiles').delete().eq('id', id);
+            if (error) throw error;
+        } catch (err: any) {
+            console.error('UserModel.delete error:', err);
+            throw err;
         }
     }
 
     async getAll(limit: number = 50, offset: number = 0): Promise<User[]> {
-        const db = await this.getDb();
-        return await db.all<User[]>(`
-      SELECT * FROM users
-      ORDER BY created_at DESC
-      LIMIT ? OFFSET ?
-    `, limit, offset);
+        try {
+            const from = offset;
+            const to = offset + limit - 1;
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .range(from, to);
+
+            if (error) throw error;
+
+            // For each profile, we'd ideally fetch the email, but for now return with empty email
+            return (data || []).map((p) => ({
+                id: p.id,
+                email: '',
+                password: '',
+                name: p.name,
+                phone: p.phone,
+                role: p.role,
+                created_at: p.created_at,
+                updated_at: p.updated_at,
+            }));
+        } catch (err: any) {
+            console.error('UserModel.getAll error:', err);
+            throw err;
+        }
     }
 
     async count(): Promise<number> {
-        const db = await this.getDb();
-        const result = await db.get<{ count: number }>('SELECT COUNT(*) as count FROM users');
-        return result?.count || 0;
+        try {
+            const { count, error } = await supabase
+                .from('profiles')
+                .select('id', { head: true, count: 'exact' });
+
+            if (error) throw error;
+            return (count as number) || 0;
+        } catch (err: any) {
+            console.error('UserModel.count error:', err);
+            throw err;
+        }
+    }
+
+    private _generateUUID(): string {
+        // Simple UUID v4 generator for fallback
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            const r = (Math.random() * 16) | 0;
+            const v = c === 'x' ? r : (r & 0x3) | 0x8;
+            return v.toString(16);
+        });
     }
 }
 

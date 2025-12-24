@@ -109,6 +109,18 @@ export const useProductsStore = defineStore('products', () => {
         }
     }
 
+    async function refreshCategories() {
+        try {
+            const response = await categoryService.refreshCategories()
+            categories.value = Array.isArray(response) ? response : []
+            return categories.value
+        } catch (err) {
+            error.value = err.message
+            categories.value = []
+            return []
+        }
+    }
+
     async function fetchCategoriesWithCounts() {
         try {
             const response = await categoryService.getWithCounts()
@@ -245,6 +257,7 @@ export const useProductsStore = defineStore('products', () => {
         fetchFeaturedProducts,
         fetchProductById,
         fetchCategories,
+        refreshCategories,
         fetchCategoriesWithCounts,
         searchProducts,
         createProduct,

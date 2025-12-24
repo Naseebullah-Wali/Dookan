@@ -13,7 +13,7 @@ const addToWishlistValidation = [
 // All wishlist routes require authentication
 router.get('/', authenticate, wishlistController.getUserWishlist);
 router.post('/', authenticate, validate(addToWishlistValidation), wishlistController.addToWishlist);
-router.delete('/:id', authenticate, wishlistController.removeFromWishlist);
 router.delete('/', authenticate, wishlistController.clearWishlist);
+router.delete('/:id', authenticate, wishlistController.removeFromWishlist);
 
 export default router;

@@ -1,42 +1,15 @@
-/**
- * Supabase Client Configuration
- * Centralized Supabase client instance for the application
- */
-import { createClient } from '@supabase/supabase-js'
+// Supabase client removed from frontend.
+// This file remains as a fail-fast stub in case any legacy import was missed.
+export const supabase = (() => {
+    throw new Error('Frontend must not import Supabase client. Use backend API endpoints instead.')
+})();
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
-
-if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables. Please check your .env file.')
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true
-    }
-})
-
-
-// Helper function to get current user
 export const getCurrentUser = async () => {
-    const { data: { user }, error } = await supabase.auth.getUser()
-    if (error) throw error
-    return user
+    throw new Error('Frontend must not call Supabase directly. Use backend auth endpoints.')
 }
 
-// Helper function to get user profile
-export const getUserProfile = async (userId) => {
-    const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle()
-
-    if (error) throw error
-    return data
+export const getUserProfile = async () => {
+    throw new Error('Frontend must not call Supabase directly. Use backend API endpoints.')
 }
 
 export default supabase

@@ -17,7 +17,7 @@
                 <i class="bi bi-bag"></i>{{ $t('home.hero.shopNow') }}
               </router-link>
               <router-link to="/tracking" class="btn btn-outline-secondary btn-lg d-inline-flex align-items-center gap-2">
-                <i class="bi bi-box-seam"></i>{{ $t('home.hero.learnMore') }}
+                <i class="bi bi-box-seam"></i>{{ $t('home.hero.trackOrder') }}
               </router-link>
             </div>
           </div>

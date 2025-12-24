@@ -49,12 +49,18 @@ export const removeFromWishlist = async (
         }
 
         const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+            return res.status(400).json({ success: false, error: 'Invalid wishlist item ID' });
+        }
+
+        console.log('removeFromWishlist:', { itemId: id, userId: req.user.userId });
         const removed = await WishlistModel.removeById(id, req.user.userId);
+        console.log('removeFromWishlist result:', { removed });
 
         if (removed) {
             sendSuccess(res, null, 'Removed from wishlist');
         } else {
-            sendSuccess(res, null, 'Item not found', 404);
+            res.status(404).json({ success: false, error: 'Wishlist item not found' });
         }
     } catch (error) {
         next(error);

@@ -2,7 +2,7 @@
  * Categories Service - Supabase Implementation
  * Handles all category-related database operations
  */
-import { supabase } from '../lib/supabase'
+import api from './api'
 import { cacheManager } from '../utils/cacheManager'
 
 export const categoryService = {
@@ -18,25 +18,24 @@ export const categoryService = {
         // Check cache first
         const cached = cacheManager.getCache(cacheKey)
         if (cached && Array.isArray(cached)) {
+            console.log('[CategoryService] Using cached categories:', cached)
             return activeOnly ? cached.filter(c => c.active) : cached
         }
 
-        let query = supabase
-            .from('categories')
-            .select('*')
-            .order('display_order', { ascending: true })
-
-        if (activeOnly) {
-            query = query.eq('active', true)
+        try {
+            const params = { activeOnly, lang }
+            console.log('[CategoryService] Fetching from API with params:', params)
+            const res = await api.get('/categories', { params })
+            const data = res.data || []
+            console.log('[CategoryService] API Response:', data)
+            cacheManager.setCache(cacheKey, data)
+            const result = activeOnly ? data.filter(c => c.active) : data
+            console.log('[CategoryService] Returning filtered categories:', result)
+            return result
+        } catch (error) {
+            console.error('[CategoryService] Error fetching categories:', error)
+            throw error
         }
-
-        const { data, error } = await query
-
-        if (error) throw error
-
-        // Cache the result
-        cacheManager.setCache(cacheKey, data)
-        return data
     },
 
     /**
@@ -46,14 +45,8 @@ export const categoryService = {
      * @returns {Promise<Object>} Category data
      */
     async getById(id, lang = 'en') {
-        const { data, error } = await supabase
-            .from('categories')
-            .select('*')
-            .eq('id', id)
-            .single()
-
-        if (error) throw error
-        return data
+        const res = await api.get(`/categories/${id}`, { params: { lang } })
+        return res.data
     },
 
     /**
@@ -75,21 +68,12 @@ export const categoryService = {
                 }))
         }
 
-        const { data, error } = await supabase
-            .from('categories')
-            .select('*, products(count)')
-            .eq('active', true)
-            .order('display_order', { ascending: true })
-
-        if (error) throw error
-
-        // Transform the data to include product count
+        const res = await api.get('/categories/with-counts', { params: { lang } })
+        const data = res.data || []
         const transformed = data.map(category => ({
             ...category,
-            product_count: category.products?.[0]?.count || 0
+            product_count: category.product_count || 0
         }))
-
-        // Cache the result
         cacheManager.setCache(cacheKey, data)
         return transformed
     },
@@ -100,14 +84,8 @@ export const categoryService = {
      * @returns {Promise<Object>} Created category
      */
     async create(categoryData) {
-        const { data, error } = await supabase
-            .from('categories')
-            .insert(categoryData)
-            .select()
-            .single()
-
-        if (error) throw error
-        return data
+        const res = await api.post('/categories', categoryData)
+        return res.data
     },
 
     /**
@@ -117,15 +95,8 @@ export const categoryService = {
      * @returns {Promise<Object>} Updated category
      */
     async update(id, categoryData) {
-        const { data, error } = await supabase
-            .from('categories')
-            .update(categoryData)
-            .eq('id', id)
-            .select()
-            .single()
-
-        if (error) throw error
-        return data
+        const res = await api.put(`/categories/${id}`, categoryData)
+        return res.data
     },
 
     /**
@@ -134,13 +105,26 @@ export const categoryService = {
      * @returns {Promise<Object>} Success response
      */
     async delete(id) {
-        const { error } = await supabase
-            .from('categories')
-            .delete()
-            .eq('id', id)
-
-        if (error) throw error
+        await api.delete(`/categories/${id}`)
+        // Clear categories cache when deleting
+        cacheManager.clearSpecificCache(cacheManager.getCacheKeys().CATEGORIES)
         return { message: 'Category deleted successfully' }
+    },
+
+    /**
+     * Force refresh categories from server (bypass cache)
+     * @param {string} [lang='en'] - Language code
+     * @returns {Promise<Array>} Fresh categories list
+     */
+    async refreshCategories(lang = 'en') {
+        // Clear cache first
+        cacheManager.clearSpecificCache(cacheManager.getCacheKeys().CATEGORIES)
+        // Fetch fresh data
+        const params = { activeOnly: true, lang }
+        const res = await api.get('/categories', { params })
+        const data = res.data || []
+        cacheManager.setCache(cacheManager.getCacheKeys().CATEGORIES, data)
+        return data.filter(c => c.active)
     }
 }
 

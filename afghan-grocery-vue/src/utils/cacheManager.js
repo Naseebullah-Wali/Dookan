@@ -213,6 +213,23 @@ export const cacheManager = {
      */
     getCacheTTL() {
         return CACHE_TTL
+    },
+
+    /**
+     * Clear specific cache (or all if key is null)
+     * @param {string} [key] - Cache key to clear (if null, clears all caches)
+     */
+    clearSpecificCache(key) {
+        if (key) {
+            localStorage.removeItem(key)
+            indexedCache.clear(key).catch(e => console.error('Error clearing indexed cache:', e))
+        } else {
+            // Clear all caches
+            Object.values(CACHE_KEYS).forEach(cacheKey => {
+                localStorage.removeItem(cacheKey)
+            })
+            indexedCache.clearAll().catch(e => console.error('Error clearing all indexed caches:', e))
+        }
     }
 }
 

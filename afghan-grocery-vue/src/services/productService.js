@@ -2,7 +2,7 @@
  * Products Service - Supabase Implementation
  * Handles all product-related database operations
  */
-import { supabase } from '../lib/supabase'
+import api from './api'
 import { cacheManager } from '../utils/cacheManager'
 
 // Helper to get localized field based on current language
@@ -59,50 +59,26 @@ export const productService = {
             }
         }
 
-        let query = supabase
-            .from('products')
-            .select('*, categories(id, name_en, name_de, name_fr, name_ps, name_fa, slug)', { count: 'exact' })
-            .eq('is_active', true)
-
-        // Apply filters
-        if (category) {
-            query = query.eq('category_id', category)
-        }
-
-        if (search) {
-            query = query.or(`name_en.ilike.%${search}%,name_de.ilike.%${search}%,name_fr.ilike.%${search}%,name_ps.ilike.%${search}%,name_fa.ilike.%${search}%,description_en.ilike.%${search}%`)
-        }
-
-        if (minPrice !== undefined) {
-            query = query.gte('price', minPrice)
-        }
-
-        if (maxPrice !== undefined) {
-            query = query.lte('price', maxPrice)
-        }
-
-        if (featured !== undefined) {
-            query = query.eq('featured', featured)
-        }
-
-        // Pagination
-        const from = (page - 1) * limit
-        const to = from + limit - 1
-        query = query.range(from, to)
-
-        // Order by
-        query = query.order('created_at', { ascending: false })
-
-        const { data, error, count } = await query
-
-        if (error) throw error
-
-        const response = {
-            products: data,
-            total: count,
+        const params = {
             page,
             limit,
-            totalPages: Math.ceil(count / limit)
+            category: category || undefined,
+            search: search || undefined,
+            min_price: minPrice !== undefined ? minPrice : undefined,
+            max_price: maxPrice !== undefined ? maxPrice : undefined,
+            featured: featured !== undefined ? featured : undefined,
+        }
+
+        const res = await api.get('/products', { params })
+        const products = res.data || []
+        const pagination = res.pagination || {}
+
+        const response = {
+            products,
+            total: pagination.total || products.length,
+            page,
+            limit,
+            totalPages: pagination.totalPages || Math.ceil((pagination.total || products.length) / limit),
         }
 
         // Cache only unfiltered, paginated results
@@ -125,12 +101,9 @@ export const productService = {
             // Fetch only stock and price for cached products
             const productIds = cached.products.map(p => p.id).slice(0, 40) // Only refresh first 40
 
-            const { data: freshData, error } = await supabase
-                .from('products')
-                .select('id, stock, price, compareAtPrice, is_active')
-                .in('id', productIds)
-
-            if (error || !freshData) return
+            const res = await api.get('/products', { params: { ids: productIds.join(',') } })
+            const freshData = res.data || []
+            if (!freshData) return
 
             // Merge updates
             const updated = cacheManager.mergeProductUpdates(freshData, cached.products)
@@ -164,17 +137,8 @@ export const productService = {
             return cached
         }
 
-        const { data, error } = await supabase
-            .from('products')
-            .select('*, categories(id, name_en, name_de, name_fr, name_ps, name_fa, slug)')
-            .eq('is_active', true)
-            .eq('featured', true)
-            .order('created_at', { ascending: false })
-            .limit(limit)
-
-        if (error) throw error
-
-        // Cache the result
+        const res = await api.get('/products/featured', { params: { limit } })
+        const data = res.data || []
         cacheManager.setCache(cacheKey, data)
         return data
     },
@@ -192,12 +156,9 @@ export const productService = {
             // Fetch only stock and price for cached products
             const productIds = cached.map(p => p.id)
 
-            const { data: freshData, error } = await supabase
-                .from('products')
-                .select('id, stock, price, compareAtPrice, is_active')
-                .in('id', productIds)
-
-            if (error || !freshData) return
+            const res = await api.get('/products', { params: { ids: productIds.join(',') } })
+            const freshData = res.data || []
+            if (!freshData) return
 
             // Merge updates
             const updated = cacheManager.mergeProductUpdates(freshData, cached)
@@ -217,14 +178,8 @@ export const productService = {
      * @returns {Promise<Object>} Product data
      */
     async getById(id, lang = 'en') {
-        const { data, error } = await supabase
-            .from('products')
-            .select('*, categories(id, name_en, name_de, name_fr, name_ps, name_fa, slug)')
-            .eq('id', id)
-            .single()
-
-        if (error) throw error
-        return data
+        const res = await api.get(`/products/${id}`, { params: { lang } })
+        return res.data
     },
 
     /**
@@ -233,19 +188,10 @@ export const productService = {
      * @returns {Promise<Object>} Created product
      */
     async create(productData) {
-        const { data, error } = await supabase
-            .from('products')
-            .insert(productData)
-            .select()
-            .single()
-
-        if (error) throw error
-
-        // Invalidate product caches
+        const res = await api.post('/products', productData)
         cacheManager.clearCache(cacheManager.getCacheKeys().PRODUCTS)
         cacheManager.clearCache(cacheManager.getCacheKeys().FEATURED)
-
-        return data
+        return res.data
     },
 
     /**
@@ -255,21 +201,11 @@ export const productService = {
      * @returns {Promise<Object>} Updated product
      */
     async update(id, productData) {
-        const { data, error } = await supabase
-            .from('products')
-            .update(productData)
-            .eq('id', id)
-            .select()
-            .single()
-
-        if (error) throw error
-
-        // Invalidate product caches
+        const res = await api.put(`/products/${id}`, productData)
         cacheManager.clearCache(cacheManager.getCacheKeys().PRODUCTS)
         cacheManager.clearCache(cacheManager.getCacheKeys().FEATURED)
         cacheManager.clearCache(cacheManager.getCacheKeys().PRODUCT_DETAILS)
-
-        return data
+        return res.data
     },
 
     /**
@@ -278,18 +214,10 @@ export const productService = {
      * @returns {Promise<Object>} Success response
      */
     async delete(id) {
-        const { error } = await supabase
-            .from('products')
-            .delete()
-            .eq('id', id)
-
-        if (error) throw error
-
-        // Invalidate product caches
+        await api.delete(`/products/${id}`)
         cacheManager.clearCache(cacheManager.getCacheKeys().PRODUCTS)
         cacheManager.clearCache(cacheManager.getCacheKeys().FEATURED)
         cacheManager.clearCache(cacheManager.getCacheKeys().PRODUCT_DETAILS)
-
         return { message: 'Product deleted successfully' }
     }
 }

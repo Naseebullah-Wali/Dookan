@@ -12,7 +12,7 @@
   "dependencies": {
     "@paypal/paypal-js": "^9.0.1",
     "@popperjs/core": "^2.11.8",
-    "@supabase/supabase-js": "^2.87.0",
+    
     "@vueuse/core": "^10.7.0",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",

@@ -38,6 +38,9 @@ router.post(
     orderController.createOrder
 );
 
+// Public lookup (by id or order_number)
+router.get('/lookup', orderController.getPublicOrder);
+
 router.get(
     '/',
     authenticate,

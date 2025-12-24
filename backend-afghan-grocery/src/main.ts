@@ -1,19 +1,7 @@
 import App from './core/app';
-import DatabaseConnection from './db/connection';
-import initializeDatabase from './db/schema';
-import seedDatabase from './db/seed';
 
-// Initialize database
-async function initializeApp() {
-    try {
-        await DatabaseConnection.getInstance();
-        await initializeDatabase();
-        await seedDatabase();
-    } catch (error) {
-        console.error('❌ Failed to initialize database:', error);
-        process.exit(1);
-    }
-
+// Start the application (Supabase is used as the primary datastore)
+function initializeApp() {
     // Create and start server
     const app = new App();
     app.listen();
@@ -25,12 +13,10 @@ initializeApp();
 // Graceful shutdown
 process.on('SIGTERM', async () => {
     console.log('SIGTERM signal received: closing HTTP server');
-    await DatabaseConnection.close();
     process.exit(0);
 });
 
 process.on('SIGINT', async () => {
     console.log('SIGINT signal received: closing HTTP server');
-    await DatabaseConnection.close();
     process.exit(0);
 });

@@ -16,7 +16,7 @@ export const comparePassword = async (
 };
 
 export interface JwtPayload {
-    userId: number;
+    userId: string; // UUID from Supabase profiles table
     email: string;
     role: string;
 }

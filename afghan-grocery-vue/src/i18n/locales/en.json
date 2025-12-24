@@ -20,6 +20,8 @@
         "delete": "Delete",
         "edit": "Edit",
         "add": "Add",
+        "id": "ID",
+        "actions": "Actions",
         "update": "Update",
         "close": "Close",
         "confirm": "Confirm",
@@ -74,7 +76,8 @@
             "subtitle": "Delivered to Your Doorstep",
             "description": "Discover the finest selection of Afghan groceries, spices, and traditional products",
             "shopNow": "Shop Now",
-            "learnMore": "Learn More"
+            "learnMore": "Learn More",
+            "trackOrder": "Track your order"
         },
         "categories": {
             "title": "Shop by Category",
@@ -162,7 +165,9 @@
         "size": "Size",
         "weight": "Weight",
         "verified": "Verified",
+        "featured": "Featured",
         "new": "NEW",
+        "onSale": "ON SALE",
         "sale": "SALE",
         "off": "OFF",
         "supplier": "Supplier"

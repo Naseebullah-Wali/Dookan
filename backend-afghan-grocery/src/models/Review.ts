@@ -1,4 +1,4 @@
-import DatabaseConnection from '../db/connection';
+import supabase from '../lib/supabaseClient';
 
 export interface Review {
     id: number;
@@ -22,96 +22,56 @@ export interface CreateReviewData {
 }
 
 class ReviewModel {
-    private async getDb() {
-        return await DatabaseConnection.getInstance();
-    }
-
     async create(data: CreateReviewData): Promise<Review> {
-        const db = await this.getDb();
+        const { data: created, error } = await supabase.from('reviews').insert({
+            product_id: data.product_id,
+            user_id: data.user_id,
+            order_id: data.order_id || null,
+            rating: data.rating,
+            comment: data.comment || null,
+            is_approved: 1
+        }).select().single();
 
-        const result = await db.run(`
-            INSERT INTO reviews (product_id, user_id, order_id, rating, comment, is_approved)
-            VALUES (?, ?, ?, ?, ?, 1)
-        `,
-            data.product_id,
-            data.user_id,
-            data.order_id || null,
-            data.rating,
-            data.comment || null
-        );
-
-        // Update product rating
+        if (error) throw error;
         await this.updateProductRating(data.product_id);
-
-        return (await this.findById(result.lastID!))!;
+        return created as Review;
     }
 
     async findById(id: number): Promise<Review | null> {
-        const db = await this.getDb();
-        return await db.get<Review>('SELECT * FROM reviews WHERE id = ?', id) || null;
+        const { data, error } = await supabase.from('reviews').select('*').eq('id', id).single();
+        if (error && error.code === 'PGRST116') return null;
+        if (error) throw error;
+        return data as Review | null;
     }
 
     async getProductReviews(productId: number): Promise<any[]> {
-        const db = await this.getDb();
-        return await db.all<any[]>(`
-            SELECT 
-                r.*,
-                u.name as user_name
-            FROM reviews r
-            JOIN users u ON r.user_id = u.id
-            WHERE r.product_id = ? AND r.is_approved = 1
-            ORDER BY r.created_at DESC
-        `, productId);
+        const { data, error } = await supabase.from('reviews').select('*, users(name)').eq('product_id', productId).eq('is_approved', 1).order('created_at', { ascending: false });
+        if (error) throw error;
+        return data || [];
     }
 
     async getUserReviews(userId: number): Promise<any[]> {
-        const db = await this.getDb();
-        return await db.all<any[]>(`
-            SELECT 
-                r.*,
-                p.name as product_name,
-                p.image as product_image
-            FROM reviews r
-            JOIN products p ON r.product_id = p.id
-            WHERE r.user_id = ?
-            ORDER BY r.created_at DESC
-        `, userId);
+        const { data, error } = await supabase.from('reviews').select('*, products(name, image)').eq('user_id', userId).order('created_at', { ascending: false });
+        if (error) throw error;
+        return data || [];
     }
 
     async delete(id: number, userId: number): Promise<boolean> {
-        const db = await this.getDb();
         const review = await this.findById(id);
+        if (!review || review.user_id !== userId) return false;
 
-        if (!review || review.user_id !== userId) {
-            return false;
-        }
-
-        await db.run('DELETE FROM reviews WHERE id = ?', id);
+        const { error } = await supabase.from('reviews').delete().eq('id', id);
+        if (error) throw error;
         await this.updateProductRating(review.product_id);
-
         return true;
     }
 
     private async updateProductRating(productId: number): Promise<void> {
-        const db = await this.getDb();
-
-        const stats = await db.get<{ avg_rating: number; count: number }>(`
-            SELECT 
-                AVG(rating) as avg_rating,
-                COUNT(*) as count
-            FROM reviews
-            WHERE product_id = ? AND is_approved = 1
-        `, productId);
-
-        await db.run(`
-            UPDATE products
-            SET rating = ?, review_count = ?
-            WHERE id = ?
-        `,
-            stats?.avg_rating || 0,
-            stats?.count || 0,
-            productId
-        );
+        const { data, error } = await supabase.from('reviews').select('rating', { count: 'exact' }).eq('product_id', productId).eq('is_approved', 1);
+        if (error) throw error;
+        const ratings = (data || []).map((r: any) => r.rating);
+        const avg = ratings.length ? (ratings.reduce((a: number, b: number) => a + b, 0) / ratings.length) : 0;
+        await supabase.from('products').update({ rating: avg, review_count: ratings.length }).eq('id', productId);
     }
 }
 

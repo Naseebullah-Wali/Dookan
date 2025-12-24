@@ -1,4 +1,4 @@
-import DatabaseConnection from '../db/connection';
+import supabase from '../lib/supabaseClient';
 import { NotFoundError } from '../utils/errors';
 import { generateOrderNumber, generateTrackingNumber } from '../utils/auth';
 
@@ -71,187 +71,135 @@ export interface UpdateOrderData {
 }
 
 class OrderModel {
-    private async getDb() {
-        return await DatabaseConnection.getInstance();
-    }
-
     async create(data: CreateOrderData): Promise<Order> {
-        const db = await this.getDb();
         const orderNumber = generateOrderNumber();
         const total = data.subtotal + (data.shipping_fee || 0) + (data.tax || 0) - (data.discount || 0);
 
-        try {
-            await db.run('BEGIN TRANSACTION');
-
-            let addressId = data.address_id;
-
-            // Create address if provided
-            if (data.address) {
-                const addressResult = await db.run(`
-                    INSERT INTO addresses (
-                        user_id, recipient_name, phone, province, city,
-                        district, street, postal_code, is_default
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                `,
-                    data.user_id,
-                    data.address.recipient_name,
-                    data.address.phone,
-                    data.address.province,
-                    data.address.city,
-                    data.address.district || null,
-                    data.address.street,
-                    data.address.postal_code || null,
-                    data.address.is_default ? 1 : 0
-                );
-                addressId = addressResult.lastID!;
-            }
-
-            if (!addressId) {
-                throw new Error('Address ID or Address Data is required');
-            }
-
-            const result = await db.run(`
-        INSERT INTO orders (
-          order_number, user_id, address_id, payment_method,
-          subtotal, shipping_fee, tax, discount, total, notes
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `,
-                orderNumber,
-                data.user_id,
-                addressId,
-                data.payment_method,
-                data.subtotal,
-                data.shipping_fee || 0,
-                data.tax || 0,
-                data.discount || 0,
-                total,
-                data.notes || null
-            );
-
-            const orderId = result.lastID!;
-
-            // Insert order items
-            for (const item of data.items) {
-                const itemSubtotal = item.price * item.quantity;
-                await db.run(`
-          INSERT INTO order_items (
-            order_id, product_id, product_name, product_image,
-            quantity, price, subtotal
-          )
-          VALUES (?, ?, ?, ?, ?, ?, ?)
-        `,
-                    orderId,
-                    item.product_id,
-                    item.product_name,
-                    item.product_image || null,
-                    item.quantity,
-                    item.price,
-                    itemSubtotal
-                );
-            }
-
-            await db.run('COMMIT');
-            return (await this.findById(orderId))!;
-
-        } catch (error) {
-            await db.run('ROLLBACK');
-            throw error;
+        // create address if provided
+        let addressId = data.address_id;
+        if (data.address) {
+            const { data: addr, error: addrErr } = await supabase.from('addresses').insert({
+                user_id: data.user_id,
+                recipient_name: data.address.recipient_name,
+                phone: data.address.phone,
+                province: data.address.province,
+                city: data.address.city,
+                district: data.address.district || null,
+                street: data.address.street,
+                postal_code: data.address.postal_code || null,
+                is_default: data.address.is_default ? true : false
+            }).select().single();
+            if (addrErr) throw addrErr;
+            addressId = (addr as any).id;
         }
+
+        if (!addressId) throw new Error('Address ID or Address Data is required');
+
+        const { data: createdOrder, error } = await supabase.from('orders').insert({
+            order_number: orderNumber,
+            user_id: data.user_id,
+            address_id: addressId,
+            payment_method: data.payment_method,
+            subtotal: data.subtotal,
+            shipping_fee: data.shipping_fee || 0,
+            tax: data.tax || 0,
+            discount: data.discount || 0,
+            total,
+            notes: data.notes || null
+        }).select().single();
+        if (error) throw error;
+
+        const orderId = (createdOrder as any).id;
+
+        // insert order items
+        const itemsPayload = data.items.map(i => ({
+            order_id: orderId,
+            product_id: i.product_id,
+            product_name: i.product_name,
+            product_image: i.product_image || null,
+            quantity: i.quantity,
+            price: i.price,
+            subtotal: i.price * i.quantity
+        }));
+
+        const { error: itemsErr } = await supabase.from('order_items').insert(itemsPayload);
+        if (itemsErr) throw itemsErr;
+
+        return await this.findById(orderId) as Order;
     }
 
     async findById(id: number): Promise<Order | null> {
-        const db = await this.getDb();
-        return await db.get<Order>('SELECT * FROM orders WHERE id = ?', id) || null;
+        const { data, error } = await supabase.from('orders').select('*').eq('id', id).single();
+        if (error && error.code === 'PGRST116') return null;
+        if (error) throw error;
+        return data as Order | null;
     }
 
     async findByOrderNumber(orderNumber: string): Promise<Order | null> {
-        const db = await this.getDb();
-        return await db.get<Order>('SELECT * FROM orders WHERE order_number = ?', orderNumber) || null;
+        const { data, error } = await supabase.from('orders').select('*').eq('order_number', orderNumber).single();
+        if (error && error.code === 'PGRST116') return null;
+        if (error) throw error;
+        return data as Order | null;
     }
 
     async getOrderItems(orderId: number): Promise<OrderItem[]> {
-        const db = await this.getDb();
-        return await db.all<OrderItem[]>('SELECT * FROM order_items WHERE order_id = ?', orderId);
+        const { data, error } = await supabase.from('order_items').select('*').eq('order_id', orderId);
+        if (error) throw error;
+        return data as OrderItem[];
     }
 
     async getOrderWithItems(orderId: number): Promise<any> {
         const order = await this.findById(orderId);
-        if (!order) {
-            return null;
-        }
-
+        if (!order) return null;
         const items = await this.getOrderItems(orderId);
         return { ...order, items };
     }
 
+    async getAddressById(addressId: number) {
+        const { data, error } = await supabase.from('addresses').select('*').eq('id', addressId).single();
+        if (error && error.code === 'PGRST116') return null;
+        if (error) throw error;
+        return data || null;
+    }
+
+    async getOrderWithItemsAndAddress(orderId: number): Promise<any> {
+        const order = await this.findById(orderId);
+        if (!order) return null;
+        const items = await this.getOrderItems(orderId);
+        const address = order.address_id ? await this.getAddressById(order.address_id) : null;
+        return { ...order, items, address };
+    }
+
     async update(id: number, data: UpdateOrderData): Promise<Order> {
-        const db = await this.getDb();
         const order = await this.findById(id);
-        if (!order) {
-            throw new NotFoundError('Order not found');
+        if (!order) throw new NotFoundError('Order not found');
+
+        const payload: any = {};
+        if (data.status) payload.status = data.status;
+        if (data.payment_status) payload.payment_status = data.payment_status;
+        if (data.tracking_number) payload.tracking_number = data.tracking_number;
+        if (data.notes !== undefined) payload.notes = data.notes;
+
+        if (data.status === 'shipped' && !order.tracking_number && !data.tracking_number) {
+            payload.tracking_number = generateTrackingNumber();
         }
 
-        const updates: string[] = [];
-        const values: any[] = [];
+        if (Object.keys(payload).length === 0) return order;
 
-        if (data.status) {
-            updates.push('status = ?');
-            values.push(data.status);
-
-            // Auto-generate tracking number when status changes to shipped
-            if (data.status === 'shipped' && !order.tracking_number && !data.tracking_number) {
-                updates.push('tracking_number = ?');
-                values.push(generateTrackingNumber());
-            }
-        }
-
-        if (data.payment_status) {
-            updates.push('payment_status = ?');
-            values.push(data.payment_status);
-        }
-
-        if (data.tracking_number) {
-            updates.push('tracking_number = ?');
-            values.push(data.tracking_number);
-        }
-
-        if (data.notes !== undefined) {
-            updates.push('notes = ?');
-            values.push(data.notes);
-        }
-
-        if (updates.length === 0) {
-            return order;
-        }
-
-        updates.push('updated_at = CURRENT_TIMESTAMP');
-        values.push(id);
-
-        await db.run(`
-      UPDATE orders
-      SET ${updates.join(', ')}
-      WHERE id = ?
-    `, ...values);
-
-        return (await this.findById(id))!;
+        const { data: updated, error } = await supabase.from('orders').update(payload).eq('id', id).select().single();
+        if (error) throw error;
+        return updated as Order;
     }
 
     async getUserOrders(userId: number, limit: number = 50, offset: number = 0): Promise<any[]> {
-        const db = await this.getDb();
-        const orders = await db.all<Order[]>(`
-      SELECT * FROM orders
-      WHERE user_id = ?
-      ORDER BY created_at DESC
-      LIMIT ? OFFSET ?
-    `, userId, limit, offset);
-
-        // Fetch items for each order (could be optimized with a join, but keeping it simple for now)
-        const ordersWithItems = await Promise.all(orders.map(async (order) => ({
+        const from = offset;
+        const to = offset + limit - 1;
+        const { data: orders, error } = await supabase.from('orders').select('*').eq('user_id', userId).order('created_at', { ascending: false }).range(from, to);
+        if (error) throw error;
+        const ordersWithItems = await Promise.all((orders || []).map(async (order: any) => ({
             ...order,
             items: await this.getOrderItems(order.id),
         })));
-
         return ordersWithItems;
     }
 
@@ -264,53 +212,25 @@ class OrderModel {
         limit: number = 50,
         offset: number = 0
     ): Promise<Order[]> {
-        const db = await this.getDb();
-        let query = 'SELECT * FROM orders WHERE 1=1';
-        const params: any[] = [];
-
-        if (filters.status) {
-            query += ' AND status = ?';
-            params.push(filters.status);
-        }
-
-        if (filters.payment_status) {
-            query += ' AND payment_status = ?';
-            params.push(filters.payment_status);
-        }
-
-        if (filters.user_id) {
-            query += ' AND user_id = ?';
-            params.push(filters.user_id);
-        }
-
-        query += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
-        params.push(limit, offset);
-
-        return await db.all<Order[]>(query, ...params);
+        let q: any = supabase.from('orders').select('*');
+        if (filters.status) q = q.eq('status', filters.status);
+        if (filters.payment_status) q = q.eq('payment_status', filters.payment_status);
+        if (filters.user_id) q = q.eq('user_id', filters.user_id);
+        const from = offset;
+        const to = offset + limit - 1;
+        const { data, error } = await q.order('created_at', { ascending: false }).range(from, to);
+        if (error) throw error;
+        return data as Order[];
     }
 
     async count(filters: { status?: string; payment_status?: string; user_id?: number } = {}): Promise<number> {
-        const db = await this.getDb();
-        let query = 'SELECT COUNT(*) as count FROM orders WHERE 1=1';
-        const params: any[] = [];
-
-        if (filters.status) {
-            query += ' AND status = ?';
-            params.push(filters.status);
-        }
-
-        if (filters.payment_status) {
-            query += ' AND payment_status = ?';
-            params.push(filters.payment_status);
-        }
-
-        if (filters.user_id) {
-            query += ' AND user_id = ?';
-            params.push(filters.user_id);
-        }
-
-        const result = await db.get<{ count: number }>(query, ...params);
-        return result?.count || 0;
+        let q: any = supabase.from('orders').select('id', { head: true, count: 'exact' });
+        if (filters.status) q = q.eq('status', filters.status);
+        if (filters.payment_status) q = q.eq('payment_status', filters.payment_status);
+        if (filters.user_id) q = q.eq('user_id', filters.user_id);
+        const { count, error } = await q;
+        if (error) throw error;
+        return (count as number) || 0;
     }
 }
 

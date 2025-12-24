@@ -124,3 +124,51 @@ export const updateOrderStatus = async (
         next(error);
     }
 };
+
+export const getPublicOrder = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const q = (req.query.q as string) || '';
+        if (!q) {
+            sendSuccess(res, null);
+            return;
+        }
+
+        let order: any = null;
+
+        if (/^\d+$/.test(q)) {
+            const id = parseInt(q);
+            order = await OrderModel.getOrderWithItemsAndAddress(id);
+        } else {
+            const byNumber = await OrderModel.findByOrderNumber(q);
+            if (byNumber) {
+                order = await OrderModel.getOrderWithItemsAndAddress(byNumber.id);
+            }
+        }
+
+        if (!order) {
+            sendSuccess(res, null);
+            return;
+        }
+
+        // Only expose non-sensitive fields
+        const publicOrder = {
+            id: order.id,
+            order_number: order.order_number,
+            status: order.status,
+            created_at: order.created_at,
+            subtotal: order.subtotal,
+            shipping_fee: order.shipping_fee,
+            total: order.total,
+            address: order.address,
+            items: order.items
+        };
+
+        sendSuccess(res, publicOrder);
+    } catch (error) {
+        next(error);
+    }
+};

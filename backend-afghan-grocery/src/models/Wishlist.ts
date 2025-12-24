@@ -1,90 +1,49 @@
-import DatabaseConnection from '../db/connection';
+import supabase from '../lib/supabaseClient';
 
 export interface WishlistItem {
     id: number;
-    user_id: number;
+    user_id: string; // UUID from profiles table
     product_id: number;
     created_at: string;
 }
 
 class WishlistModel {
-    private async getDb() {
-        return await DatabaseConnection.getInstance();
+    async getUserWishlist(userId: string): Promise<any[]> {
+        const { data, error } = await supabase.from('wishlists').select('*, products(*)').eq('user_id', userId).order('created_at', { ascending: false });
+        if (error) throw error;
+        return data || [];
     }
 
-    async getUserWishlist(userId: number): Promise<any[]> {
-        const db = await this.getDb();
-        const items = await db.all<any[]>(`
-            SELECT 
-                w.id,
-                w.user_id,
-                w.product_id,
-                w.created_at,
-                p.name,
-                p.price,
-                p.original_price,
-                p.image,
-                p.stock,
-                p.rating,
-                p.category_id,
-                p.size
-            FROM wishlist w
-            JOIN products p ON w.product_id = p.id
-            WHERE w.user_id = ?
-            ORDER BY w.created_at DESC
-        `, userId);
-        return items;
+    async add(userId: string, productId: number): Promise<WishlistItem> {
+        // Check if exists
+        const { data: existing } = await supabase.from('wishlists').select('*').eq('user_id', userId).eq('product_id', productId).single();
+        if (existing) return existing as WishlistItem;
+
+        const { data, error } = await supabase.from('wishlists').insert({ user_id: userId, product_id: productId }).select().single();
+        if (error) throw error;
+        return data as WishlistItem;
     }
 
-    async add(userId: number, productId: number): Promise<WishlistItem> {
-        const db = await this.getDb();
-
-        // Check if already exists
-        const existing = await db.get<WishlistItem>(
-            'SELECT * FROM wishlist WHERE user_id = ? AND product_id = ?',
-            userId,
-            productId
-        );
-
-        if (existing) {
-            return existing;
-        }
-
-        const result = await db.run(
-            'INSERT INTO wishlist (user_id, product_id) VALUES (?, ?)',
-            userId,
-            productId
-        );
-
-        return (await db.get<WishlistItem>(
-            'SELECT * FROM wishlist WHERE id = ?',
-            result.lastID
-        ))!;
+    async remove(userId: string, productId: number): Promise<boolean> {
+        const { data, error } = await supabase.from('wishlists').delete().eq('user_id', userId).eq('product_id', productId);
+        if (error) throw error;
+        // Supabase returns null on successful delete; presence of error indicates success
+        return !error;
     }
 
-    async remove(userId: number, productId: number): Promise<boolean> {
-        const db = await this.getDb();
-        const result = await db.run(
-            'DELETE FROM wishlist WHERE user_id = ? AND product_id = ?',
-            userId,
-            productId
-        );
-        return (result.changes || 0) > 0;
+    async removeById(id: number, userId: string): Promise<boolean> {
+        console.log('Wishlist.removeById query:', { id, userId });
+        const { data, error } = await supabase.from('wishlists').delete().eq('id', id).eq('user_id', userId);
+        console.log('Wishlist.removeById result:', { data, error });
+        if (error) throw error;
+        // Supabase returns null on successful delete; no error means success
+        return true;
     }
 
-    async removeById(id: number, userId: number): Promise<boolean> {
-        const db = await this.getDb();
-        const result = await db.run(
-            'DELETE FROM wishlist WHERE id = ? AND user_id = ?',
-            id,
-            userId
-        );
-        return (result.changes || 0) > 0;
-    }
-
-    async clear(userId: number): Promise<void> {
-        const db = await this.getDb();
-        await db.run('DELETE FROM wishlist WHERE user_id = ?', userId);
+    async clear(userId: string): Promise<void> {
+        const { error } = await supabase.from('wishlists').delete().eq('user_id', userId);
+        if (error) throw error;
+        // Supabase returns null on successful delete
     }
 }
 

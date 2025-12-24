@@ -1,17 +1,17 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authService } from '@/services'
-import { supabase } from '@/lib/supabase'
 
 export const useAuthStore = defineStore('auth', () => {
     const user = ref(null)
     const profile = ref(null)
     const session = ref(null)
+    const token = ref(localStorage.getItem('accessToken') || null)
     const loading = ref(false)
     const error = ref(null)
     const initialized = ref(false)
 
-    const isAuthenticated = computed(() => !!session.value)
+    const isAuthenticated = computed(() => !!token.value)
     const isAdmin = computed(() => profile.value?.role === 'admin')
 
     // Initialize auth state from Supabase
@@ -20,32 +20,29 @@ export const useAuthStore = defineStore('auth', () => {
 
         loading.value = true
         try {
-            // Get initial session
-            const { data: { session: initialSession } } = await supabase.auth.getSession()
-
-            if (initialSession) {
-                session.value = initialSession
-                user.value = initialSession.user
+            // First check if we have localStorage tokens
+            const s = await authService.getSession()
+            if (s && s.accessToken) {
+                token.value = s.accessToken
+                // attempt to fetch profile
                 await fetchProfile()
+            } else {
+                // No localStorage token; check if we're authenticated via cookies (e.g., after OAuth)
+                const currentUser = await authService.getCurrentUser()
+                if (currentUser) {
+                    // User is authenticated via cookies; set a flag so we know auth is valid
+                    // (we won't store the httpOnly cookie in localStorage, but we know we're logged in)
+                    user.value = currentUser
+                    profile.value = currentUser
+                    token.value = 'cookie-authenticated' // placeholder to indicate cookie-auth
+                }
             }
         } catch (err) {
+            // ignore
         } finally {
             loading.value = false
             initialized.value = true
         }
-
-        // Listen to auth changes
-        authService.onAuthStateChange(async (event, newSession) => {
-            if (newSession) {
-                session.value = newSession
-                user.value = newSession.user
-                await fetchProfile()
-            } else {
-                session.value = null
-                user.value = null
-                profile.value = null
-            }
-        })
     }
 
     async function register(userData) {
@@ -56,9 +53,13 @@ export const useAuthStore = defineStore('auth', () => {
 
             user.value = response.user
             session.value = response.session
+            token.value = response.session?.accessToken || null
+            if (token.value) {
+                localStorage.setItem('accessToken', token.value)
+                if (response.session.refreshToken) localStorage.setItem('refreshToken', response.session.refreshToken)
+            }
 
-            // Fetch profile after registration
-            if (user.value && response.session) {
+            if (user.value) {
                 await fetchProfile()
             }
             return true
@@ -77,6 +78,12 @@ export const useAuthStore = defineStore('auth', () => {
             const response = await authService.login(email, password)
             user.value = response.user
             session.value = response.session
+            token.value = response.session?.accessToken || null
+            if (token.value) {
+                localStorage.setItem('accessToken', token.value)
+                if (response.session.refreshToken) localStorage.setItem('refreshToken', response.session.refreshToken)
+            }
+
             profile.value = response.profile
             return true
         } catch (err) {
@@ -95,6 +102,9 @@ export const useAuthStore = defineStore('auth', () => {
             user.value = null
             session.value = null
             profile.value = null
+            token.value = null
+            localStorage.removeItem('accessToken')
+            localStorage.removeItem('refreshToken')
             return true
         } catch (err) {
             error.value = err.message || 'Logout failed'
@@ -115,9 +125,7 @@ export const useAuthStore = defineStore('auth', () => {
             const userData = await authService.getProfile()
             profile.value = userData
 
-            // Ensure auth user object mirrors profile fields used in UI
             if (user.value) {
-                // Supabase auth user may not include profile.name or phone
                 if (userData.name) user.value.name = userData.name
                 if (userData.phone) user.value.phone = userData.phone
             }
@@ -208,6 +216,7 @@ export const useAuthStore = defineStore('auth', () => {
         initialized,
         isAuthenticated,
         isAdmin,
+            token,
         initialize,
         register,
         login,

@@ -94,6 +94,13 @@ const routes = [
         component: () => import('@/views/LoginPage.vue'),
         meta: { title: 'Login - Afghan Grocery', guestOnly: true }
     },
+    // OAuth handled server-side; no client callback route required
+    {
+        path: '/auth/oauth/callback',
+        name: 'OAuthCallback',
+        component: () => import('@/views/OAuthCallback.vue'),
+        meta: { title: 'Authenticating...' }
+    },
     {
         path: '/register',
         name: 'Register',

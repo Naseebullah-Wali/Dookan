@@ -25,7 +25,7 @@
             </div>
             
             <div class="form-check mb-3">
-              <input v-model="formData.is_active" type="checkbox" class="form-check-input" id="isActive" />
+              <input v-model="formData.active" type="checkbox" class="form-check-input" id="isActive" />
               <label class="form-check-label" for="isActive">
                 {{ $t('common.active') }}
               </label>
@@ -70,29 +70,53 @@ const formData = ref({
   name: '',
   icon: '',
   description: '',
-  is_active: true
+  active: true
 })
 
 onMounted(() => {
   modalInstance.value = new Modal(modalRef.value)
 })
 
+// Watch for prop changes to sync with formData
 watch(() => props.category, (newVal) => {
   if (newVal) {
     isEditing.value = true
-    formData.value = { ...newVal }
+    formData.value = {
+      name: newVal.name || '',
+      icon: newVal.icon || '',
+      description: newVal.description || '',
+      active: newVal.active === 1 ? true : (newVal.active ? true : false)
+    }
   } else {
     isEditing.value = false
     formData.value = {
       name: '',
       icon: '',
       description: '',
-      is_active: true
+      active: true
     }
   }
-})
+}, { deep: true })
 
 function show() {
+  // Re-sync formData from prop when showing
+  if (props.category) {
+    isEditing.value = true
+    formData.value = {
+      name: props.category.name || '',
+      icon: props.category.icon || '',
+      description: props.category.description || '',
+      active: props.category.active === 1 ? true : (props.category.active ? true : false)
+    }
+  } else {
+    isEditing.value = false
+    formData.value = {
+      name: '',
+      icon: '',
+      description: '',
+      active: true
+    }
+  }
   modalInstance.value.show()
 }
 

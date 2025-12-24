@@ -1,4 +1,5 @@
 /* Dookan Branding & Bootstrap Overrides */
+@import './animations.css';
 
 :root {
     /* Brand Colors */
@@ -153,4 +154,4 @@ h6 {
 }
 
 /* Animation Utilities */
-@import './animations.css';
+/* Animation utilities are imported at top of file */

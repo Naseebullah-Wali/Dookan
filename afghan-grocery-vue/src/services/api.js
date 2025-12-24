@@ -10,14 +10,16 @@ const api = axios.create({
     baseURL: `${API_BASE_URL}/api/${API_VERSION}`,
     headers: {
         'Content-Type': 'application/json'
-    }
+    },
+    withCredentials: true // Send cookies with every request
 })
 
-// Request interceptor - add auth token
+// Request interceptor - add auth token (but not for cookie-authenticated users)
 api.interceptors.request.use(
     (config) => {
         const authStore = useAuthStore()
-        if (authStore.token) {
+        // Only add Bearer token if it's a real token (not the cookie-auth placeholder)
+        if (authStore.token && authStore.token !== 'cookie-authenticated') {
             config.headers.Authorization = `Bearer ${authStore.token}`
         }
         return config

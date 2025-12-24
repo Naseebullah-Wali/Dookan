@@ -25,9 +25,21 @@
           <div class="col-lg-6 col-12">
             <div class="position-relative">
               <img :src="productImageUrl" :alt="product.name" class="img-fluid rounded shadow-lg" />
-              <span v-if="product.verified" class="badge bg-success position-absolute top-0 start-0 m-3">
-                <i class="bi bi-check-circle me-1"></i>{{ $t('product.verified') }}
-              </span>
+              <!-- Dynamic Badges -->
+              <div class="position-absolute top-0 start-0 m-3 d-flex flex-column gap-2">
+                <span v-if="product.verified === 1 || product.verified === true" class="badge bg-success">
+                  <i class="bi bi-check-circle me-1"></i>{{ $t('product.verified') }}
+                </span>
+                <span v-if="product.featured === true || product.is_featured === 1" class="badge bg-warning text-dark">
+                  <i class="bi bi-star-fill me-1"></i>{{ $t('product.featured') }}
+                </span>
+                <span v-if="product.is_new === 1 || product.is_new === true" class="badge bg-info">
+                  {{ $t('product.new') }}
+                </span>
+                <span v-if="product.on_sale === true || product.on_sale === 1" class="badge bg-danger">
+                  {{ $t('product.onSale') }}
+                </span>
+              </div>
             </div>
           </div>
 

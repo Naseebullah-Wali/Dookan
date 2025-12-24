@@ -5,14 +5,17 @@
       
       <!-- Dynamic Badges -->
       <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2 align-items-end">
-        <span v-if="product.verified" class="badge bg-success">
+        <span v-if="isVerified" class="badge bg-success">
           <i class="bi bi-check-circle me-1"></i>{{ $t('product.verified') }}
         </span>
-        <span v-if="product.sale_percentage > 0" class="badge bg-danger">
-          {{ product.sale_percentage }}% {{ $t('product.off') }}
+        <span v-if="isFeatured" class="badge bg-warning text-dark">
+          <i class="bi bi-star-fill me-1"></i>{{ $t('product.featured') }}
         </span>
-        <span v-if="product.is_new" class="badge bg-info">
+        <span v-if="isNew" class="badge bg-info">
           {{ $t('product.new') }}
+        </span>
+        <span v-if="isOnSale" class="badge bg-danger">
+          {{ $t('product.onSale') }}
         </span>
       </div>
       
@@ -76,6 +79,23 @@ const productImageUrl = computed(() => getImageUrl(props.product.image))
 const formattedRating = computed(() => {
   const rating = props.product.rating || 0
   return rating.toFixed(1)
+})
+
+// Computed properties for badge visibility
+const isVerified = computed(() => {
+  return props.product.verified === 1 || props.product.verified === true
+})
+
+const isFeatured = computed(() => {
+  return props.product.featured === true || props.product.is_featured === 1 || props.product.is_featured === true
+})
+
+const isNew = computed(() => {
+  return props.product.is_new === 1 || props.product.is_new === true
+})
+
+const isOnSale = computed(() => {
+  return props.product.on_sale === true || props.product.on_sale === 1
 })
 
 function formatPrice(price) {

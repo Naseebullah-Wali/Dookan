@@ -1,4 +1,4 @@
-import DatabaseConnection from '../db/connection';
+import supabase from '../lib/supabaseClient';
 import { NotFoundError } from '../utils/errors';
 
 export interface NewsItem {
@@ -53,117 +53,96 @@ export interface CreateNewsItemData {
 export interface UpdateNewsItemData extends Partial<CreateNewsItemData> { }
 
 class NewsItemModel {
-    private async getDb() {
-        return await DatabaseConnection.getInstance();
-    }
-
     async create(data: CreateNewsItemData): Promise<NewsItem> {
-        const db = await this.getDb();
+        const payload: any = {
+            title: data.title,
+            title_ps: data.title_ps || null,
+            title_fa: data.title_fa || null,
+            title_de: data.title_de || null,
+            title_fr: data.title_fr || null,
+            subtitle: data.subtitle || null,
+            subtitle_ps: data.subtitle_ps || null,
+            subtitle_fa: data.subtitle_fa || null,
+            subtitle_de: data.subtitle_de || null,
+            subtitle_fr: data.subtitle_fr || null,
+            description: data.description || null,
+            description_ps: data.description_ps || null,
+            description_fa: data.description_fa || null,
+            description_de: data.description_de || null,
+            description_fr: data.description_fr || null,
+            tag: data.tag || null,
+            image: data.image || null,
+            bg_class: data.bg_class || null,
+            is_active: data.is_active !== undefined ? data.is_active : true,
+            display_order: data.display_order || 0
+        };
 
-        const result = await db.run(`
-      INSERT INTO news_items (
-        title, title_ps, title_fa, title_de, title_fr,
-        subtitle, subtitle_ps, subtitle_fa, subtitle_de, subtitle_fr,
-        description, description_ps, description_fa, description_de, description_fr,
-        tag, image, bg_class, is_active, display_order
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `,
-            data.title,
-            data.title_ps || null,
-            data.title_fa || null,
-            data.title_de || null,
-            data.title_fr || null,
-            data.subtitle || null,
-            data.subtitle_ps || null,
-            data.subtitle_fa || null,
-            data.subtitle_de || null,
-            data.subtitle_fr || null,
-            data.description || null,
-            data.description_ps || null,
-            data.description_fa || null,
-            data.description_de || null,
-            data.description_fr || null,
-            data.tag || null,
-            data.image || null,
-            data.bg_class || null,
-            data.is_active ? 1 : 1,
-            data.display_order || 0
-        );
+        const { data: created, error } = await supabase
+            .from('news_items')
+            .insert(payload)
+            .select()
+            .single();
 
-        return (await this.findById(result.lastID!))!;
+        if (error) throw error;
+        return created as NewsItem;
     }
 
     async findById(id: number): Promise<NewsItem | null> {
-        const db = await this.getDb();
-        return await db.get<NewsItem>('SELECT * FROM news_items WHERE id = ?', id) || null;
+        const { data, error } = await supabase
+            .from('news_items')
+            .select('*')
+            .eq('id', id)
+            .maybeSingle();
+
+        if (error) throw error;
+        return (data as NewsItem) || null;
     }
 
     async update(id: number, data: UpdateNewsItemData): Promise<NewsItem> {
-        const db = await this.getDb();
-        const newsItem = await this.findById(id);
-        if (!newsItem) {
-            throw new NotFoundError('News item not found');
-        }
+        const existing = await this.findById(id);
+        if (!existing) throw new NotFoundError('News item not found');
 
-        const updates: string[] = [];
-        const values: any[] = [];
+        const payload: any = { ...data };
+        if (payload.is_active !== undefined) payload.is_active = !!payload.is_active;
 
-        const fields = [
-            'title', 'title_ps', 'title_fa', 'title_de', 'title_fr',
-            'subtitle', 'subtitle_ps', 'subtitle_fa', 'subtitle_de', 'subtitle_fr',
-            'description', 'description_ps', 'description_fa', 'description_de', 'description_fr',
-            'tag', 'image', 'bg_class', 'display_order'
-        ];
+        const { data: updated, error } = await supabase
+            .from('news_items')
+            .update(payload)
+            .eq('id', id)
+            .select()
+            .single();
 
-        fields.forEach((field) => {
-            if (data[field as keyof UpdateNewsItemData] !== undefined) {
-                updates.push(`${field} = ?`);
-                values.push(data[field as keyof UpdateNewsItemData]);
-            }
-        });
-
-        if (data.is_active !== undefined) {
-            updates.push('is_active = ?');
-            values.push(data.is_active ? 1 : 0);
-        }
-
-        if (updates.length === 0) {
-            return newsItem;
-        }
-
-        updates.push('updated_at = CURRENT_TIMESTAMP');
-        values.push(id);
-
-        await db.run(`
-      UPDATE news_items
-      SET ${updates.join(', ')}
-      WHERE id = ?
-    `, ...values);
-
-        return (await this.findById(id))!;
+        if (error) throw error;
+        return updated as NewsItem;
     }
 
     async delete(id: number): Promise<void> {
-        const db = await this.getDb();
-        const result = await db.run('DELETE FROM news_items WHERE id = ?', id);
+        const { count, error, data } = await supabase
+            .from('news_items')
+            .delete()
+            .eq('id', id)
+            .select();
 
-        if (result.changes === 0) {
+        if (error) throw error;
+        if (!data || (Array.isArray(data) && data.length === 0)) {
             throw new NotFoundError('News item not found');
         }
     }
 
     async getAll(activeOnly: boolean = true): Promise<NewsItem[]> {
-        const db = await this.getDb();
-        let query = 'SELECT * FROM news_items';
+        let query = supabase.from('news_items').select('*');
 
         if (activeOnly) {
-            query += ' WHERE is_active = 1';
+            query = query.eq('is_active', true);
         }
 
-        query += ' ORDER BY display_order ASC, created_at DESC';
+        // order by display_order asc, created_at desc
+        const { data, error } = await query
+            .order('display_order', { ascending: true })
+            .order('created_at', { ascending: false });
 
-        return await db.all<NewsItem[]>(query);
+        if (error) throw error;
+        return (data as NewsItem[]) || [];
     }
 }
 
