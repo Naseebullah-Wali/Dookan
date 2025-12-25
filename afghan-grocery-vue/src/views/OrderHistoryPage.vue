@@ -1,5 +1,6 @@
 <template>
   <div class="orders-page bg-light min-vh-100">
+    <LoadingSpinner :isLoading="loading" :fullScreen="true" message="Loading your orders..." />
     <AppHeader />
     
     <div class="container py-5">
@@ -8,13 +9,7 @@
         <p class="text-muted">{{ $t('profile.viewOrders') }}</p>
       </div>
 
-      <div v-if="loading" class="d-flex justify-content-center py-5">
-        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-          <span class="visually-hidden">{{ $t('common.loading') }}</span>
-        </div>
-      </div>
-
-      <div v-else-if="orders.length > 0" class="row g-4">
+      <div v-if="orders.length > 0" class="row g-4">
         <div v-for="order in orders" :key="order.id" class="col-12">
           <div class="order-card card border-0 shadow-sm overflow-hidden">
             <!-- Order Header -->
@@ -103,6 +98,7 @@ import { ref, onMounted } from 'vue'
 import { useOrdersStore } from '@/stores/orders'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 
 const ordersStore = useOrdersStore()
 const orders = ref([])

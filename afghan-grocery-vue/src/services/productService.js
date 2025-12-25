@@ -41,7 +41,7 @@ export const productService = {
         const shouldUseCache = !category && !search && minPrice === undefined && maxPrice === undefined && !featured && page === 1
 
         if (shouldUseCache) {
-            const cached = cacheManager.getCache(cacheKey)
+            const cached = await cacheManager.getCache(cacheKey)
             if (cached && cached.products) {
                 // Defensive check: if cached product array looks unexpectedly small
                 // compared to the recorded total or requested limit, invalidate it
@@ -95,7 +95,7 @@ export const productService = {
      */
     async refreshProductCache() {
         try {
-            const cached = cacheManager.getCache(cacheManager.getCacheKeys().PRODUCTS)
+            const cached = await cacheManager.getCache(cacheManager.getCacheKeys().PRODUCTS)
             if (!cached || !cached.products || cached.products.length === 0) return
 
             // Fetch only stock and price for cached products
@@ -130,7 +130,7 @@ export const productService = {
         const cacheKey = cacheManager.getCacheKeys().FEATURED
 
         // Check cache first
-        const cached = cacheManager.getCache(cacheKey)
+        const cached = await cacheManager.getCache(cacheKey)
         if (cached && Array.isArray(cached)) {
             // Refresh stock/price in background
             this.refreshFeaturedCache()
@@ -150,7 +150,7 @@ export const productService = {
     async refreshFeaturedCache() {
         try {
             const cacheKey = cacheManager.getCacheKeys().FEATURED
-            const cached = cacheManager.getCache(cacheKey)
+            const cached = await cacheManager.getCache(cacheKey)
             if (!cached || !Array.isArray(cached)) return
 
             // Fetch only stock and price for cached products

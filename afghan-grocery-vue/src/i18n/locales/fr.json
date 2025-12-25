@@ -149,7 +149,10 @@
         "onSale": "EN SOLDE",
         "sale": "SOLDES",
         "off": "DE RABAIS",
-        "supplier": "Fournisseur"
+        "supplier": "Fournisseur",
+        "rating": "Votre note",
+        "submitReview": "Soumettre un avis",
+        "shareReview": "Partagez votre expérience honnête avec ce produit. Qu'avez-vous aimé ou pas aimé ?"
     },
     "cart": {
         "title": "Panier",
@@ -452,7 +455,12 @@
         "stockWarning": "Plus que {count} articles en stock",
         "exceedsStock": "Ne peut pas dépasser le stock disponible",
         "fileSizeError": "La taille du fichier doit être inférieure à 5 Mo",
-        "uploadError": "Échec du téléchargement de l'image"
+        "uploadError": "Échec du téléchargement de l'image",
+        "reviewSubmitted": "Avis soumis avec succès !",
+        "reviewDuplicate": "Vous avez déjà soumis un avis pour ce produit. Vous ne pouvez évaluer un produit qu'une seule fois.",
+        "reviewRequired": "Veuillez fournir une note et un commentaire",
+        "reviewLoginRequired": "Veuillez vous connecter à votre compte pour rédiger un avis",
+        "reviewCharacters": "caractères"
     },
     "testimonials": {
         "customer1": {

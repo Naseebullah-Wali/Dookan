@@ -32,7 +32,8 @@ export const useReviewsStore = defineStore('reviews', () => {
         error.value = null
         try {
             const response = await api.post('/reviews', reviewData)
-            reviews.value.unshift(response.data)
+            // Refresh all reviews for this product after creating one
+            await fetchProductReviews(reviewData.product_id)
             return response.data
         } catch (err) {
             error.value = err.message

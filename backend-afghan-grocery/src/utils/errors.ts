@@ -40,3 +40,15 @@ export class ConflictError extends AppError {
         super(message, 409);
     }
 }
+
+export class ServiceUnavailableError extends AppError {
+    constructor(message: string = 'Service temporarily unavailable. Please try again later.') {
+        super(message, 503);
+    }
+}
+
+export class RateLimitError extends AppError {
+    constructor(message: string = 'Too many requests. Please try again later.') {
+        super(message, 429);
+    }
+}

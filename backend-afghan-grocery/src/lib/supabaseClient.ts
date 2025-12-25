@@ -42,7 +42,35 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
 }
 
 const supabase: SupabaseClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
-    auth: { persistSession: false }
+    auth: { persistSession: false },
+    // Increase timeout to 30 seconds
+    global: {
+        headers: {
+            'X-Client-Info': 'supabase-js/2.0',
+        },
+        fetch: async (url: string, options?: any) => {
+            // Add timeout handling
+            const timeout = 30000; // 30 seconds
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+            try {
+                // Use native fetch with timeout
+                const response = await fetch(url, {
+                    ...options,
+                    signal: controller.signal,
+                });
+                return response;
+            } catch (error) {
+                if ((error as any)?.name === 'AbortError') {
+                    throw new Error('Supabase request timeout');
+                }
+                throw error;
+            } finally {
+                clearTimeout(timeoutId);
+            }
+        },
+    },
 });
 
 export default supabase;

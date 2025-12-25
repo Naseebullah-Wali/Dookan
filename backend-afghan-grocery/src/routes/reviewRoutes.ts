@@ -3,6 +3,7 @@ import { body } from 'express-validator';
 import * as reviewController from '../controllers/reviewController';
 import { authenticate } from '../middleware/auth';
 import { validate } from '../middleware/validator';
+import { asyncHandler } from '../utils/asyncHandler';
 
 const router = Router();
 
@@ -14,15 +15,15 @@ const createReviewValidation = [
 ];
 
 // Get reviews for a product (public)
-router.get('/product/:productId', reviewController.getProductReviews);
+router.get('/product/:productId', asyncHandler(reviewController.getProductReviews));
 
 // Get user's reviews (authenticated)
-router.get('/user', authenticate, reviewController.getUserReviews);
+router.get('/user', authenticate, asyncHandler(reviewController.getUserReviews));
 
 // Create review (authenticated)
-router.post('/', authenticate, validate(createReviewValidation), reviewController.createReview);
+router.post('/', authenticate, validate(createReviewValidation), asyncHandler(reviewController.createReview));
 
 // Delete review (authenticated)
-router.delete('/:id', authenticate, reviewController.deleteReview);
+router.delete('/:id', authenticate, asyncHandler(reviewController.deleteReview));
 
 export default router;

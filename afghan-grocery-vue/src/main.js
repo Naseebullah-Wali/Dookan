@@ -6,6 +6,10 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import * as bootstrap from 'bootstrap'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import './assets/styles/main.css'
+import { cacheManager } from './utils/cacheManager'
+
+// Clear old caches on app startup to ensure fresh data
+cacheManager.clearAllCaches()
 
 // Make Bootstrap available globally
 window.bootstrap = bootstrap

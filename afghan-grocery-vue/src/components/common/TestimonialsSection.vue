@@ -86,54 +86,8 @@ onMounted(async () => {
     testimonials.value = response.data || []
   } catch (error) {
     console.error('Failed to load testimonials:', error)
-    // Fallback to default testimonials if API fails
-    testimonials.value = [
-      {
-        id: 1,
-        user_name: t('testimonials.customer1.name'),
-        location: t('testimonials.customer1.location'),
-        rating: 5,
-        comment: t('testimonials.customer1.comment'),
-        gender: 'male',
-        created_at: '2025-01-15T10:00:00Z'
-      },
-      {
-        id: 2,
-        user_name: t('testimonials.customer2.name'),
-        location: t('testimonials.customer2.location'),
-        rating: 5,
-        comment: t('testimonials.customer2.comment'),
-        gender: 'female',
-        created_at: '2025-01-10T14:30:00Z'
-      },
-      {
-        id: 3,
-        user_name: t('testimonials.customer3.name'),
-        location: t('testimonials.customer3.location'),
-        rating: 5,
-        comment: t('testimonials.customer3.comment'),
-        gender: 'male',
-        created_at: '2025-01-08T09:15:00Z'
-      },
-      {
-        id: 4,
-        user_name: t('testimonials.customer4.name'),
-        location: t('testimonials.customer4.location'),
-        rating: 5,
-        comment: t('testimonials.customer4.comment'),
-        gender: 'female',
-        created_at: '2025-01-05T16:45:00Z'
-      },
-      {
-        id: 5,
-        user_name: t('testimonials.customer5.name'),
-        location: t('testimonials.customer5.location'),
-        rating: 5,
-        comment: t('testimonials.customer5.comment'),
-        gender: 'male',
-        created_at: '2025-01-03T11:20:00Z'
-      }
-    ]
+    // Show empty if API fails - don't use stale fallback data
+    testimonials.value = []
   } finally {
     loading.value = false
   }

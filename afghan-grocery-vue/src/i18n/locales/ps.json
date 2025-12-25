@@ -51,7 +51,13 @@
         "products": "محصولات",
         "or": "یا",
         "loggingIn": "ننوتل...",
-        "login": "ننوتل"
+        "login": "ننوتل",
+        "image": "انځور",
+        "previous": "شاته",
+        "next": "مخکې",
+        "submitting": "د ثبت حال کې...",
+        "review": "ستاسو تبصره",
+        "selectRating": "له یوې څخه پنځو ستکو ته اندازه وټاکئ"
     },
     "header": {
         "searchPlaceholder": "د افغاني توکو لټون وکړئ...",
@@ -148,6 +154,32 @@
         "minimumRating": "لږترلږه نمرې",
         "stars": "ستوري",
         "allRatings": "ټولې نمرې"
+    },
+    "product": {
+        "addToCart": "کڅوړې ته اضافه کول",
+        "addToWishlist": "د خوښې لیست ته اضافه کول",
+        "removeFromWishlist": "د خوښې لیست څخه لرې کول",
+        "outOfStock": "نشتې دی",
+        "inStock": "دی دسترس کې",
+        "stock": "موجوديت",
+        "price": "قیمت",
+        "description": "تشریح",
+        "reviews": "نظرات",
+        "specifications": "تفصیلات",
+        "relatedProducts": "اړوند محصولات",
+        "quantity": "تعداد",
+        "size": "اندازه",
+        "weight": "وزن",
+        "verified": "تایید شوی",
+        "featured": "ځانګړي",
+        "new": "نوی",
+        "onSale": "فروخت په حال کې",
+        "sale": "حراج",
+        "off": "تخفیف",
+        "supplier": "تأمین کننده",
+        "rating": "ستاسو ستکو اندازه",
+        "submitReview": "تبصره ثبت کړئ",
+        "shareReview": "خپل صادقانه تجربه د دې محصول سره شریک کړئ. تاسو څه ور خوښ شو او یا ناپسند شو؟"
     },
     "profile": {
         "title": "زما پروفایل",
@@ -483,7 +515,12 @@
         "stockWarning": "یوازې {count} توکي په سټاک کې پاتې دي",
         "exceedsStock": "د موجود سټاک څخه نشي ډیریدلی",
         "fileSizeError": "د فایل اندازه باید له ۵ ایم بي څخه کمه وي",
-        "uploadError": "د انځور اپلوډ کول ناکام شول"
+        "uploadError": "د انځور اپلوډ کول ناکام شول",
+        "reviewSubmitted": "تبصره په بریالیتوب سره ثبت شوه!",
+        "reviewDuplicate": "تاسو دمخه د دې محصول لپاره تبصره ثبت کړې ده. تاسو یوازې یو ځل محصول ته نظر ورکولی شئ.",
+        "reviewRequired": "مهرباني وکړئ ستار اندازه او تبصره وورکړئ",
+        "reviewLoginRequired": "مهرباني وکړئ د تبصره لیکلو لپاره خپل حسابې ته ننوځئ",
+        "reviewCharacters": "حروف"
     },
     "testimonials": {
         "customer1": {

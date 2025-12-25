@@ -77,4 +77,40 @@ if (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY && process.env.SUP
     };
 }
 
+// Validate critical configuration on startup
+function validateConfig() {
+    const errors: string[] = [];
+    
+    if (!config.jwt.secret || config.jwt.secret === 'your-secret-key-change-in-production') {
+        errors.push('JWT_SECRET must be set and changed from default');
+    }
+    
+    if (!config.jwt.refreshSecret || config.jwt.refreshSecret === 'your-refresh-secret-key') {
+        errors.push('JWT_REFRESH_SECRET must be set and changed from default');
+    }
+    
+    if (config.env === 'production') {
+        if (!config.supabase) {
+            errors.push('SUPABASE configuration is required in production');
+        }
+        
+        if (config.rateLimit.maxRequests > 1000) {
+            console.warn('⚠️ Rate limit maxRequests is very high in production');
+        }
+    }
+    
+    if (errors.length > 0) {
+        console.error('❌ Configuration Validation Errors:');
+        errors.forEach(err => console.error(`   - ${err}`));
+        if (config.env === 'production') {
+            throw new Error('Invalid configuration - cannot start in production');
+        }
+    } else {
+        console.log('✅ Configuration validated successfully');
+    }
+}
+
+// Run validation
+validateConfig();
+
 export default config;

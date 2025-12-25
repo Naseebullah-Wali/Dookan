@@ -1,5 +1,6 @@
 <template>
   <div class="wishlist-page">
+    <LoadingSpinner :isLoading="loading" :fullScreen="true" message="Loading wishlist..." />
     <AppHeader />
     
     <div class="container py-4 py-md-5">
@@ -14,13 +15,6 @@
             <p class="text-muted mb-4">{{ $t('messages.loginToViewWishlist') }}</p>
             <router-link to="/login" class="btn btn-primary">{{ $t('common.login') }}</router-link>
           </div>
-        </div>
-      </div>
-
-      <!-- Loading State -->
-      <div v-else-if="loading" class="text-center py-5">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">{{ $t('common.loading') }}</span>
         </div>
       </div>
 
@@ -103,6 +97,7 @@ import { useI18n } from 'vue-i18n'
 import { getImageUrl } from '@/services/imageService'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 
 const wishlistStore = useWishlistStore()
 const authStore = useAuthStore()

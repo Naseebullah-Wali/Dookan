@@ -93,15 +93,11 @@ onMounted(async () => {
   try {
     const response = await api.get('/news')
     items.value = response.data || []
-    
-    // If no items from API, use fallback
-    if (items.value.length === 0) {
-      items.value = getDefaultNewsItems()
-    }
+    // Always fetch fresh from API, no fallback
   } catch (error) {
     console.error('Failed to load news items:', error)
-    // Fallback to default items if API fails
-    items.value = getDefaultNewsItems()
+    // Show empty if API fails - don't use stale fallback
+    items.value = []
   } finally {
     loading.value = false
     startTicker()

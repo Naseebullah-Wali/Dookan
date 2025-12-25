@@ -1,5 +1,6 @@
 import supabase from '../lib/supabaseClient';
 import { NotFoundError, ConflictError } from '../utils/errors';
+import { retry } from '../utils/retry';
 
 export interface User {
     id: string; // UUID from auth.users
@@ -78,34 +79,36 @@ class UserModel {
 
     async findById(id: string): Promise<User | null> {
         try {
-            const { data: profile, error: profileError } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', id)
-                .single();
+            return await retry(async () => {
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
 
-            if (profileError && profileError.code === 'PGRST116') return null;
-            if (profileError) throw profileError;
+                if (profileError && profileError.code === 'PGRST116') return null;
+                if (profileError) throw profileError;
 
-            // Get email from auth.users via a join or fetch separately
-            let email = '';
-            try {
-                const { data: authUser } = await supabase.auth.admin.getUserById(id);
-                email = authUser?.user?.email || '';
-            } catch (err) {
-                // If we can't fetch from auth, that's okay; email will be empty
-            }
+                // Get email from auth.users via a join or fetch separately
+                let email = '';
+                try {
+                    const { data: authUser } = await supabase.auth.admin.getUserById(id);
+                    email = authUser?.user?.email || '';
+                } catch (err) {
+                    // If we can't fetch from auth, that's okay; email will be empty
+                }
 
-            return {
-                id: profile.id,
-                email,
-                password: '',
-                name: profile.name,
-                phone: profile.phone,
-                role: profile.role,
-                created_at: profile.created_at,
-                updated_at: profile.updated_at,
-            };
+                return {
+                    id: profile.id,
+                    email,
+                    password: '',
+                    name: profile.name,
+                    phone: profile.phone,
+                    role: profile.role,
+                    created_at: profile.created_at,
+                    updated_at: profile.updated_at,
+                };
+            }, { maxAttempts: 3, initialDelay: 200, maxDelay: 3000 });
         } catch (err: any) {
             console.error('UserModel.findById error:', err);
             throw err;

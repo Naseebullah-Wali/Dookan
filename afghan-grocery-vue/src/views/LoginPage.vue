@@ -1,5 +1,6 @@
 <template>
   <div class="login-page">
+    <LoadingSpinner :isLoading="loading" :fullScreen="true" message="Signing in..." />
     <AppHeader />
     
     <div class="container py-3 py-md-5">
@@ -86,6 +87,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useI18n } from 'vue-i18n'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()

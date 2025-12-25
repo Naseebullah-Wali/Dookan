@@ -16,7 +16,7 @@ export const categoryService = {
         const cacheKey = cacheManager.getCacheKeys().CATEGORIES
 
         // Check cache first
-        const cached = cacheManager.getCache(cacheKey)
+        const cached = await cacheManager.getCache(cacheKey)
         if (cached && Array.isArray(cached)) {
             console.log('[CategoryService] Using cached categories:', cached)
             return activeOnly ? cached.filter(c => c.active) : cached
@@ -58,7 +58,7 @@ export const categoryService = {
         const cacheKey = cacheManager.getCacheKeys().CATEGORIES
 
         // Check cache first
-        const cached = cacheManager.getCache(cacheKey)
+        const cached = await cacheManager.getCache(cacheKey)
         if (cached && Array.isArray(cached)) {
             return cached
                 .filter(c => c.active)

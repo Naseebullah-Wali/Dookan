@@ -1,5 +1,6 @@
 <template>
   <div class="cart-page">
+    <LoadingSpinner :isLoading="isRemoving" :fullScreen="false" size="sm" message="Updating cart..." />
     <AppHeader />
     
     <div class="container py-4 py-md-5">
@@ -38,7 +39,7 @@
                 <div class="row g-3 align-items-center">
                   <!-- Product Image -->
                   <div class="col-auto">
-                    <img :src="item.image" :alt="item.name" class="rounded" style="width: 100px; height: 100px; object-fit: cover;" />
+                    <img :src="getImageUrl(item.image)" :alt="item.name" class="rounded" style="width: 100px; height: 100px; object-fit: cover;" />
                   </div>
                   
                   <!-- Product Details -->
@@ -163,17 +164,21 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { useCartStore } from '@/stores/cart'
 import { useLanguageStore } from '@/stores/language'
 import { useCurrencyStore } from '@/stores/currency'
 import { useI18n } from 'vue-i18n'
+import { getImageUrl } from '@/services/imageService'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 
 const cartStore = useCartStore()
 const languageStore = useLanguageStore()
 const currencyStore = useCurrencyStore()
 const { t } = useI18n()
+const isRemoving = ref(false)
 
 function removeItem(item) {
   cartStore.removeFromCart(item.id)

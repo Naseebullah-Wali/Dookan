@@ -149,7 +149,10 @@
         "onSale": "IM ANGEBOT",
         "sale": "SALE",
         "off": "RABATT",
-        "supplier": "Lieferant"
+        "supplier": "Lieferant",
+        "rating": "Ihre Bewertung",
+        "submitReview": "Bewertung einreichen",
+        "shareReview": "Teilen Sie Ihre ehrliche Erfahrung mit diesem Produkt. Was hat Ihnen gefallen oder nicht gefallen?"
     },
     "cart": {
         "title": "Warenkorb",
@@ -452,7 +455,12 @@
         "stockWarning": "Nur noch {count} Artikel auf Lager",
         "exceedsStock": "Verfügbarer Bestand kann nicht überschritten werden",
         "fileSizeError": "Dateigröße muss kleiner als 5MB sein",
-        "uploadError": "Bild konnte nicht hochgeladen werden"
+        "uploadError": "Bild konnte nicht hochgeladen werden",
+        "reviewSubmitted": "Bewertung erfolgreich eingereicht!",
+        "reviewDuplicate": "Sie haben bereits eine Bewertung für dieses Produkt eingereicht. Sie können ein Produkt nur einmal bewerten.",
+        "reviewRequired": "Bitte geben Sie eine Bewertung und einen Kommentar ein",
+        "reviewLoginRequired": "Bitte melden Sie sich an, um eine Bewertung zu schreiben",
+        "reviewCharacters": "Zeichen"
     },
     "testimonials": {
         "customer1": {

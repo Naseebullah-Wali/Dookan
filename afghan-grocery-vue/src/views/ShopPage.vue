@@ -1,5 +1,6 @@
 <template>
   <div class="shop-page">
+    <LoadingSpinner :isLoading="loading" :fullScreen="true" message="Loading products..." />
     <AppHeader />
     
     <!-- Page Header -->
@@ -228,6 +229,7 @@ import ProductCard from '@/components/product/ProductCard.vue'
 import PriceRangeFilter from '@/components/filters/PriceRangeFilter.vue'
 import RatingFilter from '@/components/filters/RatingFilter.vue'
 import PaginationComponent from '@/components/common/PaginationComponent.vue'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import { useAnalytics } from '@/composables/useAnalytics'
 
 const route = useRoute()

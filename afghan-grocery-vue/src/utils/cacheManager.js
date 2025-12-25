@@ -12,10 +12,10 @@ const CACHE_KEYS = {
 }
 
 const CACHE_TTL = {
-    PRODUCTS: 24 * 60 * 60 * 1000, // 24 hours for full product data
-    CATEGORIES: 7 * 24 * 60 * 60 * 1000, // 7 days
+    PRODUCTS: 60 * 60 * 1000, // 1 hour - refreshes frequently for fresh data
+    CATEGORIES: 3 * 60 * 60 * 1000, // 3 hours
     FEATURED: 60 * 60 * 1000, // 1 hour for featured products
-    PRODUCT_DETAILS: 24 * 60 * 60 * 1000 // 24 hours
+    PRODUCT_DETAILS: 60 * 60 * 1000 // 1 hour
 }
 
 import { indexedCache } from './indexedCache'
@@ -46,9 +46,9 @@ export const cacheManager = {
     /**
      * Get cached data
      * @param {string} key - Cache key
-     * @returns {Object|null} Cached data or null if invalid
+     * @returns {Promise<Object|null>} Cached data or null if invalid
      */
-    getCache(key) {
+    async getCache(key) {
         if (!this.isCacheValid(key)) {
             this.clearCache(key)
             return null
@@ -57,10 +57,8 @@ export const cacheManager = {
         try {
             // Use IndexedDB for large caches (PRODUCTS, PRODUCT_DETAILS, FEATURED)
             if ([CACHE_KEYS.PRODUCTS, CACHE_KEYS.PRODUCT_DETAILS, CACHE_KEYS.FEATURED].includes(key)) {
-                return indexedCache.get(key).then(v => v?.data || null).catch(e => {
-                    console.error('Indexed cache get error', e)
-                    return null
-                })
+                const cached = await indexedCache.get(key)
+                return cached?.data || null
             }
 
             const cached = localStorage.getItem(key)

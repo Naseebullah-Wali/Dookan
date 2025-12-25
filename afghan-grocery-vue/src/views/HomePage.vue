@@ -1,5 +1,6 @@
 <template>
   <div class="home-page">
+    <LoadingSpinner :isLoading="loading" :fullScreen="true" size="lg" message="Loading featured products..." />
     <AppHeader />
     
     <!-- Hero Section -->
@@ -117,6 +118,7 @@ import { useLanguageStore } from '@/stores/language'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import NewsTicker from '@/components/common/NewsTicker.vue'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import TestimonialsSection from '@/components/common/TestimonialsSection.vue'
 import ProductCard from '@/components/product/ProductCard.vue'
 import HeroBackground from '@/components/common/HeroBackground.vue'

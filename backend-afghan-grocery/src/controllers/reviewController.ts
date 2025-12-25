@@ -13,7 +13,7 @@ export const createReview = async (
             throw new UnauthorizedError();
         }
 
-        const { product_id, rating, comment, order_id } = req.body;
+        const { product_id, rating, comment } = req.body;
 
         if (rating < 1 || rating > 5) {
             throw new ValidationError('Rating must be between 1 and 5');
@@ -23,8 +23,7 @@ export const createReview = async (
             product_id,
             user_id: req.user.userId,
             rating,
-            comment,
-            order_id
+            comment
         });
 
         sendSuccess(res, review, 'Review submitted successfully', 201);
@@ -40,6 +39,11 @@ export const getProductReviews = async (
 ): Promise<void> => {
     try {
         const productId = parseInt(req.params.productId);
+        
+        if (isNaN(productId)) {
+            throw new ValidationError('Invalid product ID');
+        }
+        
         const reviews = await ReviewModel.getProductReviews(productId);
         sendSuccess(res, reviews);
     } catch (error) {

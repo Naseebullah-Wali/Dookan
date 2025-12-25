@@ -51,7 +51,13 @@
         "products": "products",
         "or": "or",
         "loggingIn": "Logging in...",
-        "login": "Login"
+        "login": "Login",
+        "image": "Image",
+        "previous": "Previous",
+        "next": "Next",
+        "submitting": "Submitting...",
+        "review": "Your Review",
+        "selectRating": "Select a rating from 1 to 5 stars"
     },
     "header": {
         "searchPlaceholder": "Search for Afghan groceries...",
@@ -170,7 +176,10 @@
         "onSale": "ON SALE",
         "sale": "SALE",
         "off": "OFF",
-        "supplier": "Supplier"
+        "supplier": "Supplier",
+        "rating": "Your Rating",
+        "submitReview": "Submit Review",
+        "shareReview": "Share your honest experience with this product. What did you like or dislike?"
     },
     "cart": {
         "title": "Shopping Cart",
@@ -499,7 +508,12 @@
         "stockWarning": "Only {count} items left in stock",
         "exceedsStock": "Cannot exceed available stock",
         "fileSizeError": "File size must be less than 5MB",
-        "uploadError": "Failed to upload image"
+        "uploadError": "Failed to upload image",
+        "reviewSubmitted": "Review submitted successfully!",
+        "reviewDuplicate": "You have already submitted a review for this product. You can only review a product once.",
+        "reviewRequired": "Please provide a rating and comment",
+        "reviewLoginRequired": "Please login to your account to write a review",
+        "reviewCharacters": "characters"
     },
     "testimonials": {
         "customer1": {

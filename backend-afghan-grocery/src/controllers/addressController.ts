@@ -17,7 +17,7 @@ export const createAddress = async (req: Request, res: Response, next: NextFunct
             ...req.body,
             user_id: req.user!.userId
         });
-        sendSuccess(res, address, 201);
+        sendSuccess(res, address, 'Address created successfully', 201);
     } catch (error) {
         next(error);
     }
@@ -39,7 +39,7 @@ export const updateAddress = async (req: Request, res: Response, next: NextFunct
 export const deleteAddress = async (req: Request, res: Response, next: NextFunction) => {
     try {
         await AddressModel.delete(parseInt(req.params.id), req.user!.userId);
-        sendSuccess(res, null, 200, 'Address deleted successfully');
+        sendSuccess(res, null, 'Address deleted successfully', 200);
     } catch (error) {
         next(error);
     }

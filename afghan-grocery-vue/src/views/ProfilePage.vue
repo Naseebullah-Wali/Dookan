@@ -1,5 +1,6 @@
 <template>
   <div class="profile-page">
+    <LoadingSpinner :isLoading="isSaving" :fullScreen="true" message="Saving changes..." />
     <AppHeader />
     
     <div class="container py-5">
@@ -80,6 +81,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useI18n } from 'vue-i18n'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import AddressBook from '@/components/user/AddressBook.vue'
 
 const router = useRouter()
@@ -88,6 +90,7 @@ const { t } = useI18n()
 
 const activeTab = ref('info')
 const loading = ref(false)
+const isSaving = ref(false)
 const formData = ref({
   firstName: '',
   lastName: '',

@@ -1,5 +1,6 @@
 <template>
   <div class="checkout-page">
+    <LoadingSpinner :isLoading="isProcessing" :fullScreen="true" message="Processing your order..." />
     <AppHeader />
     
     <div class="container py-5">
@@ -197,6 +198,7 @@ import { useCurrencyStore } from '@/stores/currency'
 import { useI18n } from 'vue-i18n'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
+import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import { useOrdersStore } from '@/stores/orders'
 import { loadScript } from "@paypal/paypal-js";
 import { PaymentService } from '@/services/PaymentService';
