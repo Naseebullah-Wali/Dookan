@@ -29,6 +29,12 @@ interface Config {
         maxFileSize: number;
         uploadPath: string;
     };
+    server?: {
+        url?: string;
+    };
+    frontend?: {
+        url?: string;
+    };
     supabase?: {
         url: string;
         anonKey: string;

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import supabase from '../lib/supabaseClient'
-import { sendSuccess, sendError } from '../utils/response'
+import { sendSuccess } from '../utils/response'
 
 export const getSetting = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -10,7 +10,7 @@ export const getSetting = async (req: Request, res: Response, next: NextFunction
             return next(error)
         }
         // return value directly for simplicity
-        return sendSuccess(res, data ? data.value : null)
+        sendSuccess(res, data ? data.value : null)
     } catch (err) {
         next(err)
     }
@@ -24,7 +24,7 @@ export const upsertSetting = async (req: Request, res: Response, next: NextFunct
         if (error) {
             return next(error)
         }
-        return sendSuccess(res, data)
+        sendSuccess(res, data)
     } catch (err) {
         next(err)
     }

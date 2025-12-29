@@ -240,9 +240,9 @@ class ProductModel {
     }
 
     async updateStock(id: number, quantity: number): Promise<void> {
-        const { data, error } = await supabase.from('products').update({ stock: supabase.raw('stock + ?', [quantity]) }).eq('id', id);
+        const { data, error } = await (supabase.from('products').update({ stock: (supabase as any).raw('stock + ?', [quantity]) }).eq('id', id) as any);
         if (error) throw error;
-        if (!data || (Array.isArray(data) && data.length === 0)) throw new NotFoundError('Product not found');
+        if (!data || (Array.isArray(data) && (data as any).length === 0)) throw new NotFoundError('Product not found');
     }
 
     async updateRating(productId: number): Promise<void> {

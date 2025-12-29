@@ -32,6 +32,7 @@
     "@types/morgan": "^1.9.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.10.1",
+    "@types/nodemailer": "^6.4.14",
     "nodemon": "^3.1.11",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3"
@@ -40,7 +41,7 @@
     "@paypal/checkout-server-sdk": "^1.0.3",
     "@supabase/supabase-js": "^2.87.0",
     "axios": "^1.13.2",
-    "bcryptjs": "^2.4.3",
+    "bcryptjs": "^3.0.0",
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

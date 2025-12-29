@@ -61,7 +61,7 @@ export const getUserReviews = async (
             throw new UnauthorizedError();
         }
 
-        const reviews = await ReviewModel.getUserReviews(req.user.userId);
+        const reviews = await ReviewModel.getUserReviews(Number(req.user.userId));
         sendSuccess(res, reviews);
     } catch (error) {
         next(error);
@@ -79,7 +79,7 @@ export const deleteReview = async (
         }
 
         const id = parseInt(req.params.id);
-        const deleted = await ReviewModel.delete(id, req.user.userId);
+        const deleted = await ReviewModel.delete(id, Number(req.user.userId));
 
         if (deleted) {
             sendSuccess(res, null, 'Review deleted successfully');

@@ -47,7 +47,7 @@ class CategoryModel {
             name_fr: row.name_fr || null,
             icon: row.icon || null,
             description: row.description_en || null,
-            active: row.active === true || row.active === 1 || row.active === 'true',
+            is_active: row.active === true || row.active === 1 || row.active === 'true' ? 1 : 0,
             created_at: row.created_at,
             updated_at: row.updated_at,
         };

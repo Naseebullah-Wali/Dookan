@@ -4,7 +4,7 @@ import { sendSuccess } from '../utils/response';
 
 export const getMyAddresses = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const addresses = await AddressModel.findByUserId(req.user!.userId);
+        const addresses = await AddressModel.findByUserId(Number(req.user!.userId));
         sendSuccess(res, addresses);
     } catch (error) {
         next(error);
@@ -27,7 +27,7 @@ export const updateAddress = async (req: Request, res: Response, next: NextFunct
     try {
         const address = await AddressModel.update(
             parseInt(req.params.id),
-            req.user!.userId,
+            Number(req.user!.userId),
             req.body
         );
         sendSuccess(res, address);
@@ -38,7 +38,7 @@ export const updateAddress = async (req: Request, res: Response, next: NextFunct
 
 export const deleteAddress = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        await AddressModel.delete(parseInt(req.params.id), req.user!.userId);
+        await AddressModel.delete(parseInt(req.params.id), Number(req.user!.userId));
         sendSuccess(res, null, 'Address deleted successfully', 200);
     } catch (error) {
         next(error);

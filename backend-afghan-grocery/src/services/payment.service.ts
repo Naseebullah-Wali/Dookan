@@ -79,7 +79,7 @@ export class PaymentService {
 
         try {
             // Basic instantiation for read-only
-            const tronWeb = new TronWeb({
+            const tronWeb = new (TronWeb as any)({
                 fullHost: 'https://api.trongrid.io',
                 headers: { "TRON-PRO-API-KEY": paymentConfig.crypto.trc20.tronGridApiKey }
             });

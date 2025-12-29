@@ -91,9 +91,9 @@ class ReviewModel {
         return data || [];
     }
 
-    async delete(id: number, userId: number): Promise<boolean> {
+    async delete(id: number, userId: string | number): Promise<boolean> {
         const review = await this.findById(id);
-        if (!review || review.user_id !== userId) return false;
+        if (!review || String(review.user_id) !== String(userId)) return false;
 
         const { error } = await supabase.from('product_reviews').delete().eq('id', id);
         if (error) throw error;

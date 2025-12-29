@@ -50,7 +50,8 @@ export const removeFromWishlist = async (
 
         const id = parseInt(req.params.id);
         if (isNaN(id)) {
-            return res.status(400).json({ success: false, error: 'Invalid wishlist item ID' });
+            res.status(400).json({ success: false, error: 'Invalid wishlist item ID' });
+            return;
         }
 
         console.log('removeFromWishlist:', { itemId: id, userId: req.user.userId });

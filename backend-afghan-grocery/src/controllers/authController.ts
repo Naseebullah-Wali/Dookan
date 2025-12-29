@@ -133,12 +133,14 @@ export const getCurrentUser = async (
 ): Promise<void> => {
     try {
         if (!req.user) {
-            return res.status(401).json({ success: false, error: 'Not authenticated' });
+            res.status(401).json({ success: false, error: 'Not authenticated' });
+            return;
         }
 
         const user = await UserModel.findById(req.user.userId);
         if (!user) {
-            return res.status(401).json({ success: false, error: 'User not found' });
+            res.status(401).json({ success: false, error: 'User not found' });
+            return;
         }
 
         // Return user data (password already excluded from model)
@@ -424,7 +426,7 @@ export const handleOAuthCallback = async (req: Request, res: Response, next: Nex
             throw new Error(`Token exchange failed: ${text}`);
         }
 
-        const tokenData = await tokenResp.json();
+        const tokenData = (await tokenResp.json()) as any;
         const supabaseAccessToken = tokenData.access_token;
         const supabaseRefreshToken = tokenData.refresh_token;
 
@@ -439,6 +441,7 @@ export const handleOAuthCallback = async (req: Request, res: Response, next: Nex
 
         // Upsert local user
         // Normalize fields returned from Google vs Supabase
+        const userInfo = (await userResp.json()) as any;
         const email = userInfo.email || userInfo.email_address || (userInfo.user_metadata && userInfo.user_metadata.email);
         const name = userInfo.name || (userInfo.user_metadata && (userInfo.user_metadata.full_name || userInfo.user_metadata.name)) || email;
         if (!email) {

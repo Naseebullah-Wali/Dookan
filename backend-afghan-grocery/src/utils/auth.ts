@@ -22,17 +22,15 @@ export interface JwtPayload {
 }
 
 export const generateAccessToken = (payload: JwtPayload): string => {
-    const options: SignOptions = {
+    return jwt.sign(payload, config.jwt.secret, {
         expiresIn: config.jwt.expiresIn,
-    };
-    return jwt.sign(payload, config.jwt.secret, options);
+    } as any);
 };
 
 export const generateRefreshToken = (payload: JwtPayload): string => {
-    const options: SignOptions = {
+    return jwt.sign(payload, config.jwt.refreshSecret, {
         expiresIn: config.jwt.refreshExpiresIn,
-    };
-    return jwt.sign(payload, config.jwt.refreshSecret, options);
+    } as any);
 };
 
 export const verifyAccessToken = (token: string): JwtPayload => {

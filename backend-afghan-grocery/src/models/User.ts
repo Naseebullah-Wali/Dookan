@@ -121,7 +121,7 @@ class UserModel {
             const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
             if (authError) throw authError;
 
-            const authUser = authUsers?.users?.find((u) => u.email === email);
+            const authUser = (authUsers?.users as any)?.find((u: any) => u.email === email);
             if (!authUser) return null;
 
             const { data: profile, error: profileError } = await supabase
@@ -176,9 +176,9 @@ class UserModel {
                     id,
                     email: existing.email,
                     password: '',
-                    name: data.name || null,
-                    phone: data.phone || null,
-                    role: 'user',
+                    name: data.name || '',
+                    phone: data.phone || undefined,
+                    role: 'customer',
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString(),
                 };

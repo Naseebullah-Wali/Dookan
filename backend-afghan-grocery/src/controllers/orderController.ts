@@ -77,8 +77,8 @@ export const getUserOrders = async (
         const limit = parseInt(req.query.limit as string) || 20;
         const offset = (page - 1) * limit;
 
-        const orders = await OrderModel.getUserOrders(req.user.userId, limit, offset);
-        const total = await OrderModel.count({ user_id: req.user.userId });
+        const orders = await OrderModel.getUserOrders(Number(req.user.userId), limit, offset);
+        const total = await OrderModel.count({ user_id: Number(req.user.userId) });
 
         sendPaginatedResponse(res, orders, page, limit, total);
     } catch (error) {
