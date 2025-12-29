@@ -153,9 +153,10 @@ class App {
     }
 
     public listen(): void {
-        this.app.listen(config.port, () => {
+        const port = process.env.PORT || config.port;
+        this.app.listen(port, () => {
             console.log('=================================');
-            console.log(`🚀 Server running on port ${config.port}`);
+            console.log(`🚀 Server running on port ${port}`);
             console.log(`📝 Environment: ${config.env}`);
             console.log(`🌐 API Version: ${config.apiVersion}`);
             console.log('=================================');

@@ -35,11 +35,7 @@ RUN npm ci --only=production
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --retries=3 --start-period=40s \
-    CMD node -e "require('http').get('http://localhost:3000/', (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })" || exit 1
-
-# Expose port
+# Expose port (Render will assign PORT env var)
 EXPOSE 3000
 
 # Use dumb-init to handle signals properly
