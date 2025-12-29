@@ -4,13 +4,22 @@ FROM node:18-alpine AS builder
 WORKDIR /app
 
 # Copy package files
-COPY package.json package-lock.json ./
+COPY package*.json ./
 
 # Install dependencies (including dev for TypeScript compilation)
-RUN npm install
+RUN npm ci --legacy-peer-deps
 
 # Copy source code
 COPY . .
+
+# Set dummy build-time environment variables for TypeScript compilation only
+# These are only used during build, not at runtime
+ENV NODE_ENV=production \
+    JWT_SECRET=build-time-secret-not-used \
+    JWT_REFRESH_SECRET=build-time-secret-not-used \
+    SUPABASE_URL=https://dummy.supabase.co \
+    SUPABASE_ANON_KEY=dummy \
+    SUPABASE_SERVICE_KEY=dummy
 
 # Build TypeScript
 RUN npm run build
@@ -27,10 +36,10 @@ RUN apk add --no-cache dumb-init
 RUN mkdir -p db uploads
 
 # Copy package files
-COPY package.json package-lock.json ./
+COPY package*.json ./
 
 # Install production dependencies only
-RUN npm ci --only=production
+RUN npm ci --only=production --legacy-peer-deps
 
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
