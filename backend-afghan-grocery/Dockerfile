@@ -46,4 +46,4 @@ EXPOSE 3000
 ENTRYPOINT ["/sbin/dumb-init", "--"]
 
 # Start application
-CMD ["node", "dist/src/main.js"]
+CMD ["node", "dist/main.js"]
