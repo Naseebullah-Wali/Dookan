@@ -27,10 +27,21 @@ class App {
     public app: Application;
 
     constructor() {
-        this.app = express();
-        this.initializeMiddlewares();
-        this.initializeRoutes();
-        this.initializeErrorHandling();
+        try {
+            console.log('🔨 Initializing Express app...');
+            this.app = express();
+            console.log('✅ Express app created');
+            this.initializeMiddlewares();
+            console.log('✅ Middlewares initialized');
+            this.initializeRoutes();
+            console.log('✅ Routes initialized');
+            this.initializeErrorHandling();
+            console.log('✅ Error handling initialized');
+        } catch (error: any) {
+            console.error('❌ Error in App constructor:', error?.message || error);
+            console.error(error?.stack);
+            throw error;
+        }
     }
 
     private initializeMiddlewares(): void {

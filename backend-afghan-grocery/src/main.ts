@@ -1,3 +1,9 @@
+// Start with immediate logging
+console.log('🔧 Backend starting...');
+console.log('Node version:', process.version);
+console.log('Environment:', process.env.NODE_ENV || 'development');
+console.log('PORT env:', process.env.PORT);
+
 import App from './core/app';
 
 // Global error handlers for unhandled errors
@@ -23,12 +29,22 @@ process.on('uncaughtException', (error: Error) => {
 
 // Start the application (Supabase is used as the primary datastore)
 function initializeApp() {
-    // Create and start server
-    const app = new App();
-    app.listen();
+    try {
+        console.log('📦 Creating App instance...');
+        // Create and start server
+        const app = new App();
+        console.log('✅ App instance created');
+        app.listen();
+        console.log('✅ Server listening');
+    } catch (error: any) {
+        console.error('❌ Failed to initialize app:', error?.message || error);
+        console.error(error?.stack);
+        process.exit(1);
+    }
 }
 
 // Start the application
+console.log('🚀 Calling initializeApp...');
 initializeApp();
 
 // Graceful shutdown
