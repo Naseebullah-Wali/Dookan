@@ -45,6 +45,9 @@ class App {
     }
 
     private initializeMiddlewares(): void {
+        // Trust proxy - CRITICAL for rate limiting behind nginx/reverse proxy
+        this.app.set('trust proxy', 1);
+
         // Request ID tracking for logging and debugging
         this.app.use((req, res, next) => {
             (req as any).id = req.headers['x-request-id'] || randomUUID();
@@ -58,13 +61,17 @@ class App {
         // CORS
         this.app.use(cors(config.cors));
 
-        // General rate limiting
+        // General rate limiting with proper IP detection
         const limiter = rateLimit({
             windowMs: config.rateLimit.windowMs,
             max: config.rateLimit.maxRequests,
             message: 'Too many requests from this IP, please try again later.',
             standardHeaders: true,
             legacyHeaders: false,
+            keyGenerator: (req, res) => {
+                // Use X-Forwarded-For header if available (from nginx), otherwise use remote IP
+                return req.ip || req.socket.remoteAddress || 'unknown';
+            },
         });
         this.app.use('/api/', limiter);
 
@@ -76,6 +83,9 @@ class App {
             standardHeaders: true,
             legacyHeaders: false,
             skipSuccessfulRequests: false,
+            keyGenerator: (req, res) => {
+                return req.ip || req.socket.remoteAddress || 'unknown';
+            },
         });
 
         // Strict rate limiting for payment endpoints
@@ -85,6 +95,9 @@ class App {
             message: 'Too many payment requests. Please try again later.',
             standardHeaders: true,
             legacyHeaders: false,
+            keyGenerator: (req, res) => {
+                return req.ip || req.socket.remoteAddress || 'unknown';
+            },
         });
 
         // Body parsing with size limits
