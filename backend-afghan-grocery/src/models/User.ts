@@ -32,42 +32,41 @@ export interface UpdateUserData {
 
 class UserModel {
     /**
-     * Create a user profile in the profiles table.
-     * Note: For Google OAuth users, the auth.users entry is created by Supabase Auth,
-     * and this function creates the corresponding profile record.
+     * Create a user in the users table.
+     * Supabase trigger will automatically create the corresponding profile.
      */
     async create(data: CreateUserData): Promise<User> {
         try {
-            // For OAuth users, we don't create auth.users here (Supabase Auth does that).
-            // We just create/upsert a profile record.
-            // Use a generated UUID for local users, or use the provided id if from OAuth.
             const userId = (data as any).id || this._generateUUID();
 
-            const profilePayload: any = {
-                id: userId,
-                name: data.name,
-                phone: data.phone || null,
-                role: data.role || 'customer',
-            };
-
+            // Insert into users table - Supabase trigger will create the profile
             const { data: created, error } = await supabase
-                .from('profiles')
-                .upsert(profilePayload, { onConflict: 'id' })
+                .from('users')
+                .insert({
+                    id: userId,
+                    email: data.email,
+                    password: data.password || null,
+                    name: data.name,
+                    phone: data.phone || null,
+                    role: data.role || 'customer',
+                    is_verified: data.is_verified || 0,
+                })
                 .select()
                 .single();
 
             if (error) {
-                console.error('Profile create/upsert error:', error);
+                console.error('User insert error:', error);
                 throw error;
             }
 
             return {
                 id: created.id,
-                email: data.email,
-                password: data.password || '',
+                email: created.email,
+                password: created.password || '',
                 name: created.name,
                 phone: created.phone,
                 role: created.role,
+                is_verified: created.is_verified,
                 created_at: created.created_at,
                 updated_at: created.updated_at,
             };
