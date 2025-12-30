@@ -299,7 +299,7 @@ export const startGoogleOAuth = async (req: Request, res: Response, next: NextFu
         let authUrl: string;
         if (oauthFlow === 'fragment') {
             // Fragment flow: deliver token to frontend callback
-            const frontendBase = process.env.FRONTEND_URL || config.frontend?.url || `${req.protocol}://${req.get('host')?.replace(/:3000$/, ':5173')}`;
+            const frontendBase = process.env.FRONTEND_URL || config.frontend?.url || `${req.protocol}://${req.get('host')}`;
             const redirectTo = `${frontendBase.replace(/\/$/, '')}/auth/oauth/callback`;
             authUrl = `${SUPABASE_URL}/auth/v1/authorize?provider=google&response_type=token&redirect_to=${encodeURIComponent(redirectTo)}`;
         } else {
@@ -313,9 +313,9 @@ export const startGoogleOAuth = async (req: Request, res: Response, next: NextFu
 };
 
 // Serve fallback JS for fragment handling (keeps CSP happy)
-export const oauthFallbackScript = async (_req: Request, res: Response, next: NextFunction) => {
+export const oauthFallbackScript = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const frontendUrl = (process.env.FRONTEND_URL || config.frontend?.url || 'http://localhost:5173').replace(/\/$/, '');
+        const frontendUrl = (process.env.FRONTEND_URL || config.frontend?.url || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
         const js = `(function(){
   try {
     var frontend = '${frontendUrl}';
