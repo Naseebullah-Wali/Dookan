@@ -18,19 +18,15 @@ export const categoryService = {
         // Check cache first
         const cached = await cacheManager.getCache(cacheKey)
         if (cached && Array.isArray(cached)) {
-            console.log('[CategoryService] Using cached categories:', cached)
             return activeOnly ? cached.filter(c => c.active) : cached
         }
 
         try {
             const params = { activeOnly, lang }
-            console.log('[CategoryService] Fetching from API with params:', params)
             const res = await api.get('/categories', { params })
             const data = res.data || []
-            console.log('[CategoryService] API Response:', data)
             cacheManager.setCache(cacheKey, data)
             const result = activeOnly ? data.filter(c => c.active) : data
-            console.log('[CategoryService] Returning filtered categories:', result)
             return result
         } catch (error) {
             console.error('[CategoryService] Error fetching categories:', error)

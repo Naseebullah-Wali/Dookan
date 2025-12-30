@@ -32,43 +32,54 @@ export interface UpdateUserData {
 
 class UserModel {
     /**
-     * Create a user in the users table.
+     * Create a user using Supabase Auth's admin API.
+     * This creates the user in auth.users table.
      * Supabase trigger will automatically create the corresponding profile.
      */
     async create(data: CreateUserData): Promise<User> {
         try {
-            const userId = (data as any).id || this._generateUUID();
+            // Use Supabase Auth admin API to create user in auth.users
+            const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
+                email: data.email,
+                password: data.password,
+                user_metadata: {
+                    name: data.name,
+                    phone: data.phone,
+                },
+            });
 
-            // Insert into users table - Supabase trigger will create the profile
-            const { data: created, error } = await supabase
-                .from('users')
-                .insert({
-                    id: userId,
-                    email: data.email,
-                    password: data.password || null,
+            if (authError || !authUser?.user) {
+                console.error('Auth user creation error:', authError);
+                throw authError || new Error('Failed to create auth user');
+            }
+
+            // Now create/update the profile with additional role information
+            const { data: profileData, error: profileError } = await supabase
+                .from('profiles')
+                .upsert({
+                    id: authUser.user.id,
                     name: data.name,
                     phone: data.phone || null,
                     role: data.role || 'customer',
-                    is_verified: data.is_verified || 0,
-                })
+                }, { onConflict: 'id' })
                 .select()
                 .single();
 
-            if (error) {
-                console.error('User insert error:', error);
-                throw error;
+            if (profileError) {
+                console.error('Profile creation error:', profileError);
+                throw profileError;
             }
 
             return {
-                id: created.id,
-                email: created.email,
-                password: created.password || '',
-                name: created.name,
-                phone: created.phone,
-                role: created.role,
-                is_verified: created.is_verified,
-                created_at: created.created_at,
-                updated_at: created.updated_at,
+                id: authUser.user.id,
+                email: authUser.user.email || '',
+                password: '', // Don't return password
+                name: data.name,
+                phone: data.phone || '',
+                role: profileData?.role || 'customer',
+                is_verified: authUser.user.email_confirmed_at ? 1 : 0,
+                created_at: authUser.user.created_at || new Date().toISOString(),
+                updated_at: authUser.user.updated_at || new Date().toISOString(),
             };
         } catch (err: any) {
             console.error('UserModel.create error:', err);
