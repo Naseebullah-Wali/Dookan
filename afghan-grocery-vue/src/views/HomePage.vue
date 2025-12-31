@@ -112,9 +112,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useProductsStore } from '@/stores/products'
 import { useLanguageStore } from '@/stores/language'
+import { useAnalytics } from '@/composables/useAnalytics'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import NewsTicker from '@/components/common/NewsTicker.vue'
@@ -123,8 +125,10 @@ import TestimonialsSection from '@/components/common/TestimonialsSection.vue'
 import ProductCard from '@/components/product/ProductCard.vue'
 import HeroBackground from '@/components/common/HeroBackground.vue'
 
+const route = useRoute()
 const productsStore = useProductsStore()
 const languageStore = useLanguageStore()
+const analytics = useAnalytics()
 const featuredProducts = ref([])
 const categories = ref([])
 const loading = ref(true)
@@ -138,12 +142,13 @@ async function loadFeaturedProducts() {
     await productsStore.fetchFeaturedProducts(4)
     featuredProducts.value = productsStore.featuredProducts
   } catch (error) {
-    console.error('Error loading featured products:', error)
+    // Error already handled by store
   }
 }
 
-onMounted(async () => {
+async function loadHomePageData() {
   try {
+    loading.value = true
     // Fetch categories with counts
     await productsStore.fetchCategoriesWithCounts()
     categories.value = productsStore.categories.map(cat => ({
@@ -151,22 +156,35 @@ onMounted(async () => {
       count: cat.product_count || 0
     }))
     
-    // Fetch featured products on mount
+    // Fetch featured products
     await loadFeaturedProducts()
   } catch (error) {
-    console.error('Error loading homepage data:', error)
     // Set empty arrays on error so page still renders
     categories.value = []
     featuredProducts.value = []
   } finally {
     loading.value = false
   }
+}
+
+onMounted(async () => {
+  await loadHomePageData()
+  
+  // Track page view
+  analytics.trackPageView('Home Page', route.fullPath)
 
   // Set up interval to refresh featured products
   refreshInterval = setInterval(() => {
     loadFeaturedProducts()
   }, REFRESH_INTERVAL)
 })
+
+// Watch for route changes - reload data when navigating back to home
+watch(() => route.path, async (newPath) => {
+  if (newPath === '/') {
+    await loadHomePageData()
+  }
+}, { immediate: false })
 
 onUnmounted(() => {
   // Clean up the interval when component is unmounted

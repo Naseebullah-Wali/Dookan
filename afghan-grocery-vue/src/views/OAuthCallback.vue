@@ -42,8 +42,6 @@ export default {
         apiBase = '/api/v1';
       }
 
-      console.log('OAuthCallback: exchanging token with backend');
-
       const resp = await fetch(`${apiBase}/auth/oauth/exchange`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
