@@ -18,7 +18,7 @@ export const categoryService = {
         // Check cache first
         const cached = await cacheManager.getCache(cacheKey)
         if (cached && Array.isArray(cached)) {
-            return activeOnly ? cached.filter(c => c.active) : cached
+            return activeOnly ? cached.filter(c => c.is_active) : cached
         }
 
         try {
@@ -26,7 +26,7 @@ export const categoryService = {
             const res = await api.get('/categories', { params })
             const data = res.data || []
             cacheManager.setCache(cacheKey, data)
-            const result = activeOnly ? data.filter(c => c.active) : data
+            const result = activeOnly ? data.filter(c => c.is_active) : data
             return result
         } catch (error) {
             console.error('[CategoryService] Error fetching categories:', error)
@@ -57,7 +57,7 @@ export const categoryService = {
         const cached = await cacheManager.getCache(cacheKey)
         if (cached && Array.isArray(cached)) {
             return cached
-                .filter(c => c.active)
+                .filter(c => c.is_active)
                 .map(category => ({
                     ...category,
                     product_count: category.product_count || 0
@@ -120,7 +120,7 @@ export const categoryService = {
         const res = await api.get('/categories', { params })
         const data = res.data || []
         cacheManager.setCache(cacheManager.getCacheKeys().CATEGORIES, data)
-        return data.filter(c => c.active)
+        return data.filter(c => c.is_active)
     }
 }
 

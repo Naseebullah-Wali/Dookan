@@ -112,7 +112,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProductsStore } from '@/stores/products'
 import { useLanguageStore } from '@/stores/language'
@@ -142,24 +142,32 @@ async function loadFeaturedProducts() {
     await productsStore.fetchFeaturedProducts(4)
     featuredProducts.value = productsStore.featuredProducts
   } catch (error) {
-    // Error already handled by store
+    // Error handled by store
   }
 }
 
 async function loadHomePageData() {
   try {
     loading.value = true
-    // Fetch categories with counts
-    await productsStore.fetchCategoriesWithCounts()
-    categories.value = productsStore.categories.map(cat => ({
-      ...cat,
-      count: cat.product_count || 0
-    }))
+    
+    // Fetch categories - always get fresh data from API
+    const response = await productsStore.fetchCategories()
+    
+    if (!response || response.length === 0) {
+      console.warn('No categories returned from API')
+      categories.value = []
+    } else {
+      categories.value = response.map(cat => ({
+        ...cat,
+        count: cat.product_count || 0
+      }))
+    }
     
     // Fetch featured products
     await loadFeaturedProducts()
   } catch (error) {
-    // Set empty arrays on error so page still renders
+    console.error('Error loading homepage data:', error)
+    // Silently fail - page still renders
     categories.value = []
     featuredProducts.value = []
   } finally {
@@ -178,13 +186,6 @@ onMounted(async () => {
     loadFeaturedProducts()
   }, REFRESH_INTERVAL)
 })
-
-// Watch for route changes - reload data when navigating back to home
-watch(() => route.path, async (newPath) => {
-  if (newPath === '/') {
-    await loadHomePageData()
-  }
-}, { immediate: false })
 
 onUnmounted(() => {
   // Clean up the interval when component is unmounted
