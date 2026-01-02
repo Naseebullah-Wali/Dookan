@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { productService, categoryService } from '@/services'
+import { cacheManager } from '@/utils/cacheManager'
 
 export const useProductsStore = defineStore('products', () => {
     const products = ref([])
@@ -52,6 +53,16 @@ export const useProductsStore = defineStore('products', () => {
     }
 
     async function fetchFeaturedProducts(limit = 8) {
+        // Check cache first using the cacheManager
+        const CACHE_KEY = 'ag_featured_cache'
+        const cached = await cacheManager.getCache(CACHE_KEY)
+        if (cached && Array.isArray(cached) && cached.length >= limit) {
+            console.log('✅ Featured products cache HIT - serving from cache (', cached.length, 'items )')
+            featuredProducts.value = cached.slice(0, limit)
+            return featuredProducts.value
+        }
+
+        console.log('⏳ Featured products cache MISS - fetching from API...')
         loading.value = true
         error.value = null
         try {
@@ -73,6 +84,11 @@ export const useProductsStore = defineStore('products', () => {
             }
 
             featuredProducts.value = products
+            
+            // Cache the results using cacheManager
+            cacheManager.setCache(CACHE_KEY, products)
+            console.log('💾 Featured products cached successfully (', products.length, 'items, 1 hour TTL )')
+            
             return featuredProducts.value
         } catch (err) {
             error.value = err.message
@@ -148,6 +164,10 @@ export const useProductsStore = defineStore('products', () => {
             total: 0,
             totalPages: 0
         }
+    }
+
+    function clearFeaturedProductsCache() {
+        cacheManager.clearCache('ag_featured_cache')
     }
 
     async function createProduct(productData) {
@@ -266,6 +286,7 @@ export const useProductsStore = defineStore('products', () => {
         createCategory,
         updateCategory,
         deleteCategory,
-        clearProducts
+        clearProducts,
+        clearFeaturedProductsCache
     }
 })

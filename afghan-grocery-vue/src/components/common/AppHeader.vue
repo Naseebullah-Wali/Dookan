@@ -304,4 +304,10 @@ onUnmounted(() => {
 .bg-light-hover:hover {
   background-color: var(--bs-gray-100);
 }
+
+/* Reduce container padding for header */
+.navbar .container {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
 </style>

@@ -1,24 +1,15 @@
 import { Router } from 'express';
-import { PaymentController } from '../controllers/payment.controller';
-import rateLimit from 'express-rate-limit';
+import PaymentController from '../controllers/paymentController';
+import { authenticate } from '../middleware/auth';
 
 const router = Router();
 
-// Rate limiting for payment verification to prevent spam checks
-const verificationLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    limit: 20, // Limit each IP to 20 verification requests per windowMs
-    message: 'Too many verification attempts, please try again later'
-});
-
-// PayPal Routes
-router.post('/paypal/create-order', PaymentController.createPayPalOrder); // @ts-ignore
-router.post('/paypal/capture-order', PaymentController.capturePayPalOrder);
-
-// Crypto Routes
-router.post('/verify-crypto', verificationLimiter, PaymentController.verifyCryptoTransaction); // @ts-ignore
-
-// WhatsApp Route
-router.post('/whatsapp/link', PaymentController.getWhatsAppLink); // @ts-ignore
+// Stripe Routes (Preferred Payment Method)
+router.post('/stripe/create-intent', authenticate, PaymentController.createPaymentIntent); // @ts-ignore
+router.post('/stripe/payment-link', authenticate, PaymentController.createPaymentLink); // @ts-ignore - Note: This endpoint requires authentication
+router.post('/stripe/confirm', authenticate, PaymentController.confirmPayment); // @ts-ignore
+router.get('/stripe/status/:paymentIntentId', authenticate, PaymentController.getPaymentStatus); // @ts-ignore
+router.get('/stripe/currencies', PaymentController.getSupportedCurrencies); // @ts-ignore
+router.post('/stripe/webhook', PaymentController.handleWebhook); // @ts-ignore
 
 export default router;

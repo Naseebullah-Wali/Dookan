@@ -32,6 +32,11 @@
                     :placeholder="$t('login.passwordPlaceholder')"
                     required
                   />
+                  <div class="text-end mt-2">
+                    <router-link to="/forgot-password" class="small text-primary text-decoration-none">
+                      {{ $t('login.forgotPassword') }}
+                    </router-link>
+                  </div>
                 </div>
 
                 <div v-if="error" class="alert alert-danger py-2 small" role="alert">
@@ -57,15 +62,6 @@
                 {{ $t('login.signInWithGoogle') }}
               </button>
 
-              <div class="alert alert-info py-2 py-md-3">
-                <p class="mb-2 small"><strong><i class="bi bi-info-circle me-2"></i>{{ $t('login.demoAccount') }}:</strong></p>
-                <p class="mb-1 small" style="font-size: 0.85rem;">{{ $t('common.email') }}: customer@test.com</p>
-                <p class="mb-2 mb-md-3 small" style="font-size: 0.85rem;">{{ $t('common.password') }}: customer123</p>
-                <button @click="useDemoAccount" class="btn btn-outline-primary btn-sm w-100">
-                  <i class="bi bi-person-check me-2"></i>{{ $t('login.useDemo') }}
-                </button>
-              </div>
-
               <div class="text-center mt-3 mt-md-4">
                 <span class="text-muted small">{{ $t('login.noAccount') }} </span>
                 <router-link to="/register" class="text-decoration-none fw-semibold small">{{ $t('login.registerHere') }}</router-link>
@@ -81,13 +77,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useI18n } from 'vue-i18n'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
+import api from '@/services/api'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -97,6 +94,15 @@ const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const error = ref('')
+
+// Eagerly fetch CSRF token when component mounts
+onMounted(async () => {
+  try {
+    await api.get('/csrf-token')
+  } catch (err) {
+    console.warn('Failed to pre-fetch CSRF token:', err)
+  }
+})
 
 async function handleLogin() {
   loading.value = true
@@ -125,12 +131,6 @@ async function handleGoogleSignIn() {
     loading.value = false
   }
   // Page will redirect to Google and handle auth, no need to manually navigate
-}
-
-function useDemoAccount() {
-  email.value = 'customer@test.com'
-  password.value = 'customer123'
-  handleLogin()
 }
 </script>
 

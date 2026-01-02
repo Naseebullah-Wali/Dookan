@@ -142,10 +142,10 @@
             <h2 class="mb-3">{{ $t('contact.followUs') }}</h2>
             <p class="text-muted mb-4">{{ $t('contact.followUsText') }}</p>
             <div class="d-flex gap-3 justify-content-center flex-wrap">
-              <a href="#" class="btn btn-outline-primary"><i class="bi bi-facebook me-2"></i>Facebook</a>
-              <a href="#" class="btn btn-outline-primary"><i class="bi bi-instagram me-2"></i>Instagram</a>
-              <a href="#" class="btn btn-outline-primary"><i class="bi bi-twitter me-2"></i>Twitter</a>
-              <a href="#" class="btn btn-outline-primary"><i class="bi bi-linkedin me-2"></i>LinkedIn</a>
+              <a v-if="socialLinks.facebook" :href="socialLinks.facebook" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary"><i class="bi bi-facebook me-2"></i>Facebook</a>
+              <a v-if="socialLinks.instagram" :href="socialLinks.instagram" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary"><i class="bi bi-instagram me-2"></i>Instagram</a>
+              <a v-if="socialLinks.twitter" :href="socialLinks.twitter" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary"><i class="bi bi-twitter me-2"></i>Twitter</a>
+              <a v-if="socialLinks.linkedin" :href="socialLinks.linkedin" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary"><i class="bi bi-linkedin me-2"></i>LinkedIn</a>
             </div>
           </div>
         </div>
@@ -168,8 +168,16 @@ const { t } = useI18n()
 
 // Support contact details from environment variables
 const supportEmail = import.meta.env.VITE_SUPPORT_EMAIL || 'info@dookan.af'
-const supportPhone = import.meta.env.VITE_SUPPORT_PHONE || '+93 700 123 456'
-const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '93700123456'
+const supportPhone = import.meta.env.VITE_SUPPORT_PHONE || '4915217735657'
+const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '4915217735657'
+
+// Social media links from environment variables
+const socialLinks = ref({
+  facebook: import.meta.env.VITE_FACEBOOK_URL || '',
+  instagram: import.meta.env.VITE_INSTAGRAM_URL || '',
+  twitter: import.meta.env.VITE_TWITTER_URL || '',
+  linkedin: import.meta.env.VITE_LINKEDIN_URL || ''
+})
 
 const formData = ref({
   name: '',

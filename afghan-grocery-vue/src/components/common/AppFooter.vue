@@ -44,7 +44,7 @@
       
       <!-- Footer Bottom -->
       <div class="pt-4 border-top border-secondary">
-        <div class="row align-items-center">
+        <div class="row align-items-center mb-3">
           <div class="col-md-6 col-12 text-center text-md-start mb-3 mb-md-0">
             <p class="text-white-50 mb-0">{{ $t('footer.copyright') }}</p>
           </div>
@@ -55,6 +55,14 @@
             </div>
           </div>
         </div>
+
+        <!-- Powered By Section -->
+        <div class="pt-2">
+          <p class="text-white-50 small mb-0">
+            Powered by 
+            <a href="https://NaseebWali.com" target="_blank" rel="noopener noreferrer" class="text-white-50 hover-text-white text-decoration-none">Dream Team Remote</a>
+          </p>
+        </div>
       </div>
     </div>
   </footer>
@@ -64,5 +72,11 @@
 .hover-text-white:hover {
   color: white !important;
   transition: color 0.2s ease;
+}
+
+/* Reduce container padding for footer */
+.container {
+  padding-left: 0.90rem;
+  padding-right: 0.90rem;
 }
 </style>

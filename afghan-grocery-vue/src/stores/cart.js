@@ -12,8 +12,22 @@ export const useCartStore = defineStore('cart', () => {
         return items.value.reduce((total, item) => total + (item.price * item.quantity), 0)
     })
 
+    // Delivery fee logic centralized here. It uses a per-city mapping with a free-threshold
+    const deliveryCity = ref(localStorage.getItem('deliveryCity') || 'kandahar')
+
+    const deliveryFeesMap = {
+        kandahar: 400
+    }
+
+    function setDeliveryCity(city) {
+        deliveryCity.value = city
+        localStorage.setItem('deliveryCity', city)
+    }
+
     const deliveryFee = computed(() => {
-        return subtotal.value > 5000 ? 0 : 200
+        // Free if subtotal above threshold, else use city specific fee or default
+        if (subtotal.value > 5000) return 0
+        return deliveryFeesMap[deliveryCity.value] || 200
     })
 
     const total = computed(() => {
@@ -107,8 +121,10 @@ export const useCartStore = defineStore('cart', () => {
         items,
         itemCount,
         subtotal,
+        deliveryCity,
         deliveryFee,
         total,
+        setDeliveryCity,
         addToCart,
         removeFromCart,
         updateQuantity,

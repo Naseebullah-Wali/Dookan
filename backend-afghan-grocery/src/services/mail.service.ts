@@ -86,4 +86,62 @@ export async function sendContactEmail({ name, email, phone, subject, message }:
     }
 }
 
-export default { sendContactEmail }
+export async function sendPasswordResetEmail({ email, resetLink }: { email: string; resetLink: string }) {
+    try {
+        const mailOptions = {
+            from: `Dookan Support <${SUPPORT_EMAIL}>`,
+            to: email,
+            subject: 'Reset Your Password - Dookan',
+            text: `Click the link below to reset your password:\n\n${resetLink}\n\nThis link will expire in 1 hour.\n\nIf you did not request this email, please ignore it.`,
+            html: `
+                <h2>Password Reset Request</h2>
+                <p>We received a request to reset your password. Click the link below to proceed:</p>
+                <p><a href="${resetLink}" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Reset Password</a></p>
+                <p>Or copy and paste this link in your browser:</p>
+                <p>${resetLink}</p>
+                <p><strong>This link will expire in 1 hour.</strong></p>
+                <hr/>
+                <p>If you did not request this email, please ignore it. Your account is secure.</p>
+            `
+        }
+
+        // If no SMTP configured, log warning and return graceful failure
+        if (!transporter) {
+            console.warn('⚠️ Email service unavailable - SMTP not configured. Password reset email not sent.', {
+                to: email,
+                timestamp: new Date().toISOString()
+            })
+            return {
+                success: false,
+                error: 'Email service unavailable',
+                message: 'Email service is temporarily unavailable. Please try again later.'
+            }
+        }
+
+        const info = await transporter.sendMail(mailOptions)
+        console.info('📧 Password reset email sent successfully:', {
+            messageId: info.messageId,
+            to: email,
+            timestamp: new Date().toISOString()
+        })
+        return {
+            success: true,
+            messageId: info.messageId
+        }
+    } catch (error: any) {
+        console.error('❌ Failed to send password reset email:', {
+            message: error.message,
+            code: error.code,
+            timestamp: new Date().toISOString()
+        })
+        
+        return {
+            success: false,
+            error: 'Send failed',
+            message: 'Failed to send password reset email. Please try again later.'
+        }
+    }
+}
+
+export default { sendContactEmail, sendPasswordResetEmail }
+

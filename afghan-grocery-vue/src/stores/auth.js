@@ -6,7 +6,8 @@ export const useAuthStore = defineStore('auth', () => {
     const user = ref(null)
     const profile = ref(null)
     const session = ref(null)
-    const token = ref(localStorage.getItem('accessToken') || null)
+    // Don't load token from localStorage anymore - use httpOnly cookies
+    const token = ref(null)
     const loading = ref(false)
     const error = ref(null)
     const initialized = ref(false)
@@ -53,11 +54,9 @@ export const useAuthStore = defineStore('auth', () => {
 
             user.value = response.user
             session.value = response.session
-            token.value = response.session?.accessToken || null
-            if (token.value) {
-                localStorage.setItem('accessToken', token.value)
-                if (response.session.refreshToken) localStorage.setItem('refreshToken', response.session.refreshToken)
-            }
+            // With httpOnly cookies, backend sets auth cookie automatically
+            // Set flag to indicate cookie-authenticated
+            token.value = 'cookie-authenticated'
 
             if (user.value) {
                 await fetchProfile()
@@ -78,11 +77,9 @@ export const useAuthStore = defineStore('auth', () => {
             const response = await authService.login(email, password)
             user.value = response.user
             session.value = response.session
-            token.value = response.session?.accessToken || null
-            if (token.value) {
-                localStorage.setItem('accessToken', token.value)
-                if (response.session.refreshToken) localStorage.setItem('refreshToken', response.session.refreshToken)
-            }
+            // With httpOnly cookies, backend sets auth cookie automatically
+            // Set flag to indicate cookie-authenticated
+            token.value = 'cookie-authenticated'
 
             profile.value = response.profile
             return true
@@ -103,8 +100,8 @@ export const useAuthStore = defineStore('auth', () => {
             session.value = null
             profile.value = null
             token.value = null
-            localStorage.removeItem('accessToken')
-            localStorage.removeItem('refreshToken')
+            // localStorage no longer stores tokens (using httpOnly cookies)
+            // Backend will clear the cookies
             return true
         } catch (err) {
             error.value = err.message || 'Logout failed'

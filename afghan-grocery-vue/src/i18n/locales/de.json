@@ -364,7 +364,8 @@
         "faq3A": "Wir akzeptieren Online-Zahlungen und Nachnahme.",
         "followUs": "Folgen Sie uns",
         "followUsText": "Bleiben Sie über soziale Medien mit uns in Verbindung für Updates und Sonderangebote!",
-        "messageSent": "Nachricht erfolgreich gesendet! Wir melden uns bald bei Ihnen."
+        "messageSent": "Nachricht erfolgreich gesendet! Wir melden uns bald bei Ihnen.",
+        "messageSentViaWhatsApp": "Nachricht per WhatsApp versendet!"
     },
     "tracking": {
         "title": "Bestellung verfolgen",

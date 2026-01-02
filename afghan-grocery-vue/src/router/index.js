@@ -94,7 +94,26 @@ const routes = [
         component: () => import('@/views/LoginPage.vue'),
         meta: { title: 'Login - Afghan Grocery', guestOnly: true }
     },
-    // OAuth handled server-side; no client callback route required
+    {
+        path: '/forgot-password',
+        name: 'ForgotPassword',
+        component: () => import('@/views/ForgotPasswordPage.vue'),
+        meta: { title: 'Forgot Password - Afghan Grocery', guestOnly: true }
+    },
+    {
+        path: '/reset-password',
+        name: 'ResetPassword',
+        component: () => import('@/pages/ResetPasswordPage.vue'),
+        meta: { title: 'Reset Password - Afghan Grocery', guestOnly: true }
+    },
+    // OAuth callback from Supabase - main route
+    {
+        path: '/auth/callback',
+        name: 'AuthCallback',
+        component: () => import('@/views/OAuthCallback.vue'),
+        meta: { title: 'Authenticating...' }
+    },
+    // OAuth callback alternative route (for backwards compatibility)
     {
         path: '/auth/oauth/callback',
         name: 'OAuthCallback',

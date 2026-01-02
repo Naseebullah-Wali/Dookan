@@ -230,6 +230,46 @@ class UserModel {
         }
     }
 
+    async updatePassword(id: string, newPassword: string): Promise<boolean> {
+        try {
+            console.log(`🔐 Updating password in Supabase for user ID: ${id}`);
+            console.log(`📝 New password length: ${newPassword.length} chars`);
+            
+            // Update password in auth.users via Supabase Admin API
+            // NOTE: Pass plain password - Supabase will hash it internally
+            const { data, error } = await supabase.auth.admin.updateUserById(id, {
+                password: newPassword,
+            });
+
+            if (error) {
+                console.error('❌ Supabase updateUserById error:', {
+                    code: error.status || error.code,
+                    message: error.message,
+                    userId: id,
+                });
+                throw error;
+            }
+
+            console.log('✅ Supabase password updated successfully');
+            console.log(`📊 Updated user:`, {
+                id: data.user?.id,
+                email: data.user?.email,
+                updated_at: data.user?.updated_at,
+            });
+
+            return true;
+        } catch (err: any) {
+            console.error('❌ UserModel.updatePassword error:', {
+                name: err.name,
+                message: err.message,
+                code: err.code,
+                status: err.status,
+                userId: id,
+            });
+            throw err;
+        }
+    }
+
     async getAll(limit: number = 50, offset: number = 0): Promise<User[]> {
         try {
             const from = offset;

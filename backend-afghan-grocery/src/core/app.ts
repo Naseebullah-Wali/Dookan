@@ -4,10 +4,11 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import { randomUUID } from 'crypto';
 import config from '../config';
 import { errorHandler, notFoundHandler } from '../middleware/errorHandler';
+import csrfProtection, { csrfToken } from '../middleware/csrf';
 import authRoutes from '../routes/authRoutes';
 import productRoutes from '../routes/productRoutes';
 import categoryRoutes from '../routes/categoryRoutes';
@@ -61,17 +62,14 @@ class App {
         // CORS
         this.app.use(cors(config.cors));
 
-        // General rate limiting with proper IP detection
+        // General rate limiting with proper IP detection (IPv6 safe)
         const limiter = rateLimit({
             windowMs: config.rateLimit.windowMs,
             max: config.rateLimit.maxRequests,
             message: 'Too many requests from this IP, please try again later.',
             standardHeaders: true,
             legacyHeaders: false,
-            keyGenerator: (req, res) => {
-                // Use X-Forwarded-For header if available (from nginx), otherwise use remote IP
-                return req.ip || req.socket.remoteAddress || 'unknown';
-            },
+            keyGenerator: ipKeyGenerator,
         });
         this.app.use('/api/', limiter);
 
@@ -83,9 +81,7 @@ class App {
             standardHeaders: true,
             legacyHeaders: false,
             skipSuccessfulRequests: false,
-            keyGenerator: (req, res) => {
-                return req.ip || req.socket.remoteAddress || 'unknown';
-            },
+            keyGenerator: ipKeyGenerator,
         });
 
         // Strict rate limiting for payment endpoints
@@ -95,15 +91,32 @@ class App {
             message: 'Too many payment requests. Please try again later.',
             standardHeaders: true,
             legacyHeaders: false,
-            keyGenerator: (req, res) => {
-                return req.ip || req.socket.remoteAddress || 'unknown';
-            },
+            keyGenerator: ipKeyGenerator,
         });
 
         // Body parsing with size limits
         this.app.use(express.json({ limit: '1mb' }));
         this.app.use(express.urlencoded({ extended: true, limit: '1mb' }));
         this.app.use(cookieParser());
+
+        // CSRF Protection - apply to all routes EXCEPT csrf-token endpoint
+        this.app.use((req, res, next) => {
+            // Skip CSRF for csrf-token endpoint and GET requests
+            if (req.method === 'GET' && req.path.endsWith('/csrf-token')) {
+                return next();
+            }
+            csrfProtection(req, res, (err) => {
+                if (err) {
+                    console.error('CSRF Error:', err.message, 'Path:', req.path, 'Method:', req.method);
+                    // Only handle CSRF-specific errors
+                    if (err.code === 'EBADCSRFTOKEN') {
+                        return res.status(403).json({ error: 'Invalid CSRF token' });
+                    }
+                    return next(err);
+                }
+                next();
+            });
+        });
 
         // Compression
         this.app.use(compression());
@@ -138,6 +151,13 @@ class App {
                 status: 'OK',
                 timestamp: new Date().toISOString(),
                 environment: config.env,
+            });
+        });
+
+        // CSRF token endpoint - apply CSRF middleware to generate token
+        this.app.get(`/api/${apiVersion}/csrf-token`, csrfProtection, (req, res) => {
+            res.json({
+                csrfToken: req.csrfToken()
             });
         });
 

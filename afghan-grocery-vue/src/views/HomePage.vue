@@ -79,7 +79,7 @@
         
         <!-- Loading State -->
         <div v-if="loading" class="row g-3">
-          <div v-for="i in 4" :key="i" class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12">
+          <div v-for="i in 6" :key="i" class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12">
             <div class="card border-0 shadow-sm" style="height: 350px;">
               <div class="placeholder-glow">
                 <div class="placeholder col-12" style="height: 200px;"></div>
@@ -88,15 +88,58 @@
           </div>
         </div>
         
-        <!-- Products Grid -->
-        <div v-else class="row g-3">
-          <div
-            v-for="product in featuredProducts"
-            :key="product.id"
-            class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12"
-          >
-            <ProductCard :product="product" />
+        <!-- Products Carousel -->
+        <div v-else>
+          <!-- Product Cards Grid -->
+          <div class="row g-3">
+            <div
+              v-for="product in paginatedProducts"
+              :key="product.id"
+              class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12 carousel-product-item"
+            >
+              <ProductCard :product="product" />
+            </div>
           </div>
+          
+          <!-- Carousel Controls (Below Cards) -->
+          <div v-if="maxPages > 1" class="carousel-controls mt-5 d-flex justify-content-center align-items-center gap-4">
+            <!-- Previous Button -->
+            <button
+              @click="languageStore.isRTL ? nextPage() : prevPage()"
+              class="carousel-arrow-btn"
+              :aria-label="$t('common.previous') || 'Previous'"
+            >
+              <i :class="['bi', languageStore.isRTL ? 'bi-chevron-right' : 'bi-chevron-left']"></i>
+            </button>
+            
+            <!-- Pagination Dots -->
+            <div class="pagination-dots d-flex gap-2">
+              <button
+                v-for="page in maxPages"
+                :key="page"
+                @click="carouselPage = page - 1"
+                class="pagination-dot"
+                :class="{ active: carouselPage === page - 1 }"
+                :aria-label="`Page ${page}`"
+              ></button>
+            </div>
+            
+            <!-- Next Button -->
+            <button
+              @click="languageStore.isRTL ? prevPage() : nextPage()"
+              class="carousel-arrow-btn"
+              :aria-label="$t('common.next') || 'Next'"
+            >
+              <i :class="['bi', languageStore.isRTL ? 'bi-chevron-left' : 'bi-chevron-right']"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Mobile View All Button -->
+        <div class="mt-5 text-center d-sm-none">
+          <router-link to="/shop" class="btn btn-primary btn-lg">
+            {{ $t('common.viewAll') }} <i class="bi bi-arrow-right ms-2"></i>
+          </router-link>
         </div>
       </div>
     </section>
@@ -105,14 +148,14 @@
     <div class="section-separator"></div>
 
     <!-- Testimonials Section -->
-    <TestimonialsSection />
+    <TestimonialMarquee />
 
     <AppFooter />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProductsStore } from '@/stores/products'
 import { useLanguageStore } from '@/stores/language'
@@ -121,7 +164,7 @@ import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import NewsTicker from '@/components/common/NewsTicker.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
-import TestimonialsSection from '@/components/common/TestimonialsSection.vue'
+import TestimonialMarquee from '@/components/common/TestimonialMarquee.vue'
 import ProductCard from '@/components/product/ProductCard.vue'
 import HeroBackground from '@/components/common/HeroBackground.vue'
 
@@ -130,6 +173,8 @@ const productsStore = useProductsStore()
 const languageStore = useLanguageStore()
 const analytics = useAnalytics()
 const featuredProducts = ref([])
+const carouselPage = ref(0)
+const itemsPerPage = ref(6)
 const categories = ref([])
 const loading = ref(true)
 let refreshInterval = null
@@ -139,8 +184,9 @@ const REFRESH_INTERVAL = 5 * 60 * 1000
 
 async function loadFeaturedProducts() {
   try {
-    await productsStore.fetchFeaturedProducts(4)
+    await productsStore.fetchFeaturedProducts(12)
     featuredProducts.value = productsStore.featuredProducts
+    carouselPage.value = 0
   } catch (error) {
     // Error handled by store
   }
@@ -150,14 +196,14 @@ async function loadHomePageData() {
   try {
     loading.value = true
     
-    // Fetch categories - always get fresh data from API
-    const response = await productsStore.fetchCategories()
+    // Fetch categories with product counts
+    await productsStore.fetchCategoriesWithCounts()
     
-    if (!response || response.length === 0) {
+    if (!productsStore.categories || productsStore.categories.length === 0) {
       console.warn('No categories returned from API')
       categories.value = []
     } else {
-      categories.value = response.map(cat => ({
+      categories.value = productsStore.categories.map(cat => ({
         ...cat,
         count: cat.product_count || 0
       }))
@@ -174,6 +220,27 @@ async function loadHomePageData() {
     loading.value = false
   }
 }
+
+// Carousel navigation
+function nextPage() {
+  const maxPages = Math.ceil(featuredProducts.value.length / itemsPerPage.value)
+  carouselPage.value = (carouselPage.value + 1) % maxPages
+}
+
+function prevPage() {
+  const maxPages = Math.ceil(featuredProducts.value.length / itemsPerPage.value)
+  carouselPage.value = (carouselPage.value - 1 + maxPages) % maxPages
+}
+
+const paginatedProducts = computed(() => {
+  const start = carouselPage.value * itemsPerPage.value
+  const end = start + itemsPerPage.value
+  return featuredProducts.value.slice(start, end)
+})
+
+const maxPages = computed(() => {
+  return Math.ceil(featuredProducts.value.length / itemsPerPage.value)
+})
 
 onMounted(async () => {
   await loadHomePageData()
@@ -296,5 +363,73 @@ onUnmounted(() => {
     max-width: 350px;
     margin-top: 2rem;
   }
+}
+
+/* Carousel Styles */
+.carousel-controls {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e9ecef;
+}
+
+/* Carousel Arrow Buttons */
+.carousel-arrow-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid var(--bs-primary);
+  background: transparent;
+  color: var(--bs-primary);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.carousel-arrow-btn:hover {
+  background: var(--bs-primary);
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.carousel-arrow-btn:active {
+  transform: scale(0.95);
+}
+
+.pagination-dots {
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--bs-primary);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  padding: 0;
+  min-width: 12px;
+  min-height: 12px;
+}
+
+.pagination-dot:hover {
+  background: var(--bs-primary);
+  transform: scale(1.25);
+}
+
+.pagination-dot.active {
+  background: var(--bs-primary);
+}
+
+/* Smooth product item appearance */
+.carousel-product-item {
+  transition: opacity 0.3s ease;
 }
 </style>

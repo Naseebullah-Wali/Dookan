@@ -54,25 +54,83 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useOrdersStore } from '@/stores/orders'
 import { useCurrencyStore } from '@/stores/currency'
+import { useCartStore } from '@/stores/cart'
 import { useAnalytics } from '@/composables/useAnalytics'
+import { getRecaptchaToken } from '@/utils/recaptcha'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 
 const route = useRoute()
+const router = useRouter()
 const ordersStore = useOrdersStore()
 const currencyStore = useCurrencyStore()
+const cartStore = useCartStore()
 const analytics = useAnalytics()
 const order = ref(null)
+const isLoading = ref(false)
 
 onMounted(async () => {
-  const orderId = route.params.orderId
-  order.value = await ordersStore.fetchOrderById(orderId)
+  isLoading.value = true
   
-  if (order.value) {
-    analytics.trackPurchase(order.value)
+  try {
+    // Check if this is a Stripe payment return
+    const sessionId = route.query.session_id
+    if (sessionId) {
+      console.log('✅ Stripe payment completed, session_id:', sessionId)
+      
+      // Get pending order data from sessionStorage
+      const pendingOrderDataStr = sessionStorage.getItem('pendingOrderData')
+      if (pendingOrderDataStr) {
+        try {
+          const orderData = JSON.parse(pendingOrderDataStr)
+          console.log('📦 Creating order from Stripe payment...')
+          
+          // Update payment intent ID from Stripe
+          orderData.payment_intent_id = sessionId
+          
+          // Add recaptcha token if available
+          const recaptchaToken = await getRecaptchaToken('create_order')
+          if (recaptchaToken) {
+            orderData.recaptchaToken = recaptchaToken
+          }
+          
+          // Create the order
+          const createdOrder = await ordersStore.createOrder(orderData)
+          order.value = createdOrder
+          
+          // Clear cart and pending data
+          cartStore.clearCart()
+          sessionStorage.removeItem('pendingOrderData')
+          
+          console.log('✅ Order created:', createdOrder.id)
+          
+          // Track purchase
+          if (order.value) {
+            analytics.trackPurchase(order.value)
+          }
+        } catch (err) {
+          console.error('❌ Error creating order from Stripe session:', err)
+          // Still redirect to show the confirmation page with error info
+        }
+      }
+    } else {
+      // Normal confirmation page load with orderId
+      const orderId = route.params.orderId
+      if (orderId) {
+        order.value = await ordersStore.fetchOrderById(orderId)
+        
+        if (order.value) {
+          analytics.trackPurchase(order.value)
+        }
+      }
+    }
+  } catch (error) {
+    console.error('❌ Confirmation page error:', error)
+  } finally {
+    isLoading.value = false
   }
 })
 </script>

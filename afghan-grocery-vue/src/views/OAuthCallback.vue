@@ -45,6 +45,7 @@ export default {
       const resp = await fetch(`${apiBase}/auth/oauth/exchange`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',  // Send/receive cookies for auth
         body: JSON.stringify({ access_token, provider_token })
       });
 

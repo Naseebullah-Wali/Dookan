@@ -6,60 +6,107 @@
         <p class="text-center text-muted">{{ $t('home.testimonials.subtitle') }}</p>
       </div>
 
-      <div v-if="!loading" class="marquee-wrapper">
-        <div class="marquee-track d-flex gap-4" :class="{ 'rtl-animation': languageStore.isRTL }" :style="{ animationDuration: '40s' }">
-          <!-- Original Testimonials -->
-          <div 
-            v-for="(testimonial, index) in testimonials"
-            :key="`orig-${testimonial.id}`"
-            class="card shadow-sm flex-shrink-0 testimonial-card"
-            style="width: 350px;">
-            <div class="card-body p-4">
-              <div class="d-flex align-items-center gap-3 mb-3">
-                <img 
-                  :src="getTestimonialAvatar(testimonial, index)" 
-                  :alt="testimonial.user_name"
-                  class="rounded-circle"
-                  style="width: 50px; height: 50px; object-fit: cover;"
-                />
-                <div>
-                  <h5 class="mb-0">{{ testimonial.user_name }}</h5>
-                  <p class="text-muted small mb-0">{{ testimonial.location }}</p>
+      <div v-if="!loading" class="testimonials-container">
+        <!-- Desktop Animation View -->
+        <div v-if="!shouldShowSlider" class="marquee-wrapper">
+          <div class="marquee-track d-flex gap-4" :class="{ 'rtl-animation': languageStore.isRTL }" :style="{ animationDuration: '40s' }">
+            <!-- Original Testimonials -->
+            <div 
+              v-for="(testimonial, index) in testimonials"
+              :key="`orig-${testimonial.id}`"
+              class="card shadow-sm flex-shrink-0 testimonial-card"
+              style="width: 350px;">
+              <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                  <img 
+                    :src="getTestimonialAvatar(testimonial, index)" 
+                    :alt="testimonial.user_name"
+                    class="rounded-circle"
+                    style="width: 50px; height: 50px; object-fit: cover;"
+                  />
+                  <div>
+                    <h5 class="mb-0">{{ testimonial.user_name }}</h5>
+                    <p class="text-muted small mb-0">{{ testimonial.location }}</p>
+                  </div>
                 </div>
+                <div class="mb-3">
+                  <i v-for="star in 5" :key="star" :class="['bi', star <= testimonial.rating ? 'bi-star-fill' : 'bi-star', 'text-warning']"></i>
+                </div>
+                <p class="fst-italic text-secondary mb-3">"{{ testimonial.comment }}"</p>
+                <div class="text-muted small">{{ formatDate(testimonial.created_at) }}</div>
               </div>
-              <div class="mb-3">
-                <i v-for="star in 5" :key="star" :class="['bi', star <= testimonial.rating ? 'bi-star-fill' : 'bi-star', 'text-warning']"></i>
+            </div>
+
+            <!-- Duplicated Testimonials for Loop -->
+            <div 
+              v-for="(testimonial, index) in testimonials"
+              :key="`dup-${testimonial.id}`"
+              class="card shadow-sm flex-shrink-0 testimonial-card"
+              style="width: 350px;">
+              <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                  <img 
+                    :src="getTestimonialAvatar(testimonial, index)" 
+                    :alt="testimonial.user_name"
+                    class="rounded-circle"
+                    style="width: 50px; height: 50px; object-fit: cover;"
+                  />
+                  <div>
+                    <h5 class="mb-0">{{ testimonial.user_name }}</h5>
+                    <p class="text-muted small mb-0">{{ testimonial.location }}</p>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <i v-for="star in 5" :key="star" :class="['bi', star <= testimonial.rating ? 'bi-star-fill' : 'bi-star', 'text-warning']"></i>
+                </div>
+                <p class="fst-italic text-secondary mb-3">"{{ testimonial.comment }}"</p>
+                <div class="text-muted small">{{ formatDate(testimonial.created_at) }}</div>
               </div>
-              <p class="fst-italic text-secondary mb-3">"{{ testimonial.comment }}"</p>
-              <div class="text-muted small">{{ formatDate(testimonial.created_at) }}</div>
             </div>
           </div>
+        </div>
 
-          <!-- Duplicated Testimonials for Loop -->
-          <div 
-            v-for="(testimonial, index) in testimonials"
-            :key="`dup-${testimonial.id}`"
-            class="card shadow-sm flex-shrink-0 testimonial-card"
-            style="width: 350px;">
+        <!-- Mobile Slider View -->
+        <div v-else class="mobile-testimonials-slider">
+          <div class="testimonial-card card shadow-sm" style="width: 100%;">
             <div class="card-body p-4">
               <div class="d-flex align-items-center gap-3 mb-3">
                 <img 
-                  :src="getTestimonialAvatar(testimonial, index)" 
-                  :alt="testimonial.user_name"
+                  :src="getTestimonialAvatar(testimonials[currentIndex], currentIndex)" 
+                  :alt="testimonials[currentIndex].user_name"
                   class="rounded-circle"
                   style="width: 50px; height: 50px; object-fit: cover;"
                 />
                 <div>
-                  <h5 class="mb-0">{{ testimonial.user_name }}</h5>
-                  <p class="text-muted small mb-0">{{ testimonial.location }}</p>
+                  <h5 class="mb-0">{{ testimonials[currentIndex].user_name }}</h5>
+                  <p class="text-muted small mb-0">{{ testimonials[currentIndex].location }}</p>
                 </div>
               </div>
               <div class="mb-3">
-                <i v-for="star in 5" :key="star" :class="['bi', star <= testimonial.rating ? 'bi-star-fill' : 'bi-star', 'text-warning']"></i>
+                <i v-for="star in 5" :key="star" :class="['bi', star <= testimonials[currentIndex].rating ? 'bi-star-fill' : 'bi-star', 'text-warning']"></i>
               </div>
-              <p class="fst-italic text-secondary mb-3">"{{ testimonial.comment }}"</p>
-              <div class="text-muted small">{{ formatDate(testimonial.created_at) }}</div>
+              <p class="fst-italic text-secondary mb-3">"{{ testimonials[currentIndex].comment }}"</p>
+              <div class="text-muted small">{{ formatDate(testimonials[currentIndex].created_at) }}</div>
             </div>
+          </div>
+          
+          <!-- Mobile Navigation -->
+          <div class="d-flex justify-content-center align-items-center gap-3 mt-4">
+            <button 
+              @click="currentIndex = (currentIndex - 1 + testimonials.length) % testimonials.length"
+              class="btn btn-sm btn-outline-primary rounded-circle"
+              :aria-label="$t('common.previous') || 'Previous'"
+            >
+              <i class="bi bi-chevron-left"></i>
+            </button>
+            <span class="text-muted small">{{ currentIndex + 1 }} / {{ testimonials.length }}</span>
+            <button 
+              @click="currentIndex = (currentIndex + 1) % testimonials.length"
+              class="btn btn-sm btn-outline-primary rounded-circle"
+              :aria-label="$t('common.next') || 'Next'"
+            >
+              <i class="bi bi-chevron-right"></i>
+            </button>
           </div>
         </div>
       </div>
@@ -68,7 +115,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import api from '@/services/api'
 import { getAvatarUrl } from '@/services/imageService'
 import { useI18n } from 'vue-i18n'
@@ -79,6 +126,10 @@ const languageStore = useLanguageStore()
 
 const testimonials = ref([])
 const loading = ref(true)
+const isMobile = ref(false)
+const currentIndex = ref(0)
+
+const shouldShowSlider = computed(() => isMobile.value && testimonials.value.length > 0)
 
 onMounted(async () => {
   try {
@@ -86,11 +137,16 @@ onMounted(async () => {
     testimonials.value = response.data || []
   } catch (error) {
     console.error('Failed to load testimonials:', error)
-    // Show empty if API fails - don't use stale fallback data
     testimonials.value = []
   } finally {
     loading.value = false
   }
+
+  // Detect mobile
+  isMobile.value = window.innerWidth <= 640
+  window.addEventListener('resize', () => {
+    isMobile.value = window.innerWidth <= 640
+  })
 })
 
 // Get avatar URL for each testimonial
@@ -176,6 +232,10 @@ function formatDate(dateString) {
 @media (max-width: 640px) {
   .testimonial-card {
     width: 280px !important;
+  }
+  
+  .mobile-testimonials-slider {
+    padding: 0 1rem;
   }
 }
 </style>

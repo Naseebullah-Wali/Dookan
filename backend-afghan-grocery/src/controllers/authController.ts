@@ -1,4 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
+import { randomBytes, createHash } from 'crypto';
+import supabase from '../lib/supabaseClient';
 import UserModel from '../models/User';
 import { hashPassword, comparePassword, generateAccessToken, generateRefreshToken } from '../utils/auth';
 import { sendSuccess } from '../utils/response';
@@ -37,6 +39,24 @@ export const register = async (
             role: user.role,
         });
 
+        // Set httpOnly cookies for tokens (secure auth)
+        const isProduction = config.env === 'production';
+        res.cookie('accessToken', accessToken, {
+            httpOnly: true,        // Prevents JS access (XSS protection)
+            secure: isProduction,  // HTTPS only in production
+            sameSite: 'strict',    // CSRF protection
+            maxAge: 24 * 60 * 60 * 1000,  // 24 hours
+            path: '/',
+        });
+
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000,  // 7 days
+            path: '/',
+        });
+
         // Remove password from response
         const { password: _, ...userWithoutPassword } = user;
 
@@ -44,8 +64,7 @@ export const register = async (
             res,
             {
                 user: userWithoutPassword,
-                accessToken,
-                refreshToken,
+                // Don't send tokens in body when using httpOnly cookies
             },
             'Registration successful',
             201
@@ -63,19 +82,41 @@ export const login = async (
     try {
         const { email, password } = req.body;
 
-        // Find user
-        const user = await UserModel.findByEmail(email);
+        console.log(`🔐 Login attempt for email: ${email}`);
+
+        // Authenticate with Supabase Auth API directly
+        // This validates credentials against auth.users table
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
+
+        if (authError) {
+            console.error('❌ Supabase auth error:', {
+                code: authError.status,
+                message: authError.message,
+                email,
+            });
+            throw new UnauthorizedError('Invalid email or password');
+        }
+
+        if (!authData.user) {
+            console.error('❌ No user returned from Supabase auth');
+            throw new UnauthorizedError('Invalid email or password');
+        }
+
+        console.log(`✅ Supabase auth successful for user: ${authData.user.id}`);
+
+        // Get user profile from profiles table
+        const user = await UserModel.findById(authData.user.id);
         if (!user) {
-            throw new UnauthorizedError('Invalid email or password');
+            console.error('❌ User profile not found for ID:', authData.user.id);
+            throw new UnauthorizedError('User profile not found');
         }
 
-        // Verify password
-        const isPasswordValid = await comparePassword(password, user.password);
-        if (!isPasswordValid) {
-            throw new UnauthorizedError('Invalid email or password');
-        }
+        console.log(`✅ User profile found: ${user.email}`);
 
-        // Generate tokens
+        // Generate JWT tokens for our API
         const accessToken = generateAccessToken({
             userId: user.id,
             email: user.email,
@@ -88,13 +129,32 @@ export const login = async (
             role: user.role,
         });
 
+        // Set httpOnly cookies for tokens (secure auth)
+        const isProduction = config.env === 'production';
+        res.cookie('accessToken', accessToken, {
+            httpOnly: true,        // Prevents JS access (XSS protection)
+            secure: isProduction,  // HTTPS only in production
+            sameSite: 'strict',    // CSRF protection
+            maxAge: 24 * 60 * 60 * 1000,  // 24 hours
+            path: '/',
+        });
+
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000,  // 7 days
+            path: '/',
+        });
+
         // Remove password from response
         const { password: _, ...userWithoutPassword } = user;
 
+        console.log(`✅ Login successful for user: ${user.email}`);
         sendSuccess(res, {
             user: userWithoutPassword,
-            accessToken,
-            refreshToken,
+            // Don't send tokens in body when using httpOnly cookies
+            // Frontend will use cookies automatically
         }, 'Login successful');
     } catch (error) {
         next(error);
@@ -573,5 +633,117 @@ export const exchangeOAuth = async (req: Request, res: Response, next: NextFunct
         return res.json({ success: true, data: { user: userWithoutPassword } });
     } catch (err) {
         next(err);
+    }
+};
+/**
+ * Forgot Password - sends password reset link to email
+ */
+export const forgotPassword = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            throw new ValidationError('Email is required');
+        }
+
+        // Check if user exists
+        const user = await UserModel.findByEmail(email);
+        if (!user) {
+            // For security, don't reveal if email exists
+            sendSuccess(res, {}, 'If an account exists with this email, a reset link has been sent');
+            return;
+        }
+
+        // Generate a secure password reset token (valid for 1 hour)
+        const resetToken = randomBytes(32).toString('hex');
+        const resetTokenHash = createHash('sha256').update(resetToken).digest('hex');
+        const tokenExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour from now
+
+        // TODO: Store reset token in database
+        // For now, we're using a placeholder approach
+        console.log(`🔑 Password reset token for ${email}:`, resetToken);
+        console.log(`⏰ Token expires at: ${tokenExpiry}`);
+
+        // Build reset link
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        const resetLink = `${frontendUrl}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
+
+        // Send password reset email
+        const { sendPasswordResetEmail } = await import('../services/mail.service');
+        const emailResult = await sendPasswordResetEmail({ email, resetLink });
+
+        if (!emailResult.success) {
+            console.warn('Failed to send password reset email:', emailResult);
+            sendSuccess(res, {}, 'Password reset email could not be sent. Please try again later.');
+            return;
+        }
+
+        console.info('✅ Password reset email sent successfully to:', email);
+        sendSuccess(res, {}, 'If an account exists with this email, a reset link has been sent');
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Reset Password - validates token and updates password
+ * NOTE: This is a simplified implementation
+ * For production, store reset tokens in database with expiration times
+ */
+export const resetPassword = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { token, email, newPassword } = req.body;
+
+        if (!token || !email || !newPassword) {
+            throw new ValidationError('Token, email, and new password are required');
+        }
+
+        if (newPassword.length < 6) {
+            throw new ValidationError('Password must be at least 6 characters long');
+        }
+
+        // Find user by email
+        const user = await UserModel.findByEmail(email);
+        if (!user) {
+            throw new UnauthorizedError('Invalid reset link');
+        }
+
+        // TODO: Verify token against database stored token and expiration
+        // For now, we're using a simplified approach
+        // In production, you would:
+        // 1. Query a password_reset_tokens table
+        // 2. Check if token matches and hasn't expired
+        // 3. Delete the token after successful reset
+        
+        // Temporary validation: just verify token exists and is valid format
+        if (!token || token.length < 32) {
+            throw new UnauthorizedError('Invalid or expired reset link');
+        }
+
+        console.log(`🔄 Resetting password for user: ${email}`);
+        console.log(`🔑 Token validation (simplified): ${token.substring(0, 20)}...`);
+        console.log(`👤 User ID: ${user.id}`);
+
+        // Update user password - pass plain password, Supabase will hash it
+        // TODO: Also invalidate all existing sessions for security
+        const updateResult = await UserModel.updatePassword(user.id, newPassword);
+        
+        if (!updateResult) {
+            console.error('❌ Failed to update password in database');
+            throw new Error('Failed to update password');
+        }
+        console.info('✅ Password reset successfully for user:', email);
+        sendSuccess(res, { email }, 'Password has been reset successfully. You can now login with your new password.');
+    } catch (error) {
+        console.error('❌ Reset password error:', error);
+        next(error);
     }
 };

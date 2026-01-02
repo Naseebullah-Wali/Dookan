@@ -17,7 +17,7 @@ import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 
 // Use environment variable if available, fallback to placeholder
-const phoneNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '93700123456'
+const phoneNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '4915217735657'
 const message = encodeURIComponent(t('support.whatsappMessage'))
 
 const whatsappUrl = computed(() => {

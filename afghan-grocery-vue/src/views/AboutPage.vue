@@ -103,19 +103,19 @@
           <h2 class="text-center mb-5">{{ $t('about.impactTitle') }}</h2>
           <div class="row g-4 text-center">
             <div class="col-lg-3 col-md-6 col-6">
-              <div class="display-4 fw-bold text-primary mb-2">{{ $t('about.familiesServedCount') }}</div>
+              <div class="display-4 fw-bold text-primary mb-2">{{ impactMetrics.families_served?.toLocaleString() || '5000' }}</div>
               <div class="fw-semibold text-muted">{{ $t('about.familiesServed') }}</div>
             </div>
             <div class="col-lg-3 col-md-6 col-6">
-              <div class="display-4 fw-bold text-primary mb-2">{{ $t('about.ordersDeliveredCount') }}</div>
+              <div class="display-4 fw-bold text-primary mb-2">{{ impactMetrics.orders_delivered?.toLocaleString() || '12500' }}</div>
               <div class="fw-semibold text-muted">{{ $t('about.ordersDelivered') }}</div>
             </div>
             <div class="col-lg-3 col-md-6 col-6">
-              <div class="display-4 fw-bold text-primary mb-2">1</div>
+              <div class="display-4 fw-bold text-primary mb-2">{{ impactMetrics.cities_covered || '1' }}</div>
               <div class="fw-semibold text-muted">{{ $t('about.citiesCovered') }}</div>
             </div>
             <div class="col-lg-3 col-md-6 col-6">
-              <div class="display-4 fw-bold text-primary mb-2">98%</div>
+              <div class="display-4 fw-bold text-primary mb-2">{{ impactMetrics.customer_satisfaction || '98' }}%</div>
               <div class="fw-semibold text-muted">{{ $t('about.customerSatisfaction') }}</div>
             </div>
           </div>
@@ -174,9 +174,31 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import DeliveryMap from '@/components/common/DeliveryMap.vue'
+import api from '@/services/api'
+
+const impactMetrics = ref({
+  families_served: 5000,
+  orders_delivered: 12500,
+  cities_covered: 1,
+  customer_satisfaction: 98
+})
+
+onMounted(async () => {
+  try {
+    const response = await api.get('/settings/impact_metrics')
+    // The API returns the value directly (JSON object from site_settings table)
+    if (response.data) {
+      impactMetrics.value = response.data
+    }
+  } catch (error) {
+    console.error('Failed to load impact metrics:', error)
+    // Use default values if API fails
+  }
+})
 </script>
 
 <style scoped>

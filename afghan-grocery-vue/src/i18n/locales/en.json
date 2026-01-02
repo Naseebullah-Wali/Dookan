@@ -13,6 +13,7 @@
         "contact": "Contact",
         "loading": "Loading...",
         "saving": "Saving...",
+        "sending": "Sending...",
         "error": "Error",
         "success": "Success",
         "cancel": "Cancel",
@@ -57,7 +58,8 @@
         "next": "Next",
         "submitting": "Submitting...",
         "review": "Your Review",
-        "selectRating": "Select a rating from 1 to 5 stars"
+        "selectRating": "Select a rating from 1 to 5 stars",
+        "viewAll": "View All"
     },
     "header": {
         "searchPlaceholder": "Search for Afghan groceries...",
@@ -417,7 +419,8 @@
         "faq3A": "We accept online payments and cash on delivery.",
         "followUs": "Follow Us",
         "followUsText": "Stay connected with us on social media for updates and special offers!",
-        "messageSent": "Message sent successfully! We'll get back to you soon."
+        "messageSent": "Message sent successfully! We'll get back to you soon.",
+        "messageSentViaWhatsApp": "Message sent via WhatsApp!"
     },
     "tracking": {
         "title": "Track Your Order",
@@ -483,7 +486,40 @@
         "loginHere": "Login here",
         "signInWithGoogle": "Sign in with Google",
         "signUpWithGoogle": "Sign up with Google",
-        "continueWithGoogle": "Continue with Google"
+        "continueWithGoogle": "Continue with Google",
+        "forgotPassword": "Forgot password?"
+    },
+    "forgotPassword": {
+        "title": "Reset Your Password",
+        "subtitle": "Enter your email address and we'll send you a link to reset your password",
+        "sendLink": "Send Reset Link",
+        "emailSent": "Email Sent!",
+        "checkEmail": "We've sent a password reset link to your email address. Please check your inbox and follow the instructions.",
+        "tryAgain": "Try Another Email",
+        "backToLogin": "Back to Login",
+        "resetPassword": "Reset Password",
+        "newPassword": "New Password",
+        "confirmPassword": "Confirm Password",
+        "passwordResetSuccess": "Password reset successful!",
+        "invalidLink": "This reset link is invalid or has expired",
+        "passwordTooShort": "Password must be at least 6 characters",
+        "passwordsNotMatch": "Passwords do not match"
+    },
+    "resetPassword": {
+        "title": "Create New Password",
+        "validating": "Validating your reset link...",
+        "newPassword": "New Password",
+        "enterNewPassword": "Enter your new password",
+        "confirmPassword": "Confirm Password",
+        "confirmNewPassword": "Confirm your new password",
+        "resetPassword": "Reset Password",
+        "success": "Password Reset Successfully!",
+        "successMessage": "Your password has been reset successfully. You can now login with your new password.",
+        "goToLogin": "Go to Login",
+        "linkExpired": "Reset Link Expired",
+        "linkExpiredMessage": "Your password reset link has expired. Please request a new one.",
+        "requestNewLink": "Request New Link",
+        "backToLogin": "Back to Login"
     },
     "messages": {
         "addedToCart": "Added to cart!",

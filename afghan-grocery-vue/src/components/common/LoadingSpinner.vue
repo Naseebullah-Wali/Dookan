@@ -3,19 +3,24 @@
   <div v-if="fullScreen && isLoading" class="loading-overlay">
     <div class="loading-container">
       <div class="spinner"></div>
-      <p v-if="message" class="loading-message">{{ message }}</p>
+      <p class="loading-message">{{ displayMessage }}</p>
     </div>
   </div>
 
   <!-- Inline Loader -->
   <div v-else-if="isLoading" :class="['loading-inline', sizeClass]">
     <div class="spinner-inline"></div>
-    <p v-if="message" class="loading-message-inline">{{ message }}</p>
+    <p class="loading-message-inline">{{ displayMessage }}</p>
   </div>
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
+const props = defineProps({
   isLoading: {
     type: Boolean,
     default: true
@@ -40,6 +45,15 @@ const sizeClass = {
   md: 'loading-md',
   lg: 'loading-lg'
 }
+
+const displayMessage = computed(() => {
+  // If custom message provided, use it
+  if (props.message) return props.message
+  // Otherwise use i18n translation with proper fallback
+  const translatedMessage = t('common.loading')
+  // If translation key not found, t() returns the key itself
+  return translatedMessage && translatedMessage !== 'common.loading' ? translatedMessage : 'Loading...'
+})
 </script>
 
 <style scoped>

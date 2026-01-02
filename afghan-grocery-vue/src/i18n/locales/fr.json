@@ -364,7 +364,8 @@
         "faq3A": "Nous acceptons les paiements en ligne et le paiement à la livraison.",
         "followUs": "Suivez-nous",
         "followUsText": "Restez connecté avec nous sur les réseaux sociaux pour les mises à jour et les offres spéciales !",
-        "messageSent": "Message envoyé avec succès ! Nous vous répondrons bientôt."
+        "messageSent": "Message envoyé avec succès ! Nous vous répondrons bientôt.",
+        "messageSentViaWhatsApp": "Message envoyé via WhatsApp !"
     },
     "tracking": {
         "title": "Suivre votre commande",

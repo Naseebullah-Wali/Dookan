@@ -38,6 +38,14 @@ const changePasswordValidation = [
 // Routes
 router.post('/register', validate(registerValidation), authController.register);
 router.post('/login', validate(loginValidation), authController.login);
+// Forgot password - request password reset
+router.post('/forgot-password', validate([body('email').isEmail().normalizeEmail()]), authController.forgotPassword);
+// Reset password - validate token and update password
+router.post('/reset-password', validate([
+    body('token').notEmpty().withMessage('Reset token is required'),
+    body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
+    body('newPassword').isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
+]), authController.resetPassword);
 // OAuth start endpoint (redirects user to Supabase Google consent)
 router.get('/oauth/google', authController.startGoogleOAuth);
 // OAuth fragment exchange: frontend posts access_token from URL fragment

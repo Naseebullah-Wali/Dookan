@@ -14,14 +14,79 @@ const api = axios.create({
     withCredentials: true // Send cookies with every request
 })
 
-// Request interceptor - add auth token (but not for cookie-authenticated users)
+// Get CSRF token from cookie or backend
+let csrfToken = null
+
+const getCsrfTokenFromCookie = () => {
+    const name = 'XSRF-TOKEN'
+    const nameEQ = name + '='
+    const cookies = document.cookie.split(';')
+    for (let i = 0; i < cookies.length; i++) {
+        let cookie = cookies[i].trim()
+        if (cookie.indexOf(nameEQ) === 0) {
+            const token = decodeURIComponent(cookie.substring(nameEQ.length))
+            console.log('✅ Found XSRF-TOKEN in cookie:', token.substring(0, 20) + '...')
+            return token
+        }
+    }
+    console.log('❌ XSRF-TOKEN not found in cookies')
+    return null
+}
+
+const fetchCsrfToken = async () => {
+    try {
+        // First try to get from cookie
+        const cookieToken = getCsrfTokenFromCookie()
+        if (cookieToken) {
+            csrfToken = cookieToken
+            return csrfToken
+        }
+
+        // If not in cookie, fetch from backend
+        if (!csrfToken) {
+            console.log('📡 Fetching CSRF token from backend...')
+            const response = await axios.get(`${API_BASE_URL}/api/${API_VERSION}/csrf-token`, {
+                withCredentials: true
+            })
+            csrfToken = response.data.csrfToken
+            console.log('✅ Got CSRF token from backend:', csrfToken?.substring(0, 20) + '...')
+            
+            // Check if cookie was set after this request
+            const cookieAfterFetch = getCsrfTokenFromCookie()
+            if (cookieAfterFetch) {
+                console.log('✅ XSRF-TOKEN cookie set after fetch')
+            } else {
+                console.warn('⚠️ XSRF-TOKEN cookie NOT set after fetch')
+            }
+        }
+        return csrfToken
+    } catch (error) {
+        console.warn('Failed to fetch CSRF token:', error)
+        return null
+    }
+}
+
+// Request interceptor - add auth token and CSRF token
 api.interceptors.request.use(
-    (config) => {
+    async (config) => {
         const authStore = useAuthStore()
+        
         // Only add Bearer token if it's a real token (not the cookie-auth placeholder)
         if (authStore.token && authStore.token !== 'cookie-authenticated') {
             config.headers.Authorization = `Bearer ${authStore.token}`
         }
+
+        // Add CSRF token for non-GET requests
+        if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(config.method?.toUpperCase())) {
+            const token = await fetchCsrfToken()
+            if (token) {
+                config.headers['X-CSRF-Token'] = token
+                console.log('✅ Added X-CSRF-Token header for', config.method, config.url)
+            } else {
+                console.warn('⚠️ No CSRF token available for', config.method, config.url)
+            }
+        }
+
         return config
     },
     (error) => {
