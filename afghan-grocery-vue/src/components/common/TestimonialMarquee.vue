@@ -365,11 +365,10 @@ function formatDate(dateString) {
 }
 
 .testimonial-comment {
-  color: var(--bs-body-color);
+  color: #4a4a4a;
   line-height: 1.5;
   font-size: 0.95rem;
   font-style: italic;
-  color: var(--bs-secondary);
 }
 
 .testimonial-date {

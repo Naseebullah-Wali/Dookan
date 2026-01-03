@@ -8,7 +8,7 @@ export interface Order {
     user_id: number;
     address_id: number;
     status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-    payment_method: 'cod' | 'card' | 'bank_transfer';
+    payment_method: 'cod' | 'card' | 'bank_transfer' | 'paypal' | 'trc20' | 'arbitrum' | 'stripe' | 'whatsapp';
     payment_status: 'pending' | 'paid' | 'failed' | 'refunded';
     subtotal: number;
     shipping_fee: number;
@@ -34,13 +34,13 @@ export interface OrderItem {
 }
 
 export interface AddressData {
-    recipient_name: string;
+    full_name: string;
     phone: string;
-    province: string;
-    city: string;
-    district?: string;
     street: string;
-    postal_code?: string;
+    city: string;
+    state?: string;
+    zip?: string;
+    country?: string;
     is_default?: boolean;
 }
 
@@ -48,7 +48,7 @@ export interface CreateOrderData {
     user_id: number;
     address_id?: number;
     address?: AddressData;
-    payment_method: 'cod' | 'card' | 'bank_transfer';
+    payment_method: 'cod' | 'card' | 'bank_transfer' | 'paypal' | 'trc20' | 'arbitrum' | 'stripe' | 'whatsapp';
     items: {
         product_id: number;
         product_name: string;
@@ -80,13 +80,13 @@ class OrderModel {
         if (data.address) {
             const { data: addr, error: addrErr } = await supabase.from('addresses').insert({
                 user_id: data.user_id,
-                recipient_name: data.address.recipient_name,
+                full_name: data.address.full_name,
                 phone: data.address.phone,
-                province: data.address.province,
-                city: data.address.city,
-                district: data.address.district || null,
                 street: data.address.street,
-                postal_code: data.address.postal_code || null,
+                city: data.address.city,
+                state: data.address.state || null,
+                zip: data.address.zip || '',
+                country: data.address.country || 'Afghanistan',
                 is_default: data.address.is_default ? true : false
             }).select().single();
             if (addrErr) throw addrErr;
@@ -95,11 +95,24 @@ class OrderModel {
 
         if (!addressId) throw new Error('Address ID or Address Data is required');
 
+        // Map payment methods to database-allowed values
+        const paymentMethodMap: Record<string, string> = {
+            'cod': 'cod',
+            'card': 'card',
+            'stripe': 'card',
+            'bank_transfer': 'bank_transfer',
+            'trc20': 'bank_transfer',
+            'arbitrum': 'bank_transfer',
+            'paypal': 'paypal',
+            'whatsapp': 'cod'
+        };
+        const dbPaymentMethod = paymentMethodMap[data.payment_method] || 'cod';
+
         const { data: createdOrder, error } = await supabase.from('orders').insert({
             order_number: orderNumber,
             user_id: data.user_id,
             address_id: addressId,
-            payment_method: data.payment_method,
+            payment_method: dbPaymentMethod,
             subtotal: data.subtotal,
             shipping_fee: data.shipping_fee || 0,
             tax: data.tax || 0,
@@ -115,7 +128,7 @@ class OrderModel {
         const itemsPayload = data.items.map(i => ({
             order_id: orderId,
             product_id: i.product_id,
-            product_name: i.product_name,
+            product_name: i.product_name || (i as any).name || 'Unknown Product',
             product_image: i.product_image || null,
             quantity: i.quantity,
             price: i.price,

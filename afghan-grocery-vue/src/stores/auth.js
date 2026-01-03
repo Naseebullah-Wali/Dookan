@@ -15,27 +15,21 @@ export const useAuthStore = defineStore('auth', () => {
     const isAuthenticated = computed(() => !!token.value)
     const isAdmin = computed(() => profile.value?.role === 'admin')
 
-    // Initialize auth state from Supabase
     async function initialize() {
         if (initialized.value) return
 
         loading.value = true
         try {
-            // First check if we have localStorage tokens
             const s = await authService.getSession()
             if (s && s.accessToken) {
                 token.value = s.accessToken
-                // attempt to fetch profile
                 await fetchProfile()
             } else {
-                // No localStorage token; check if we're authenticated via cookies (e.g., after OAuth)
                 const currentUser = await authService.getCurrentUser()
                 if (currentUser) {
-                    // User is authenticated via cookies; set a flag so we know auth is valid
-                    // (we won't store the httpOnly cookie in localStorage, but we know we're logged in)
                     user.value = currentUser
                     profile.value = currentUser
-                    token.value = 'cookie-authenticated' // placeholder to indicate cookie-auth
+                    token.value = 'cookie-authenticated'
                 }
             }
         } catch (err) {
@@ -51,11 +45,8 @@ export const useAuthStore = defineStore('auth', () => {
         error.value = null
         try {
             const response = await authService.register(userData)
-
             user.value = response.user
             session.value = response.session
-            // With httpOnly cookies, backend sets auth cookie automatically
-            // Set flag to indicate cookie-authenticated
             token.value = 'cookie-authenticated'
 
             if (user.value) {
@@ -77,10 +68,7 @@ export const useAuthStore = defineStore('auth', () => {
             const response = await authService.login(email, password)
             user.value = response.user
             session.value = response.session
-            // With httpOnly cookies, backend sets auth cookie automatically
-            // Set flag to indicate cookie-authenticated
             token.value = 'cookie-authenticated'
-
             profile.value = response.profile
             return true
         } catch (err) {
@@ -100,8 +88,6 @@ export const useAuthStore = defineStore('auth', () => {
             session.value = null
             profile.value = null
             token.value = null
-            // localStorage no longer stores tokens (using httpOnly cookies)
-            // Backend will clear the cookies
             return true
         } catch (err) {
             error.value = err.message || 'Logout failed'
@@ -112,9 +98,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     async function fetchProfile() {
-        if (!user.value) {
-            return false
-        }
+        if (!user.value) return false
 
         loading.value = true
         error.value = null
@@ -141,8 +125,7 @@ export const useAuthStore = defineStore('auth', () => {
         try {
             const updatedProfile = await authService.updateProfile(data)
             profile.value = updatedProfile
-            
-            // Also update user object so name change is reflected
+
             if (user.value) {
                 user.value.name = data.name
                 if (data.phone) {
@@ -213,7 +196,7 @@ export const useAuthStore = defineStore('auth', () => {
         initialized,
         isAuthenticated,
         isAdmin,
-            token,
+        token,
         initialize,
         register,
         login,
@@ -222,6 +205,6 @@ export const useAuthStore = defineStore('auth', () => {
         updateProfile,
         changePassword,
         signInWithGoogle,
-        signUpWithGoogle
+        signUpWithGoogle,
     }
 })

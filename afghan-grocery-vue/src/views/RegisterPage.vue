@@ -129,21 +129,16 @@ const error = ref('')
 async function handleRegister() {
   loading.value = true
   error.value = ''
-  
   const userData = {
     name: `${formData.value.firstName} ${formData.value.lastName}`.trim(),
     email: formData.value.email,
     phone: formData.value.phone,
     password: formData.value.password
   }
-  
   const success = await authStore.register(userData)
-  
   loading.value = false
-  
   if (success) {
     window.showToast(t('messages.accountCreated'), 'success')
-    // Session is now persisted in auth store, safe to redirect
     router.push('/')
   } else {
     error.value = authStore.error || t('messages.registrationFailed')

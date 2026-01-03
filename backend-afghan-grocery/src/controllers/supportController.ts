@@ -1,16 +1,10 @@
 import { Request, Response, NextFunction } from 'express'
 import { sendSuccess } from '../utils/response'
-import RecaptchaService from '../services/recaptcha.service'
 import MailService from '../services/mail.service'
 
 export const submitContact = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { name, email, phone, subject, message, recaptchaToken } = req.body
-
-        if (recaptchaToken) {
-            const ok = await RecaptchaService.verify(recaptchaToken)
-            if (!ok) return res.status(400).json({ message: 'reCAPTCHA verification failed' })
-        }
+        const { name, email, phone, subject, message } = req.body
 
         // Try to send email to support inbox. If SMTP not configured, fall back to logging.
         try {

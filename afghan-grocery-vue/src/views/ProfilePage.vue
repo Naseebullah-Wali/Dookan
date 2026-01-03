@@ -118,7 +118,6 @@ async function handleUpdate() {
     name: `${formData.value.firstName} ${formData.value.lastName}`.trim(),
     phone: formData.value.phone
   }
-  
   const success = await authStore.updateProfile(updateData)
   if (success) {
     // Sync form with updated profile from store (prefer profile)

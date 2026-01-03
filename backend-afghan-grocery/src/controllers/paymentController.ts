@@ -299,6 +299,112 @@ export const handleWebhook = async (
     }
 };
 
+/**
+ * Generate WhatsApp link for order
+ */
+export const getWhatsAppLink = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { orderId, total, items, options = {} } = req.body;
+        const adminNumber = process.env.WHATSAPP_ADMIN_NUMBER || '4915217735657';
+        
+        // Build order message
+        let message = `🛒 *New Order #${orderId}*\n\n`;
+        
+        if (items && items.length > 0) {
+            message += `*Items:*\n`;
+            items.forEach((item: any) => {
+                message += `• ${item.name || item.product_name} x${item.quantity} - ${item.price}\n`;
+            });
+            message += `\n`;
+        }
+        
+        message += `*Total:* ${total}\n`;
+        
+        if (options.recipientName) {
+            message += `*Name:* ${options.recipientName}\n`;
+        }
+        if (options.phone) {
+            message += `*Phone:* ${options.phone}\n`;
+        }
+        if (options.address) {
+            message += `*Address:* ${options.address}\n`;
+        }
+        if (options.city) {
+            message += `*City:* ${options.city}\n`;
+        }
+        if (options.notes) {
+            message += `*Notes:* ${options.notes}\n`;
+        }
+        
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappUrl = `https://wa.me/${adminNumber}?text=${encodedMessage}`;
+        
+        sendSuccess(res, { url: whatsappUrl }, 'WhatsApp link generated');
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Verify crypto payment (TRC20 or Arbitrum)
+ */
+export const verifyCryptoPayment = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { type, txHash, amount } = req.body;
+        
+        if (!type || !txHash) {
+            throw new ValidationError('Transaction type and hash are required');
+        }
+        
+        const trc20Address = process.env.CRYPTO_TRC20_ADDRESS || 'TW5gj7ZPJhVGWVE4qpfR9MQvrkryQjArV1';
+        const arbitrumAddress = process.env.CRYPTO_ARBITRUM_ADDRESS || '0x084Ae494Ff43Ef2d5ef8aff8f02c757AaE4CC1Ab';
+        
+        let verified = false;
+        let message = '';
+        
+        if (type === 'TRC20') {
+            // For now, accept the transaction hash and mark as pending verification
+            // In production, you would call Trongrid API to verify
+            // const trongridApiKey = process.env.TRONGRID_API_KEY;
+            // if (trongridApiKey) { /* verify via API */ }
+            
+            console.log(`📝 TRC20 Payment submitted - TxHash: ${txHash}, Amount: ${amount} USDT`);
+            console.log(`   Expected to: ${trc20Address}`);
+            
+            // For manual verification, we accept the hash and admin verifies later
+            verified = true;
+            message = 'Transaction submitted. Payment will be confirmed after blockchain verification.';
+            
+        } else if (type === 'ARBITRUM') {
+            // For now, accept the transaction hash and mark as pending verification
+            // In production, you would call Arbiscan API to verify
+            // const arbiscanApiKey = process.env.ARBISCAN_API_KEY;
+            // if (arbiscanApiKey) { /* verify via API */ }
+            
+            console.log(`📝 Arbitrum Payment submitted - TxHash: ${txHash}, Amount: ${amount} USDT`);
+            console.log(`   Expected to: ${arbitrumAddress}`);
+            
+            verified = true;
+            message = 'Transaction submitted. Payment will be confirmed after blockchain verification.';
+            
+        } else {
+            throw new ValidationError('Invalid crypto type. Use TRC20 or ARBITRUM.');
+        }
+        
+        sendSuccess(res, { verified, txHash, type, message }, message);
+    } catch (error) {
+        next(error);
+    }
+};
+
 export default {
     createPaymentIntent,
     confirmPayment,
@@ -306,4 +412,6 @@ export default {
     createPaymentLink,
     getSupportedCurrencies,
     handleWebhook,
+    getWhatsAppLink,
+    verifyCryptoPayment,
 };

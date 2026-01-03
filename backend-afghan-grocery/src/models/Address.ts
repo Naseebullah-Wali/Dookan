@@ -3,28 +3,34 @@ import { NotFoundError, ForbiddenError } from '../utils/errors';
 
 export interface Address {
     id: number;
-    user_id: number;
-    recipient_name: string;
+    user_id: string;
+    full_name: string;
     phone: string;
-    province: string;
-    city: string;
-    district?: string;
     street: string;
-    postal_code?: string;
-    is_default: number;
+    street2?: string;
+    city: string;
+    state?: string;
+    zip?: string;
+    country: string;
+    label?: string;
+    is_default: boolean;
+    latitude?: number;
+    longitude?: number;
     created_at: string;
     updated_at: string;
 }
 
 export interface CreateAddressData {
-    user_id: number;
-    recipient_name: string;
+    user_id: string;
+    full_name: string;
     phone: string;
-    province: string;
-    city: string;
-    district?: string;
     street: string;
-    postal_code?: string;
+    street2?: string;
+    city: string;
+    state?: string;
+    zip?: string;
+    country?: string;
+    label?: string;
     is_default?: boolean;
 }
 
@@ -42,13 +48,15 @@ class AddressModel {
 
         const { data: created, error } = await supabase.from('addresses').insert({
             user_id: data.user_id,
-            recipient_name: data.recipient_name,
+            full_name: data.full_name,
             phone: data.phone,
-            province: data.province,
-            city: data.city,
-            district: data.district || null,
             street: data.street,
-            postal_code: data.postal_code || null,
+            street2: data.street2 || null,
+            city: data.city,
+            state: data.state || null,
+            zip: data.zip || '',
+            country: data.country || 'Afghanistan',
+            label: data.label || null,
             is_default: data.is_default ? true : false
         }).select().single();
         if (error) throw error;
@@ -78,7 +86,7 @@ class AddressModel {
         }
 
         const payload: any = {};
-        const fields = ['recipient_name', 'phone', 'province', 'city', 'district', 'street', 'postal_code'];
+        const fields = ['full_name', 'phone', 'street', 'street2', 'city', 'state', 'zip', 'country', 'label'];
         fields.forEach((f) => {
             if ((data as any)[f] !== undefined) payload[f] = (data as any)[f];
         });

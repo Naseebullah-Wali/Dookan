@@ -161,7 +161,6 @@ import { ref } from 'vue'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import { useI18n } from 'vue-i18n'
-import { getRecaptchaToken } from '@/utils/recaptcha'
 import api from '@/services/api'
 
 const { t } = useI18n()
@@ -218,8 +217,7 @@ async function handleSubmit() {
     }
 
     // Also attempt to send to backend support endpoint (optional fallback/logging)
-    const token = await getRecaptchaToken('contact')
-    const payload = { ...formData.value, recaptchaToken: token }
+    const payload = { ...formData.value }
     try {
       await api.post('/support/contact', payload)
     } catch (err) {

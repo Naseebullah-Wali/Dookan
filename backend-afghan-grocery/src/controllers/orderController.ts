@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from 'express';
 import OrderModel from '../models/Order';
 import { sendSuccess, sendPaginatedResponse } from '../utils/response';
 import { NotFoundError, UnauthorizedError } from '../utils/errors';
-import RecaptchaService from '../services/recaptcha.service'
 
 export const createOrder = async (
     req: Request,
@@ -12,15 +11,6 @@ export const createOrder = async (
     try {
         if (!req.user) {
             throw new UnauthorizedError();
-        }
-
-        // Verify reCAPTCHA token if provided
-        const token = req.body?.recaptchaToken
-        if (token) {
-            const ok = await RecaptchaService.verify(token)
-            if (!ok) {
-                throw new UnauthorizedError('reCAPTCHA verification failed')
-            }
         }
 
         const orderData = {

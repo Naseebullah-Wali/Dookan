@@ -141,11 +141,11 @@ async function handleSaveAddress() {
   try {
     // Map frontend fields to backend expected fields
     const addressData = {
-      recipient_name: formData.value.fullName || formData.value.recipient_name, // Use fullName as recipient_name
+      full_name: formData.value.fullName || formData.value.recipient_name,
       phone: formData.value.phone,
-      province: 'Kabul', // Default province as it's required by backend but not in form
       city: formData.value.city,
       street: formData.value.address, // Map address to street
+      country: 'Afghanistan',
       is_default: formData.value.isDefault
     }
 
@@ -170,7 +170,7 @@ async function handleSaveAddress() {
 function handleEdit(address) {
   editingAddress.value = address
   formData.value = {
-    fullName: address.recipient_name,
+    fullName: address.full_name,
     phone: address.phone,
     city: address.city,
     address: address.street,

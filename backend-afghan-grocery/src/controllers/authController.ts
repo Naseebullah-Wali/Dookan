@@ -5,7 +5,7 @@ import UserModel from '../models/User';
 import { hashPassword, comparePassword, generateAccessToken, generateRefreshToken } from '../utils/auth';
 import { sendSuccess } from '../utils/response';
 import { UnauthorizedError, ValidationError } from '../utils/errors';
-import config from '../config';
+import config from '../config/index';
 
 export const register = async (
     req: Request,
@@ -237,7 +237,6 @@ export const updateProfile = async (
         if (!req.user) {
             throw new UnauthorizedError();
         }
-
         const { name, phone, email } = req.body;
 
         const updatedUser = await UserModel.update(req.user.userId, {
@@ -245,10 +244,8 @@ export const updateProfile = async (
             phone,
             email,
         });
-
         // Remove password from response
         const { password: _, ...userWithoutPassword } = updatedUser;
-
         sendSuccess(res, userWithoutPassword, 'Profile updated successfully');
     } catch (error) {
         next(error);

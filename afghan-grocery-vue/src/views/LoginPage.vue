@@ -107,16 +107,13 @@ onMounted(async () => {
 async function handleLogin() {
   loading.value = true
   error.value = ''
-  
   const success = await authStore.login(email.value, password.value)
-  
   if (success) {
     window.showToast(t('messages.loginSuccess'), 'success')
     router.push('/')
   } else {
     error.value = authStore.error || t('messages.loginFailed')
   }
-  
   loading.value = false
 }
 

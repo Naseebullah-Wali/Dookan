@@ -12,4 +12,10 @@ router.get('/stripe/status/:paymentIntentId', authenticate, PaymentController.ge
 router.get('/stripe/currencies', PaymentController.getSupportedCurrencies); // @ts-ignore
 router.post('/stripe/webhook', PaymentController.handleWebhook); // @ts-ignore
 
+// WhatsApp Route
+router.post('/whatsapp/link', authenticate, PaymentController.getWhatsAppLink); // @ts-ignore
+
+// Crypto Routes
+router.post('/verify-crypto', authenticate, PaymentController.verifyCryptoPayment); // @ts-ignore
+
 export default router;

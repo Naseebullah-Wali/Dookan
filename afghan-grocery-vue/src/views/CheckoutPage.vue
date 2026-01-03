@@ -87,8 +87,8 @@
                         <div v-if="formData.paymentMethod === 'trc20'" class="mt-3 p-3 bg-light rounded" @click.stop>
                             <p class="mb-1 small">Send <strong>{{ currencyStore.formatPrice(cartStore.total) }}</strong> (approx {{ totalInUsd }} USDT) to:</p>
                             <div class="input-group mb-2">
-                                <input type="text" class="form-control form-control-sm" value="T..." readonly>
-                                <button class="btn btn-outline-secondary btn-sm" type="button">Copy</button>
+                                <input type="text" class="form-control form-control-sm" value="TW5gj7ZPJhVGWVE4qpfR9MQvrkryQjArV1" readonly ref="trc20AddressInput">
+                                <button class="btn btn-outline-secondary btn-sm" type="button" @click="copyAddress('TW5gj7ZPJhVGWVE4qpfR9MQvrkryQjArV1')">Copy</button>
                             </div>
                             <label class="form-label small">Transaction Hash (TXID)</label>
                             <div class="input-group">
@@ -114,8 +114,8 @@
                         <div v-if="formData.paymentMethod === 'arbitrum'" class="mt-3 p-3 bg-light rounded" @click.stop>
                              <p class="mb-1 small">Send <strong>{{ currencyStore.formatPrice(cartStore.total) }}</strong> (approx {{ totalInUsd }} USDT) to:</p>
                              <div class="input-group mb-2">
-                                <input type="text" class="form-control form-control-sm" value="0x..." readonly>
-                                <button class="btn btn-outline-secondary btn-sm" type="button">Copy</button>
+                                <input type="text" class="form-control form-control-sm" value="0x084Ae494Ff43Ef2d5ef8aff8f02c757AaE4CC1Ab" readonly>
+                                <button class="btn btn-outline-secondary btn-sm" type="button" @click="copyAddress('0x084Ae494Ff43Ef2d5ef8aff8f02c757AaE4CC1Ab')">Copy</button>
                             </div>
                             <label class="form-label small">Transaction Hash (TXID)</label>
                             <div class="input-group">
@@ -214,7 +214,6 @@ import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import { useOrdersStore } from '@/stores/orders'
 import { loadScript } from "@paypal/paypal-js";
 import { PaymentService } from '@/services/PaymentService';
-import { getRecaptchaToken } from '@/utils/recaptcha'
 
 // ========== STRIPE PAYMENT LINK (HOSTED CHECKOUT) ==========
 // No complex initialization needed - just create a link and redirect!
@@ -258,11 +257,13 @@ const deliveryFeeConverted = computed(() => {
 
 const total = computed(() => subtotalConverted.value + deliveryFeeConverted.value)
 
-// Helper for crypto amount (approximate in USD)
+// Helper for crypto amount (approximate in USD/USDT)
 const totalInUsd = computed(() => {
+    // cartStore.total is in AFN
+    // rates.USD = how many AFN per 1 USD (e.g., 70 means 1 USD = 70 AFN)
     const usdRate = currencyStore.rates.USD || 70
-    // cartStore.total is in AFN base units; convert to USD amount
-    return (cartStore.total / usdRate / 100).toFixed(2)
+    // Convert AFN to USD: AFN / rate = USD
+    return (cartStore.total / usdRate).toFixed(2)
 })
 
 // ========== LIFECYCLE ==========
@@ -308,19 +309,32 @@ function handleCityChange() {
   cartStore.setDeliveryCity(formData.value.city)
 }
 
+function copyAddress(address) {
+  navigator.clipboard.writeText(address).then(() => {
+    window.showToast('Address copied to clipboard!', 'success')
+  }).catch(() => {
+    window.showToast('Failed to copy address', 'error')
+  })
+}
+
 async function verifyCrypto(type) {
-  if (!cryptoTxHash.value) return
+  if (!cryptoTxHash.value) {
+    window.showToast('Please enter the transaction hash', 'error')
+    return
+  }
   isVerifyingCrypto.value = true
   try {
-    const result = await PaymentService.verifyCryptoPayment(type, cryptoTxHash.value, totalInUsd.value)
+    const response = await PaymentService.verifyCryptoPayment(type, cryptoTxHash.value, totalInUsd.value)
+    const result = response?.data || response
     if (result.verified) {
       cryptoVerified.value = true
-      window.showToast('Payment Verified Successfully!', 'success')
+      window.showToast(result.message || 'Payment Verified Successfully!', 'success')
     } else {
       window.showToast('Verification Failed: ' + (result.message || 'Unknown error'), 'error')
     }
   } catch (error) {
-    window.showToast('Verification Error', 'error')
+    console.error('Crypto verification error:', error)
+    window.showToast(error?.response?.data?.message || 'Verification Error', 'error')
   } finally {
     isVerifyingCrypto.value = false
   }
@@ -361,11 +375,11 @@ async function handleStripePayment() {
         size: item.size
       })),
       address: {
-        recipient_name: formData.value.recipientName,
+        full_name: formData.value.recipientName,
         phone: formData.value.phone,
-        province: formData.value.city,
         city: formData.value.city,
         street: formData.value.address,
+        country: 'Afghanistan',
         is_default: true
       },
       subtotal: cartStore.subtotal,
@@ -479,11 +493,11 @@ async function handleCheckout() {
       size: item.size
     })),
     address: {
-      recipient_name: formData.value.recipientName,
+      full_name: formData.value.recipientName,
       phone: formData.value.phone,
-      province: formData.value.city,
       city: formData.value.city,
       street: formData.value.address,
+      country: 'Afghanistan',
       is_default: true
     },
     subtotal: cartStore.subtotal,
@@ -495,11 +509,6 @@ async function handleCheckout() {
   }
 
   try {
-    const recaptchaToken = await getRecaptchaToken('create_order')
-    if (recaptchaToken) {
-      orderData.recaptchaToken = recaptchaToken
-    }
-
     if (formData.value.paymentMethod === 'whatsapp') {
       const order = await ordersStore.createOrder(orderData)
       cartStore.clearCart()
@@ -512,12 +521,13 @@ async function handleCheckout() {
       }
       const convertedTotal = currencyStore.convert(total.value)
       try {
-        const waData = await PaymentService.getWhatsAppLink(order.id, convertedTotal, orderData.items, waOptions)
-        if (waData && waData.link) {
-          window.location.href = waData.link
+        const waResponse = await PaymentService.getWhatsAppLink(order.id, convertedTotal, orderData.items, waOptions)
+        const waUrl = waResponse?.data?.url || waResponse?.url || waResponse?.data?.link || waResponse?.link
+        if (waUrl) {
+          window.location.href = waUrl
           return
         } else {
-          const msg = waData?.message || t('checkout.whatsappUnavailable') || 'WhatsApp ordering not available'
+          const msg = waResponse?.message || t('checkout.whatsappUnavailable') || 'WhatsApp ordering not available'
           window.showToast(msg, 'error')
         }
       } catch (err) {

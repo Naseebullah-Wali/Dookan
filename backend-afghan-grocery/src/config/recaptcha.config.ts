@@ -1,8 +1,9 @@
-import dotenv from 'dotenv'
-dotenv.config()
-
 export const recaptchaConfig = {
-    secret: process.env.RECAPTCHA_SECRET || ''
+    secret: '',
+    enterprise: {
+        enabled: false,
+        projectId: '',
+    },
 }
 
 export default recaptchaConfig

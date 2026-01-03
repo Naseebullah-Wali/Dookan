@@ -95,7 +95,6 @@ onMounted(async () => {
 async function handleSubmit() {
   loading.value = true
   error.value = ''
-  
   try {
     await api.post('/auth/forgot-password', { email: email.value })
     submitted.value = true

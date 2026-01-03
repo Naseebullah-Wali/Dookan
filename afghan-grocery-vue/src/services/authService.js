@@ -3,7 +3,6 @@ import api from './api'
 export const authService = {
     async register(userData) {
         const res = await api.post('/auth/register', userData)
-        // backend returns { user, accessToken, refreshToken }
         const data = res.data || {}
         return {
             user: data.user || null,
@@ -26,6 +25,7 @@ export const authService = {
             profile: data.user || null
         }
     },
+
 
     async getSession() {
         // Tokens are stored in localStorage by the auth store; return them

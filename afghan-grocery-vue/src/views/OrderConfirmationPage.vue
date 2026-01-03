@@ -59,7 +59,6 @@ import { useOrdersStore } from '@/stores/orders'
 import { useCurrencyStore } from '@/stores/currency'
 import { useCartStore } from '@/stores/cart'
 import { useAnalytics } from '@/composables/useAnalytics'
-import { getRecaptchaToken } from '@/utils/recaptcha'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 
@@ -90,12 +89,6 @@ onMounted(async () => {
           
           // Update payment intent ID from Stripe
           orderData.payment_intent_id = sessionId
-          
-          // Add recaptcha token if available
-          const recaptchaToken = await getRecaptchaToken('create_order')
-          if (recaptchaToken) {
-            orderData.recaptchaToken = recaptchaToken
-          }
           
           // Create the order
           const createdOrder = await ordersStore.createOrder(orderData)
