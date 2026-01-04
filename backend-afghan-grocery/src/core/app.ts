@@ -74,12 +74,12 @@ class App {
 
         // Strict rate limiting for auth endpoints (prevent brute force)
         const authLimiter = rateLimit({
-            windowMs: 60 * 60 * 1000, // 1 hour
-            max: 5, // 5 attempts per hour
-            message: 'Too many login attempts. Please try again in 1 hour.',
+            windowMs: 15 * 60 * 1000, // 15 minutes
+            max: 50, // 50 attempts per 15 minutes
+            message: 'Too many login attempts. Please try again in 15 minutes.',
             standardHeaders: true,
             legacyHeaders: false,
-            skipSuccessfulRequests: false,
+            skipSuccessfulRequests: true, // Don't count successful logins
         });
 
         // Strict rate limiting for payment endpoints
