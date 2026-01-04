@@ -41,6 +41,15 @@ interface StatusUpdateNotification {
     trackingNumber?: string;
 }
 
+interface TelegramResponse {
+    ok?: boolean;
+    description?: string;
+    result?: {
+        username?: string;
+        [key: string]: any;
+    };
+}
+
 class TelegramService {
     private botToken: string;
     private chatId: string;
@@ -92,7 +101,7 @@ class TelegramService {
                 body: JSON.stringify(payload),
             });
 
-            const result = await response.json();
+            const result: TelegramResponse = await response.json();
             
             if (!result.ok) {
                 console.error('[Telegram] Failed to send message:', result.description);
@@ -287,7 +296,7 @@ ${body}
 
         try {
             const response = await fetch(`${this.baseUrl}/getMe`);
-            const result = await response.json();
+            const result: TelegramResponse = await response.json();
 
             if (!result.ok) {
                 return { 
@@ -302,7 +311,7 @@ ${body}
             if (testSent) {
                 return { 
                     success: true, 
-                    message: `Connected as @${result.result.username}. Test message sent!` 
+                    message: `Connected as @${result.result?.username || 'unknown'}. Test message sent!` 
                 };
             } else {
                 return { 
