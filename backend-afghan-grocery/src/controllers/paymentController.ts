@@ -2,7 +2,79 @@ import { Request, Response, NextFunction } from 'express';
 import { sendSuccess, sendError } from '../utils/response';
 import { UnauthorizedError, ValidationError } from '../utils/errors';
 import * as stripeService from '../services/stripe.service';
+import { PaymentService } from '../services/payment.service';
 import UserModel from '../models/User';
+
+/**
+ * Create a PayPal Order for checkout
+ */
+export const createPayPalOrder = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { amount, currency = 'USD' } = req.body;
+        const userId = req.user?.userId;
+
+        if (!userId) {
+            throw new UnauthorizedError('Authentication required');
+        }
+
+        if (!amount || amount < 0.01) {
+            throw new ValidationError('Invalid amount');
+        }
+
+        const order = await PaymentService.createPayPalOrder(parseFloat(amount), currency);
+
+        sendSuccess(
+            res,
+            {
+                id: order.id,
+                status: order.status,
+            },
+            'PayPal order created successfully'
+        );
+    } catch (error) {
+        next(error);
+    }
+};
+
+/**
+ * Capture a PayPal Order after approval
+ */
+export const capturePayPalOrder = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { orderID } = req.body;
+        const userId = req.user?.userId;
+
+        if (!userId) {
+            throw new UnauthorizedError('Authentication required');
+        }
+
+        if (!orderID) {
+            throw new ValidationError('PayPal Order ID is required');
+        }
+
+        const capture = await PaymentService.capturePayPalOrder(orderID);
+
+        sendSuccess(
+            res,
+            {
+                id: capture.id,
+                status: capture.status,
+                payer: capture.payer,
+            },
+            'PayPal payment captured successfully'
+        );
+    } catch (error) {
+        next(error);
+    }
+};
 
 /**
  * Create a Payment Intent for checkout
@@ -38,13 +110,6 @@ export const createPaymentIntent = async (
         if (!user) {
             throw new UnauthorizedError('User not found');
         }
-
-        console.log(`💳 Payment Intent Request:`, {
-            userId,
-            amount,
-            currency,
-            orderId,
-        });
 
         // Create payment intent
         const paymentIntent = await stripeService.createPaymentIntent({
@@ -94,20 +159,12 @@ export const confirmPayment = async (
             throw new ValidationError('Payment Intent ID is required');
         }
 
-        console.log(`✅ Confirming payment:`, {
-            paymentIntentId,
-            userId,
-            orderId,
-        });
-
         // Get the payment intent to verify status
         const paymentIntent = await stripeService.getPaymentIntent(paymentIntentId);
 
         if (paymentIntent.status !== 'succeeded') {
             throw new ValidationError(`Payment not completed. Status: ${paymentIntent.status}`);
         }
-
-        console.log(`✅ Payment confirmed for order ${orderId}`);
 
         // TODO: Create order in database with payment_intent_id
         // TODO: Update inventory
@@ -199,12 +256,6 @@ export const createPaymentLink = async (
             throw new UnauthorizedError('User not found');
         }
 
-        console.log(`🔗 Payment Link Request:`, {
-            userId,
-            itemCount: items.length,
-            currency,
-        });
-
         // Create payment link
         const paymentLink = await stripeService.createPaymentLink({
             items,
@@ -265,14 +316,8 @@ export const handleWebhook = async (
         // Webhook signature verification should be done in middleware
         const event = req.body;
 
-        console.log(`🔔 Stripe webhook received:`, {
-            type: event.type,
-            id: event.id,
-        });
-
         switch (event.type) {
             case 'payment_intent.succeeded':
-                console.log(`✅ Payment succeeded:`, event.data.object.id);
                 // TODO: Update order status in database
                 // TODO: Send confirmation email
                 break;
@@ -284,12 +329,11 @@ export const handleWebhook = async (
                 break;
 
             case 'charge.refunded':
-                console.log(`🔄 Charge refunded:`, event.data.object.id);
                 // TODO: Handle refund
                 break;
 
             default:
-                console.log(`📋 Unhandled webhook type: ${event.type}`);
+                break;
         }
 
         sendSuccess(res, { received: true }, 'Webhook processed');
@@ -317,12 +361,20 @@ export const getWhatsAppLink = async (
         if (items && items.length > 0) {
             message += `*Items:*\n`;
             items.forEach((item: any) => {
-                message += `• ${item.name || item.product_name} x${item.quantity} - ${item.price}\n`;
+                message += `• ${item.name || item.product_name} x${item.quantity}\n`;
             });
             message += `\n`;
         }
         
+        // Add subtotal and shipping breakdown
+        if (options.subtotal) {
+            message += `*Subtotal:* ${options.subtotal}\n`;
+        }
+        if (options.shipping) {
+            message += `*Shipping:* ${options.shipping}\n`;
+        }
         message += `*Total:* ${total}\n`;
+        message += `\n`;
         
         if (options.recipientName) {
             message += `*Name:* ${options.recipientName}\n`;
@@ -376,9 +428,6 @@ export const verifyCryptoPayment = async (
             // const trongridApiKey = process.env.TRONGRID_API_KEY;
             // if (trongridApiKey) { /* verify via API */ }
             
-            console.log(`📝 TRC20 Payment submitted - TxHash: ${txHash}, Amount: ${amount} USDT`);
-            console.log(`   Expected to: ${trc20Address}`);
-            
             // For manual verification, we accept the hash and admin verifies later
             verified = true;
             message = 'Transaction submitted. Payment will be confirmed after blockchain verification.';
@@ -388,9 +437,6 @@ export const verifyCryptoPayment = async (
             // In production, you would call Arbiscan API to verify
             // const arbiscanApiKey = process.env.ARBISCAN_API_KEY;
             // if (arbiscanApiKey) { /* verify via API */ }
-            
-            console.log(`📝 Arbitrum Payment submitted - TxHash: ${txHash}, Amount: ${amount} USDT`);
-            console.log(`   Expected to: ${arbitrumAddress}`);
             
             verified = true;
             message = 'Transaction submitted. Payment will be confirmed after blockchain verification.';
@@ -406,6 +452,8 @@ export const verifyCryptoPayment = async (
 };
 
 export default {
+    createPayPalOrder,
+    capturePayPalOrder,
     createPaymentIntent,
     confirmPayment,
     getPaymentStatus,

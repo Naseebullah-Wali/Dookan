@@ -34,7 +34,7 @@ const routes = [
         meta: { title: 'Checkout - Afghan Grocery', requiresAuth: true }
     },
     {
-        path: '/confirmation/:orderId',
+        path: '/confirmation/:orderId?',
         name: 'OrderConfirmation',
         component: () => import('@/views/OrderConfirmationPage.vue'),
         meta: { title: 'Order Confirmed - Afghan Grocery' }

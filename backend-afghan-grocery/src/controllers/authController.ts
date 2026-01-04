@@ -41,10 +41,12 @@ export const register = async (
 
         // Set httpOnly cookies for tokens (secure auth)
         const isProduction = config.env === 'production';
+        // Use 'lax' in development for cross-origin requests (frontend on 5173, backend on 3000)
+        const sameSiteValue = isProduction ? 'strict' : 'lax';
         res.cookie('accessToken', accessToken, {
             httpOnly: true,        // Prevents JS access (XSS protection)
             secure: isProduction,  // HTTPS only in production
-            sameSite: 'strict',    // CSRF protection
+            sameSite: sameSiteValue,
             maxAge: 24 * 60 * 60 * 1000,  // 24 hours
             path: '/',
         });
@@ -52,7 +54,7 @@ export const register = async (
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: isProduction,
-            sameSite: 'strict',
+            sameSite: sameSiteValue,
             maxAge: 7 * 24 * 60 * 60 * 1000,  // 7 days
             path: '/',
         });
@@ -131,10 +133,12 @@ export const login = async (
 
         // Set httpOnly cookies for tokens (secure auth)
         const isProduction = config.env === 'production';
+        // Use 'lax' in development for cross-origin requests (frontend on 5173, backend on 3000)
+        const sameSiteValue = isProduction ? 'strict' : 'lax';
         res.cookie('accessToken', accessToken, {
             httpOnly: true,        // Prevents JS access (XSS protection)
             secure: isProduction,  // HTTPS only in production
-            sameSite: 'strict',    // CSRF protection
+            sameSite: sameSiteValue,
             maxAge: 24 * 60 * 60 * 1000,  // 24 hours
             path: '/',
         });
@@ -142,7 +146,7 @@ export const login = async (
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: isProduction,
-            sameSite: 'strict',
+            sameSite: sameSiteValue,
             maxAge: 7 * 24 * 60 * 60 * 1000,  // 7 days
             path: '/',
         });

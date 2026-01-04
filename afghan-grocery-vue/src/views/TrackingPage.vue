@@ -177,16 +177,27 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import api from '@/services/api'
 import { getImageUrl } from '@/services/imageService'
 
+const route = useRoute()
 const orderId = ref('')
 const order = ref(null)
 const loading = ref(false)
 const searched = ref(false)
+
+// Auto-search when order number is provided via query param
+onMounted(() => {
+  const orderQuery = route.query.order
+  if (orderQuery) {
+    orderId.value = orderQuery
+    handleSearch()
+  }
+})
 
 async function handleSearch() {
   if (!orderId.value) return

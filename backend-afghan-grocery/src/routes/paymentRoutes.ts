@@ -4,6 +4,10 @@ import { authenticate } from '../middleware/auth';
 
 const router = Router();
 
+// PayPal Routes
+router.post('/paypal/create-order', authenticate, PaymentController.createPayPalOrder); // @ts-ignore
+router.post('/paypal/capture-order', authenticate, PaymentController.capturePayPalOrder); // @ts-ignore
+
 // Stripe Routes (Preferred Payment Method)
 router.post('/stripe/create-intent', authenticate, PaymentController.createPaymentIntent); // @ts-ignore
 router.post('/stripe/payment-link', authenticate, PaymentController.createPaymentLink); // @ts-ignore - Note: This endpoint requires authentication

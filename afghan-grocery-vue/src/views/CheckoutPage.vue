@@ -284,21 +284,50 @@ onMounted(() => {
 watch(() => formData.value.paymentMethod, async (newMethod) => {
   if (newMethod === 'paypal' && !paypalLoaded.value) {
     try {
-      const paypal = await loadScript({ "clientId": "test", currency: "USD" })
+      const paypalClientId = import.meta.env.VITE_PAYPAL_CLIENT_ID || 'AY_cKFxdASRAmIdaPZDm30AEm25DwHkXrGv9mUwbIWG9MHweIiCpladI1_ebVY-75O3F23cQ9VaZgjPg'
+      const paypal = await loadScript({ clientId: paypalClientId, currency: "USD" })
       if (paypal && paypal.Buttons) {
         await paypal.Buttons({
-          createOrder: async (data, actions) => {
-            return PaymentService.createPayPalOrder(totalInUsd.value, 'USD').then(order => order.id)
+          createOrder: async () => {
+            try {
+              // Validate delivery info first
+              if (!formData.value.recipientName || !formData.value.phone || !formData.value.address) {
+                window.showToast('Please fill in delivery information first', 'error')
+                throw new Error('Missing delivery information')
+              }
+              const response = await PaymentService.createPayPalOrder(parseFloat(totalInUsd.value), 'USD')
+              // api.js returns extracted data, so response is already the data object
+              return response?.data?.id || response?.id
+            } catch (error) {
+              console.error('PayPal create order error:', error)
+              window.showToast('Failed to create PayPal order', 'error')
+              throw error
+            }
           },
-          onApprove: async (data, actions) => {
-            await PaymentService.capturePayPalOrder(data.orderID)
-            handleCheckout()
+          onApprove: async (data) => {
+            try {
+              await PaymentService.capturePayPalOrder(data.orderID)
+              window.showToast('PayPal payment successful!', 'success')
+              // Now complete the checkout
+              await handlePayPalCheckout()
+            } catch (error) {
+              console.error('PayPal capture error:', error)
+              window.showToast('Payment capture failed', 'error')
+            }
+          },
+          onError: (error) => {
+            console.error('PayPal error:', error)
+            window.showToast('PayPal payment failed', 'error')
+          },
+          onCancel: () => {
+            window.showToast('PayPal payment cancelled', 'info')
           }
         }).render('#paypal-button-container')
         paypalLoaded.value = true
       }
     } catch (error) {
       console.error("Failed to load PayPal", error)
+      window.showToast('Failed to load PayPal', 'error')
     }
   }
 })
@@ -340,6 +369,57 @@ async function verifyCrypto(type) {
   }
 }
 
+// Handle PayPal checkout after successful payment
+async function handlePayPalCheckout() {
+  if (!authStore.user) {
+    window.showToast(t('messages.loginRequired'), 'error')
+    router.push('/login?redirect=/checkout')
+    return
+  }
+
+  isProcessing.value = true
+
+  const orderData = {
+    user_id: authStore.user.id,
+    items: cartStore.items.map(item => ({
+      product_id: item.id,
+      name: languageStore.getLocalizedName(item),
+      product_image: item.image,
+      quantity: item.quantity,
+      price: item.price,
+      weight: item.weight,
+      size: item.size
+    })),
+    address: {
+      full_name: formData.value.recipientName,
+      phone: formData.value.phone,
+      city: formData.value.city,
+      street: formData.value.address,
+      country: 'Afghanistan',
+      is_default: true
+    },
+    subtotal: cartStore.subtotal,
+    shipping_fee: cartStore.deliveryFee,
+    tax: 0,
+    discount: 0,
+    payment_method: 'paypal',
+    payment_status: 'paid',
+    notes: formData.value.notes
+  }
+
+  try {
+    const order = await ordersStore.createOrder(orderData)
+    cartStore.clearCart()
+    router.push(`/confirmation/${order.id}`)
+    window.showToast(t('messages.orderSuccess'), 'success')
+  } catch (error) {
+    console.error('Order creation error:', error)
+    window.showToast(t('messages.orderError') || error.message, 'error')
+  } finally {
+    isProcessing.value = false
+  }
+}
+
 async function handleStripePayment() {
   if (!authStore.user) {
     window.showToast(t('messages.loginRequired'), 'error')
@@ -360,7 +440,7 @@ async function handleStripePayment() {
     const csrfData = await csrfResponse.json()
     const csrfToken = csrfData.csrfToken
 
-    console.log('🔗 Creating Stripe Payment Link...')
+
     
     // Prepare order data that will be created after payment
     const orderData = {
@@ -448,10 +528,10 @@ async function handleStripePayment() {
     }
 
     const paymentLinkData = await paymentLinkResponse.json()
-    console.log('✅ Payment Link created:', paymentLinkData.data.paymentLinkId)
+
 
     // Redirect to Stripe hosted checkout
-    console.log('🔄 Redirecting to Stripe...')
+
     window.location.href = paymentLinkData.data.paymentLinkUrl
   } catch (error) {
     console.error('❌ Payment error:', error)
@@ -464,6 +544,12 @@ async function handleCheckout() {
   if (!authStore.user) {
     window.showToast(t('messages.loginRequired'), 'error')
     router.push('/login?redirect=/checkout')
+    return
+  }
+
+  // PayPal - don't process via form, use PayPal button instead
+  if (formData.value.paymentMethod === 'paypal') {
+    window.showToast('Please use the PayPal button to complete your payment', 'info')
     return
   }
 
@@ -510,6 +596,12 @@ async function handleCheckout() {
 
   try {
     if (formData.value.paymentMethod === 'whatsapp') {
+      // Capture the total, subtotal, shipping and items BEFORE clearing the cart
+      const orderSubtotal = cartStore.subtotal  // AFN
+      const orderShipping = cartStore.deliveryFee  // AFN
+      const orderTotal = cartStore.total  // AFN
+      const orderItems = [...orderData.items]  // Clone the items array
+      
       const order = await ordersStore.createOrder(orderData)
       cartStore.clearCart()
       
@@ -517,14 +609,26 @@ async function handleCheckout() {
         header: t('support.whatsappOrder.header'),
         totalLabel: t('support.whatsappOrder.total'),
         currency: currencyStore.selectedCurrency.symbol,
-        footer: t('support.whatsappOrder.footer')
+        footer: t('support.whatsappOrder.footer'),
+        recipientName: formData.value.recipientName,
+        phone: formData.value.phone,
+        address: formData.value.address,
+        city: formData.value.city,
+        notes: formData.value.notes,
+        // Add subtotal and shipping for clear breakdown
+        subtotal: currencyStore.formatPrice(orderSubtotal),
+        shipping: currencyStore.formatPrice(orderShipping)
       }
-      const convertedTotal = currencyStore.convert(total.value)
+      // Use the captured orderTotal (in AFN) and format with current currency
+      const formattedTotal = currencyStore.formatPrice(orderTotal)
       try {
-        const waResponse = await PaymentService.getWhatsAppLink(order.id, convertedTotal, orderData.items, waOptions)
+        const waResponse = await PaymentService.getWhatsAppLink(order.id, formattedTotal, orderItems, waOptions)
         const waUrl = waResponse?.data?.url || waResponse?.url || waResponse?.data?.link || waResponse?.link
         if (waUrl) {
-          window.location.href = waUrl
+          // Open WhatsApp in new tab and navigate to confirmation page
+          window.open(waUrl, '_blank')
+          router.push(`/confirmation/${order.id}`)
+          window.showToast(t('messages.orderSuccess'), 'success')
           return
         } else {
           const msg = waResponse?.message || t('checkout.whatsappUnavailable') || 'WhatsApp ordering not available'
