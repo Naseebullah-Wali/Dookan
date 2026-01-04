@@ -79,7 +79,7 @@ class AddressModel {
     async update(id: number, userId: number, data: UpdateAddressData): Promise<Address> {
         const address = await this.findById(id);
         if (!address) throw new NotFoundError('Address not found');
-        if (address.user_id !== userId) throw new ForbiddenError('Access denied');
+        if (String(address.user_id) !== String(userId)) throw new ForbiddenError('Access denied');
 
         if ((data as any).is_default) {
             await supabase.from('addresses').update({ is_default: false }).eq('user_id', userId);
@@ -100,7 +100,7 @@ class AddressModel {
     async delete(id: number, userId: number): Promise<void> {
         const address = await this.findById(id);
         if (!address) throw new NotFoundError('Address not found');
-        if (address.user_id !== userId) throw new ForbiddenError('Access denied');
+        if (String(address.user_id) !== String(userId)) throw new ForbiddenError('Access denied');
 
         const { error } = await supabase.from('addresses').delete().eq('id', id);
         if (error) throw error;

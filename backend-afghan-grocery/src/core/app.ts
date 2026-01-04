@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
-import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
+import rateLimit from 'express-rate-limit';
 import { randomUUID } from 'crypto';
 import config from '../config';
 import { errorHandler, notFoundHandler } from '../middleware/errorHandler';
@@ -69,7 +69,6 @@ class App {
             message: 'Too many requests from this IP, please try again later.',
             standardHeaders: true,
             legacyHeaders: false,
-            keyGenerator: ipKeyGenerator,
         });
         this.app.use('/api/', limiter);
 
@@ -81,7 +80,6 @@ class App {
             standardHeaders: true,
             legacyHeaders: false,
             skipSuccessfulRequests: false,
-            keyGenerator: ipKeyGenerator,
         });
 
         // Strict rate limiting for payment endpoints
@@ -91,7 +89,6 @@ class App {
             message: 'Too many payment requests. Please try again later.',
             standardHeaders: true,
             legacyHeaders: false,
-            keyGenerator: ipKeyGenerator,
         });
 
         // Body parsing with size limits
@@ -157,7 +154,7 @@ class App {
         // CSRF token endpoint - apply CSRF middleware to generate token
         this.app.get(`/api/${apiVersion}/csrf-token`, csrfProtection, (req, res) => {
             res.json({
-                csrfToken: req.csrfToken()
+                csrfToken: (req as any).csrfToken()
             });
         });
 
