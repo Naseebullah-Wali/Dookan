@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import OrderModel from '../models/Order';
 import { sendSuccess, sendPaginatedResponse } from '../utils/response';
 import { NotFoundError, UnauthorizedError } from '../utils/errors';
+import { telegramService } from '../services/telegram.service';
 
 export const createOrder = async (
     req: Request,
@@ -19,6 +20,41 @@ export const createOrder = async (
         };
 
         const order = await OrderModel.create(orderData);
+
+        // Send Telegram notification for new order (async, don't await to not block response)
+        OrderModel.getOrderWithItemsAndAddress(order.id).then(async (fullOrder) => {
+            if (fullOrder) {
+                try {
+                    await telegramService.sendNewOrderNotification({
+                        orderId: fullOrder.id,
+                        orderNumber: fullOrder.order_number,
+                        customerName: fullOrder.address?.full_name || 'N/A',
+                        customerPhone: fullOrder.address?.phone || 'N/A',
+                        address: {
+                            street: fullOrder.address?.street || '',
+                            city: fullOrder.address?.city || '',
+                            state: fullOrder.address?.state,
+                            country: fullOrder.address?.country || 'Afghanistan',
+                        },
+                        items: fullOrder.items.map((item: any) => ({
+                            name: item.product_name,
+                            quantity: item.quantity,
+                            price: item.price,
+                        })),
+                        subtotal: fullOrder.subtotal,
+                        shippingFee: fullOrder.shipping_fee,
+                        total: fullOrder.total,
+                        paymentMethod: fullOrder.payment_method,
+                        paymentStatus: fullOrder.payment_status,
+                        status: fullOrder.status,
+                        notes: fullOrder.notes,
+                    });
+                } catch (telegramError) {
+                    console.error('[Telegram] Failed to send new order notification:', telegramError);
+                }
+            }
+        }).catch(err => console.error('[Telegram] Error fetching order for notification:', err));
+
         sendSuccess(res, order, 'Order created successfully', 201);
     } catch (error) {
         next(error);
@@ -108,7 +144,51 @@ export const updateOrderStatus = async (
 ): Promise<void> => {
     try {
         const id = parseInt(req.params.id);
+        
+        // Get the old order state first for comparison
+        const oldOrder = await OrderModel.findById(id);
+        const oldStatus = oldOrder?.status;
+        const oldPaymentStatus = oldOrder?.payment_status;
+        
         const order = await OrderModel.update(id, req.body);
+
+        // Send Telegram notification for status updates (async, don't block response)
+        if (oldOrder && (req.body.status || req.body.payment_status)) {
+            OrderModel.getOrderWithItemsAndAddress(order.id).then(async (fullOrder) => {
+                if (fullOrder) {
+                    try {
+                        // Check if order status changed
+                        if (req.body.status && req.body.status !== oldStatus) {
+                            await telegramService.sendStatusUpdateNotification({
+                                orderId: fullOrder.id,
+                                orderNumber: fullOrder.order_number,
+                                customerName: fullOrder.address?.full_name || 'N/A',
+                                oldStatus: oldStatus || 'pending',
+                                newStatus: req.body.status,
+                                paymentStatus: fullOrder.payment_status,
+                                trackingNumber: fullOrder.tracking_number,
+                            });
+                        }
+                        
+                        // Check if payment status changed
+                        if (req.body.payment_status && req.body.payment_status !== oldPaymentStatus) {
+                            await telegramService.sendPaymentStatusNotification(
+                                fullOrder.id,
+                                fullOrder.order_number,
+                                fullOrder.address?.full_name || 'N/A',
+                                fullOrder.payment_method,
+                                oldPaymentStatus || 'pending',
+                                req.body.payment_status,
+                                fullOrder.total
+                            );
+                        }
+                    } catch (telegramError) {
+                        console.error('[Telegram] Failed to send status update notification:', telegramError);
+                    }
+                }
+            }).catch(err => console.error('[Telegram] Error fetching order for notification:', err));
+        }
+
         sendSuccess(res, order, 'Order status updated successfully');
     } catch (error) {
         next(error);

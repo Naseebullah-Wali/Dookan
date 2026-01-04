@@ -167,7 +167,7 @@
 
         <!-- Order Summary -->
         <div class="col-lg-4 col-12">
-          <div class="card border-0 shadow-sm sticky-top" style="top: 88px;">
+          <div class="card border-0 shadow-sm order-summary-sticky">
             <div class="card-body p-4">
               <h5 class="card-title mb-4">{{ $t('checkout.orderSummary') }}</h5>
               <div class="mb-3">
@@ -655,6 +655,12 @@ async function handleCheckout() {
 </script>
 
 <style scoped>
+.order-summary-sticky {
+  position: sticky;
+  top: 88px;
+  z-index: 10; /* Lower than navbar (1020) to prevent overlap */
+}
+
 .payment-option input:checked + .payment-card {
   border-color: var(--bs-primary) !important;
   background-color: rgba(231, 111, 26, 0.1);
