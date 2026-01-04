@@ -98,8 +98,12 @@ class App {
 
         // CSRF Protection - apply to all routes EXCEPT csrf-token endpoint
         this.app.use((req, res, next) => {
-            // Skip CSRF for csrf-token endpoint and GET requests
+            // Skip CSRF for csrf-token endpoint
             if (req.method === 'GET' && req.path.endsWith('/csrf-token')) {
+                return next();
+            }
+            // Skip CSRF for OAuth routes (they have their own security via OAuth state)
+            if (req.path.includes('/oauth/')) {
                 return next();
             }
             csrfProtection(req, res, (err) => {
