@@ -15,13 +15,10 @@ export const register = async (
     try {
         const { email, password, name, phone } = req.body;
 
-        // Hash password
-        const hashedPassword = await hashPassword(password);
-
-        // Create user
+        // Create user - pass plain password, Supabase handles hashing internally
         const user = await UserModel.create({
             email,
-            password: hashedPassword,
+            password, // Don't hash - Supabase auth.admin.createUser expects plain text
             name,
             phone,
         });

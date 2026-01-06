@@ -38,6 +38,8 @@ class UserModel {
      */
     async create(data: CreateUserData): Promise<User> {
         try {
+            console.log('📝 Creating user with email:', data.email);
+            
             // Use Supabase Auth admin API to create user in auth.users
             const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
                 email: data.email,
@@ -46,12 +48,20 @@ class UserModel {
                     name: data.name,
                     phone: data.phone,
                 },
+                email_confirm: true, // Auto-confirm email for manual registration
             });
 
             if (authError || !authUser?.user) {
-                console.error('Auth user creation error:', authError);
+                console.error('❌ Auth user creation error:', {
+                    message: authError?.message,
+                    status: authError?.status,
+                    code: (authError as any)?.code,
+                    details: authError,
+                });
                 throw authError || new Error('Failed to create auth user');
             }
+            
+            console.log('✅ Auth user created:', authUser.user.id);
 
             // Now create/update the profile with additional role information
             const { data: profileData, error: profileError } = await supabase
