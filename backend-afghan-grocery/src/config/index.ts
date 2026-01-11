@@ -6,9 +6,14 @@ const config = {
   env: process.env.NODE_ENV || 'development',
   port: process.env.PORT ? parseInt(process.env.PORT, 10) : 3000,
   apiVersion: process.env.API_VERSION || 'v1',
+  // Parse CORS origins from environment: supports a single URL or a comma-separated list
   cors: {
     // Use explicit origin (cannot be '*') when sending credentials from frontend
-    origin: process.env.CORS_ORIGIN || process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: (() => {
+      const raw = process.env.CORS_ORIGIN || process.env.FRONTEND_URL || 'http://localhost:5173';
+      const list = raw.split(',').map(s => s.trim()).filter(Boolean);
+      return list.length === 1 ? list[0] : list;
+    })(),
     credentials: true,
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
