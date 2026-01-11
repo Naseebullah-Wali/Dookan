@@ -35,9 +35,19 @@ const changePasswordValidation = [
 ];
 
 // Routes
-// Routes
 router.post('/register', validate(registerValidation), authController.register);
 router.post('/login', validate(loginValidation), authController.login);
+// Email verification endpoints
+router.get('/confirm', authController.confirmEmail);
+router.post('/resend-verification', validate([body('email').isEmail().normalizeEmail()]), authController.resendEmailVerification);
+// OTP verification endpoints
+router.post('/verify-otp', validate([
+    body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
+    body('code').trim().isLength({ min: 4, max: 6 }).withMessage('Verification code is required')
+]), authController.verifyOTP);
+router.post('/resend-otp', validate([
+    body('email').isEmail().normalizeEmail().withMessage('Valid email is required')
+]), authController.resendOTP);
 // Forgot password - request password reset
 router.post('/forgot-password', validate([body('email').isEmail().normalizeEmail()]), authController.forgotPassword);
 // Reset password - validate token and update password

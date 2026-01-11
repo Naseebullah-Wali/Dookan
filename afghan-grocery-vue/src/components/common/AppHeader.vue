@@ -112,9 +112,19 @@
 
         <!-- Mobile User Section -->
         <div class="mt-auto pt-4 border-top">
-          <div class="mb-3 d-flex justify-content-center gap-3">
-            <CurrencySwitcher />
-            <LanguageSwitcher />
+          <!-- Language & Currency Section -->
+          <div class="mb-4 p-3 bg-light rounded-3">
+            <div class="small text-muted mb-2 fw-semibold">{{ $t('common.settings') || 'Settings' }}</div>
+            <div class="d-flex justify-content-between align-items-center gap-2">
+              <div class="d-flex align-items-center gap-2 flex-grow-1">
+                <i class="bi bi-globe2 text-muted"></i>
+                <LanguageSwitcher class="flex-grow-1" />
+              </div>
+              <div class="d-flex align-items-center gap-2 flex-grow-1">
+                <i class="bi bi-currency-exchange text-muted"></i>
+                <CurrencySwitcher class="flex-grow-1" />
+              </div>
+            </div>
           </div>
           <template v-if="authStore.isAuthenticated">
             <div class="d-flex align-items-center gap-3 mb-4 p-3 bg-light rounded-3">

@@ -531,6 +531,7 @@
         "loginFailed": "Login failed. Please check your credentials.",
         "accountCreated": "Account created successfully!",
         "registrationFailed": "Registration failed. Please try again.",
+        "verificationCodeSent": "Verification code sent to your email!",
         "orderPlaced": "Order placed successfully!",
         "orderSuccess": "Order placed successfully!",
         "orderError": "Failed to place order. Please try again.",
@@ -550,6 +551,24 @@
         "reviewRequired": "Please provide a rating and comment",
         "reviewLoginRequired": "Please login to your account to write a review",
         "reviewCharacters": "characters"
+    },
+    "verification": {
+        "title": "Verify Your Email",
+        "subtitle": "We sent a 6-digit verification code to",
+        "checkSpam": "Can't find the email? Please check your spam or junk folder.",
+        "verify": "Verify Email",
+        "verifying": "Verifying...",
+        "success": "Email Verified Successfully!",
+        "successMessage": "Your account is now active. You can start shopping!",
+        "startShopping": "Start Shopping",
+        "didntReceive": "Didn't receive the code?",
+        "resend": "Resend Code",
+        "resendIn": "Resend in {seconds}s",
+        "codeSent": "New verification code sent!",
+        "invalidCode": "Invalid verification code",
+        "error": "Verification failed. Please try again.",
+        "resendError": "Failed to resend code. Please try again.",
+        "backToRegister": "Back to Registration"
     },
     "testimonials": {
         "customer1": {

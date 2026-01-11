@@ -10,17 +10,22 @@ export interface User {
     phone?: string;
     role: 'customer' | 'admin';
     is_verified?: number;
+    email_verified?: boolean; // New field for email verification status
+    language?: 'en' | 'ps' | 'fa' | 'de' | 'fr'; // User's preferred language
     created_at: string;
     updated_at: string;
 }
 
 export interface CreateUserData {
+    id?: string; // Allow setting ID explicitly for Supabase integration
     email: string;
-    password: string;
+    password?: string; // Optional when creating via OAuth
     name: string;
     phone?: string;
     role?: 'customer' | 'admin';
     is_verified?: number;
+    email_verified?: boolean; // New field for email verification status
+    language?: 'en' | 'ps' | 'fa' | 'de' | 'fr'; // User's preferred language
 }
 
 export interface UpdateUserData {
@@ -28,27 +33,65 @@ export interface UpdateUserData {
     phone?: string;
     email?: string;
     password?: string;
+    email_verified?: boolean; // Allow updating email verification status
+    language?: 'en' | 'ps' | 'fa' | 'de' | 'fr'; // Allow updating language preference
 }
 
 class UserModel {
     /**
-     * Create a user using Supabase Auth's admin API.
-     * This creates the user in auth.users table.
-     * Supabase trigger will automatically create the corresponding profile.
+     * Create a user profile after Supabase Auth user is created
+     * This creates the user profile in the profiles table
      */
     async create(data: CreateUserData): Promise<User> {
         try {
-            console.log('📝 Creating user with email:', data.email);
+            console.log('📝 Creating user profile for:', data.email);
             
-            // Use Supabase Auth admin API to create user in auth.users
+            // If ID is provided, create profile directly (auth user already exists)
+            if (data.id) {
+                console.log('📝 Creating profile for existing auth user:', data.id);
+                
+                const { data: profileData, error: profileError } = await supabase
+                    .from('profiles')
+                    .upsert({
+                        id: data.id,
+                        name: data.name,
+                        phone: data.phone || null,
+                        role: data.role || 'customer',
+                        email_verified: data.email_verified || false,
+                        language: data.language || 'en',
+                    }, { onConflict: 'id' })
+                    .select()
+                    .single();
+
+                if (profileError) {
+                    console.error('Profile creation error:', profileError);
+                    throw profileError;
+                }
+
+                return {
+                    id: data.id,
+                    email: data.email,
+                    password: '', // Don't return password
+                    name: data.name,
+                    phone: data.phone || '',
+                    role: profileData?.role || 'customer',
+                    email_verified: data.email_verified || false,
+                    language: data.language || 'en',
+                    is_verified: data.email_verified ? 1 : 0,
+                    created_at: profileData?.created_at || new Date().toISOString(),
+                    updated_at: profileData?.updated_at || new Date().toISOString(),
+                };
+            }
+            
+            // Legacy flow: Create auth user and profile (kept for backward compatibility)
             const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
                 email: data.email,
-                password: data.password,
+                password: data.password || 'temp-password',
                 user_metadata: {
                     name: data.name,
                     phone: data.phone,
                 },
-                email_confirm: true, // Auto-confirm email for manual registration
+                email_confirm: false, // Require email verification
             });
 
             if (authError || !authUser?.user) {
@@ -63,7 +106,7 @@ class UserModel {
             
             console.log('✅ Auth user created:', authUser.user.id);
 
-            // Now create/update the profile with additional role information
+            // Create the profile
             const { data: profileData, error: profileError } = await supabase
                 .from('profiles')
                 .upsert({
@@ -71,6 +114,7 @@ class UserModel {
                     name: data.name,
                     phone: data.phone || null,
                     role: data.role || 'customer',
+                    email_verified: false,
                 }, { onConflict: 'id' })
                 .select()
                 .single();
@@ -87,6 +131,7 @@ class UserModel {
                 name: data.name,
                 phone: data.phone || '',
                 role: profileData?.role || 'customer',
+                email_verified: false,
                 is_verified: authUser.user.email_confirmed_at ? 1 : 0,
                 created_at: authUser.user.created_at || new Date().toISOString(),
                 updated_at: authUser.user.updated_at || new Date().toISOString(),
@@ -125,6 +170,9 @@ class UserModel {
                     name: profile.name,
                     phone: profile.phone,
                     role: profile.role,
+                    email_verified: profile.email_verified || false,
+                    language: profile.language || 'en',
+                    is_verified: profile.email_verified ? 1 : 0,
                     created_at: profile.created_at,
                     updated_at: profile.updated_at,
                 };
@@ -160,6 +208,8 @@ class UserModel {
                 name: profile.name,
                 phone: profile.phone,
                 role: profile.role,
+                email_verified: profile.email_verified || false,
+                is_verified: profile.email_verified ? 1 : 0,
                 created_at: profile.created_at,
                 updated_at: profile.updated_at,
             };
@@ -178,6 +228,7 @@ class UserModel {
             const payload: any = {};
             if (data.name !== undefined) payload.name = data.name;
             if (data.phone !== undefined) payload.phone = data.phone;
+            if (data.email_verified !== undefined) payload.email_verified = data.email_verified;
 
             // First check if profile exists in profiles table
             const { data: profileExists, error: checkError } = await supabase
@@ -199,6 +250,8 @@ class UserModel {
                     name: data.name || '',
                     phone: data.phone || undefined,
                     role: 'customer',
+                    email_verified: data.email_verified || false,
+                    is_verified: data.email_verified ? 1 : 0,
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString(),
                 };
@@ -221,6 +274,8 @@ class UserModel {
                 name: profile.name,
                 phone: profile.phone,
                 role: profile.role,
+                email_verified: profile.email_verified || false,
+                is_verified: profile.email_verified ? 1 : 0,
                 created_at: profile.created_at,
                 updated_at: profile.updated_at,
             };

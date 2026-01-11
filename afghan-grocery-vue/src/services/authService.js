@@ -6,10 +6,36 @@ export const authService = {
         const data = res.data || {}
         return {
             user: data.user || null,
+            requireEmailVerification: data.requireEmailVerification || false,
+            message: data.message || null,
             session: {
                 accessToken: data.accessToken || null,
                 refreshToken: data.refreshToken || null
             }
+        }
+    },
+
+    async resendVerificationEmail(email) {
+        const res = await api.post('/auth/resend-verification', { email })
+        return res.data || {}
+    },
+
+    async verifyOTP(email, code, language = 'en') {
+        const res = await api.post('/auth/verify-otp', { email, code, language })
+        const data = res.data || {}
+        return {
+            verified: data.verified || false,
+            user: data.user || null,
+            error: data.error || null
+        }
+    },
+
+    async resendOTP(email, language = 'en') {
+        const res = await api.post('/auth/resend-otp', { email, language })
+        const data = res.data || {}
+        return {
+            sent: data.sent || false,
+            cooldownSeconds: data.cooldownSeconds || 60
         }
     },
 

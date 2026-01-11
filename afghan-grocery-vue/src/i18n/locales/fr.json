@@ -443,6 +443,7 @@
         "loginFailed": "Échec de la connexion. Veuillez vérifier vos identifiants.",
         "accountCreated": "Compte créé avec succès !",
         "registrationFailed": "Échec de l'inscription. Veuillez réessayer.",
+        "verificationCodeSent": "Code de vérification envoyé à votre email !",
         "orderPlaced": "Commande passée avec succès !",
         "orderSuccess": "Commande passée avec succès !",
         "orderError": "Échec de la commande. Veuillez réessayer.",
@@ -462,6 +463,24 @@
         "reviewRequired": "Veuillez fournir une note et un commentaire",
         "reviewLoginRequired": "Veuillez vous connecter à votre compte pour rédiger un avis",
         "reviewCharacters": "caractères"
+    },
+    "verification": {
+        "title": "Vérifiez votre email",
+        "subtitle": "Nous avons envoyé un code de vérification à 6 chiffres à",
+        "checkSpam": "Vous ne trouvez pas l'email ? Veuillez vérifier votre dossier spam ou courrier indésirable.",
+        "verify": "Vérifier l'email",
+        "verifying": "Vérification...",
+        "success": "Email vérifié avec succès !",
+        "successMessage": "Votre compte est maintenant actif. Vous pouvez commencer vos achats !",
+        "startShopping": "Commencer vos achats",
+        "didntReceive": "Vous n'avez pas reçu le code ?",
+        "resend": "Renvoyer le code",
+        "resendIn": "Renvoyer dans {seconds}s",
+        "codeSent": "Nouveau code de vérification envoyé !",
+        "invalidCode": "Code de vérification invalide",
+        "error": "La vérification a échoué. Veuillez réessayer.",
+        "resendError": "Échec de l'envoi du code. Veuillez réessayer.",
+        "backToRegister": "Retour à l'inscription"
     },
     "testimonials": {
         "customer1": {

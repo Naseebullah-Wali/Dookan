@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyAccessToken, JwtPayload } from '../utils/auth';
 import { UnauthorizedError, ForbiddenError } from '../utils/errors';
+import UserModel from '../models/User';
 
 // Extend Express Request type to include user
 declare global {
@@ -75,5 +76,48 @@ export const optionalAuth = (
     } catch (error) {
         // Silently fail for optional auth
         next();
+    }
+};
+
+/**
+ * Middleware to check if user's email is verified
+ * Use this for routes that require email verification
+ */
+export const requireEmailVerification = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        if (!req.user) {
+            throw new UnauthorizedError('Authentication required');
+        }
+
+        // Get user from database to check email verification status
+        const userModel = new UserModel();
+        const user = await userModel.findById(req.user.userId);
+        
+        if (!user) {
+            throw new UnauthorizedError('User not found');
+        }
+
+        if (!user.email_verified) {
+            const response = {
+                success: false,
+                error: 'Email verification required',
+                code: 'EMAIL_NOT_VERIFIED',
+                message: 'Please verify your email address to access this feature. Check your inbox for the verification link.',
+                data: {
+                    email: user.email,
+                    requireEmailVerification: true,
+                }
+            };
+            res.status(403).json(response);
+            return;
+        }
+
+        next();
+    } catch (error) {
+        next(error);
     }
 };

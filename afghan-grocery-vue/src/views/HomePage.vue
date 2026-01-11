@@ -79,7 +79,7 @@
         
         <!-- Loading State -->
         <div v-if="loading" class="row g-3">
-          <div v-for="i in 6" :key="i" class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12">
+          <div v-for="i in 6" :key="i" class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-6">
             <div class="card border-0 shadow-sm" style="height: 350px;">
               <div class="placeholder-glow">
                 <div class="placeholder col-12" style="height: 200px;"></div>
@@ -95,7 +95,7 @@
             <div
               v-for="product in paginatedProducts"
               :key="product.id"
-              class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-12 carousel-product-item"
+              class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-6 carousel-product-item"
             >
               <ProductCard :product="product" />
             </div>

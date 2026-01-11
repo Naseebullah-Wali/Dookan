@@ -443,6 +443,7 @@
         "loginFailed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten.",
         "accountCreated": "Konto erfolgreich erstellt!",
         "registrationFailed": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+        "verificationCodeSent": "Bestätigungscode an Ihre E-Mail gesendet!",
         "orderPlaced": "Bestellung erfolgreich aufgegeben!",
         "orderSuccess": "Bestellung erfolgreich aufgegeben!",
         "orderError": "Bestellung fehlgeschlagen. Bitte versuchen Sie es erneut.",
@@ -462,6 +463,24 @@
         "reviewRequired": "Bitte geben Sie eine Bewertung und einen Kommentar ein",
         "reviewLoginRequired": "Bitte melden Sie sich an, um eine Bewertung zu schreiben",
         "reviewCharacters": "Zeichen"
+    },
+    "verification": {
+        "title": "E-Mail bestätigen",
+        "subtitle": "Wir haben einen 6-stelligen Bestätigungscode gesendet an",
+        "checkSpam": "E-Mail nicht gefunden? Bitte überprüfen Sie Ihren Spam- oder Junk-Ordner.",
+        "verify": "E-Mail bestätigen",
+        "verifying": "Wird überprüft...",
+        "success": "E-Mail erfolgreich bestätigt!",
+        "successMessage": "Ihr Konto ist jetzt aktiv. Sie können mit dem Einkaufen beginnen!",
+        "startShopping": "Einkaufen beginnen",
+        "didntReceive": "Code nicht erhalten?",
+        "resend": "Code erneut senden",
+        "resendIn": "Erneut senden in {seconds}s",
+        "codeSent": "Neuer Bestätigungscode gesendet!",
+        "invalidCode": "Ungültiger Bestätigungscode",
+        "error": "Bestätigung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+        "resendError": "Code konnte nicht erneut gesendet werden. Bitte versuchen Sie es erneut.",
+        "backToRegister": "Zurück zur Registrierung"
     },
     "testimonials": {
         "customer1": {

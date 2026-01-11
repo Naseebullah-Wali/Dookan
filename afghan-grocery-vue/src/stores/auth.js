@@ -11,6 +11,7 @@ export const useAuthStore = defineStore('auth', () => {
     const loading = ref(false)
     const error = ref(null)
     const initialized = ref(false)
+    const pendingVerificationEmail = ref(null)
 
     const isAuthenticated = computed(() => !!token.value)
     const isAdmin = computed(() => profile.value?.role === 'admin')
@@ -45,6 +46,19 @@ export const useAuthStore = defineStore('auth', () => {
         error.value = null
         try {
             const response = await authService.register(userData)
+            
+            // If email verification is required, don't set user as logged in
+            if (response.requireEmailVerification) {
+                // Store email for resend functionality
+                pendingVerificationEmail.value = userData.email
+                return {
+                    success: true,
+                    requireEmailVerification: true,
+                    message: response.message
+                }
+            }
+            
+            // For OAuth or other flows that don't require verification
             user.value = response.user
             session.value = response.session
             token.value = 'cookie-authenticated'
@@ -52,9 +66,27 @@ export const useAuthStore = defineStore('auth', () => {
             if (user.value) {
                 await fetchProfile()
             }
-            return true
+            return { success: true, requireEmailVerification: false }
         } catch (err) {
             error.value = err.message || 'Registration failed'
+            return { success: false, error: err.message }
+        } finally {
+            loading.value = false
+        }
+    }
+
+    async function resendVerificationEmail() {
+        if (!pendingVerificationEmail.value) {
+            error.value = 'No pending verification email'
+            return false
+        }
+        loading.value = true
+        error.value = null
+        try {
+            await authService.resendVerificationEmail(pendingVerificationEmail.value)
+            return true
+        } catch (err) {
+            error.value = err.message || 'Failed to resend verification email'
             return false
         } finally {
             loading.value = false
@@ -155,6 +187,47 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
+    async function verifyOTP(email, code, language = 'en') {
+        loading.value = true
+        error.value = null
+        try {
+            const response = await authService.verifyOTP(email, code, language)
+            
+            if (response.verified) {
+                // Auto-login after verification
+                user.value = response.user
+                profile.value = response.user
+                token.value = 'cookie-authenticated'
+                pendingVerificationEmail.value = null
+                return { success: true }
+            }
+            
+            return { success: false, error: response.error || 'Verification failed' }
+        } catch (err) {
+            error.value = err.message || 'Verification failed'
+            return { success: false, error: err.message }
+        } finally {
+            loading.value = false
+        }
+    }
+
+    async function resendOTP(email, language = 'en') {
+        loading.value = true
+        error.value = null
+        try {
+            const response = await authService.resendOTP(email, language)
+            return { 
+                success: response.sent, 
+                cooldownSeconds: response.cooldownSeconds || 60 
+            }
+        } catch (err) {
+            error.value = err.message || 'Failed to resend code'
+            return { success: false, error: err.message }
+        } finally {
+            loading.value = false
+        }
+    }
+
     async function signInWithGoogle(redirectTo) {
         loading.value = true
         error.value = null
@@ -197,6 +270,7 @@ export const useAuthStore = defineStore('auth', () => {
         isAuthenticated,
         isAdmin,
         token,
+        pendingVerificationEmail,
         initialize,
         register,
         login,
@@ -204,6 +278,8 @@ export const useAuthStore = defineStore('auth', () => {
         fetchProfile,
         updateProfile,
         changePassword,
+        verifyOTP,
+        resendOTP,
         signInWithGoogle,
         signUpWithGoogle,
     }

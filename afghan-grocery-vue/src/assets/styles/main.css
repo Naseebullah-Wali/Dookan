@@ -155,3 +155,75 @@ h6 {
 
 /* Animation Utilities */
 /* Animation utilities are imported at top of file */
+
+/* RTL Support for Pashto and Dari */
+[dir="rtl"] .form-control,
+[dir="rtl"] .form-select,
+[dir="rtl"] input[type="text"],
+[dir="rtl"] input[type="email"],
+[dir="rtl"] input[type="password"],
+[dir="rtl"] input[type="tel"],
+[dir="rtl"] input[type="number"],
+[dir="rtl"] textarea {
+    text-align: right;
+    direction: rtl;
+}
+
+/* Keep LTR for email inputs since emails are always LTR */
+[dir="rtl"] input[type="email"] {
+    direction: ltr;
+    text-align: left;
+}
+
+/* RTL dropdown alignment */
+[dir="rtl"] .dropdown-menu {
+    text-align: right;
+}
+
+[dir="rtl"] .dropdown-menu-end {
+    --bs-position: start;
+}
+
+/* RTL form labels */
+[dir="rtl"] .form-label {
+    text-align: right;
+    display: block;
+}
+
+/* RTL text alignment */
+[dir="rtl"] .text-end {
+    text-align: left !important;
+}
+
+[dir="rtl"] .text-start {
+    text-align: right !important;
+}
+
+/* RTL margins and paddings */
+[dir="rtl"] .ms-auto {
+    margin-left: 0 !important;
+    margin-right: auto !important;
+}
+
+[dir="rtl"] .me-auto {
+    margin-right: 0 !important;
+    margin-left: auto !important;
+}
+
+/* RTL icon spacing */
+[dir="rtl"] .bi {
+    margin-left: 0.25rem;
+    margin-right: 0;
+}
+
+/* Keep password fields LTR for consistency */
+[dir="rtl"] input[type="password"] {
+    direction: ltr;
+    text-align: left;
+}
+
+/* RTL OTP inputs - keep them LTR */
+[dir="rtl"] .otp-input {
+    direction: ltr;
+    text-align: center;
+}

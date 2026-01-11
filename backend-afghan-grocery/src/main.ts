@@ -5,6 +5,8 @@ console.log('Environment:', process.env.NODE_ENV || 'development');
 console.log('PORT env:', process.env.PORT);
 
 import App from './core/app';
+// Cleanup service disabled temporarily
+// import { accountCleanup } from './services/accountCleanup';
 
 // Global error handlers for unhandled errors
 process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
@@ -36,6 +38,10 @@ function initializeApp() {
         console.log('✅ App instance created');
         app.listen();
         console.log('✅ Server listening');
+        
+        // Account cleanup service disabled temporarily
+        // accountCleanup.init();
+        
     } catch (error: any) {
         console.error('❌ Failed to initialize app:', error?.message || error);
         console.error(error?.stack);

@@ -3,7 +3,56 @@ import { ref, computed } from 'vue'
 import i18n from '@/i18n'
 
 export const useLanguageStore = defineStore('language', () => {
-    const currentLocale = ref(localStorage.getItem('locale') || 'en')
+    // Map country codes to languages
+    const countryToLanguage = {
+        'AF': 'ps', // Afghanistan -> Pashto
+        'DE': 'de', // Germany -> German
+        'AT': 'de', // Austria -> German
+        'CH': 'de', // Switzerland -> German
+        'FR': 'fr', // France -> French
+        'BE': 'fr', // Belgium -> French
+        'CA': 'fr', // Canada -> French (could be en too)
+    }
+
+    // Detect language from browser/location
+    function detectDefaultLanguage() {
+        // First check localStorage
+        const savedLocale = localStorage.getItem('locale')
+        if (savedLocale) {
+            return savedLocale
+        }
+
+        // Try to detect from browser language
+        const browserLang = navigator.language || navigator.userLanguage
+        if (browserLang) {
+            const langCode = browserLang.split('-')[0].toLowerCase()
+            // Check if we support this language
+            if (['en', 'ps', 'fa', 'de', 'fr'].includes(langCode)) {
+                return langCode
+            }
+            // Check country code (e.g., de-DE, fr-FR)
+            const countryCode = browserLang.split('-')[1]?.toUpperCase()
+            if (countryCode && countryToLanguage[countryCode]) {
+                return countryToLanguage[countryCode]
+            }
+        }
+
+        // Try to detect from timezone (rough location detection)
+        try {
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+            if (timezone) {
+                if (timezone.includes('Kabul')) return 'ps'
+                if (timezone.includes('Berlin') || timezone.includes('Vienna') || timezone.includes('Zurich')) return 'de'
+                if (timezone.includes('Paris')) return 'fr'
+            }
+        } catch (e) {
+            // Ignore timezone detection errors
+        }
+
+        return 'en' // Default to English
+    }
+
+    const currentLocale = ref(detectDefaultLanguage())
 
     const languages = [
         { code: 'en', name: 'English', flag: '🇬🇧', dir: 'ltr' },

@@ -10,8 +10,8 @@ ssh root@your-vps-ip
 cd /root/dookan
 sudo bash hostinger-deployment/setup-vps.sh
 
-# Create SSL certificate
-sudo certbot certonly --standalone -d zmadookan.com -d www.zmadookan.com
+# CRITICAL: Set up DNS and SSL (after DNS propagation)
+sudo bash hostinger-deployment/dns-ssl-setup.sh
 
 # Setup Nginx
 sudo cp hostinger-deployment/nginx.conf /etc/nginx/sites-available/zmadookan.com

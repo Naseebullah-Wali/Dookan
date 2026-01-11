@@ -127,6 +127,12 @@ const routes = [
         meta: { title: 'Register - Afghan Grocery', guestOnly: true }
     },
     {
+        path: '/verify-email',
+        name: 'VerifyEmail',
+        component: () => import('@/views/VerifyEmailPage.vue'),
+        meta: { title: 'Verify Email - Afghan Grocery', guestOnly: true }
+    },
+    {
         path: '/:pathMatch(.*)*',
         name: 'NotFound',
         component: () => import('@/views/NotFoundPage.vue'),

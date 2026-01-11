@@ -90,19 +90,35 @@ mkdir -p /var/www/certbot
 chmod 755 /var/www/certbot
 
 # ============================================
-# 9. Configure Firewall
+# 9. Configure Firewall and SSH Hardening
 # ============================================
-echo -e "${YELLOW}[9/10] Configuring UFW firewall...${NC}"
-apt-get install -y ufw
+echo -e "${YELLOW}[9/10] Configuring UFW firewall and SSH hardening...${NC}"
+apt-get install -y ufw fail2ban
+
+# Configure fail2ban for SSH protection
+cat > /etc/fail2ban/jail.local << 'EOF'
+[sshd]
+enabled = true
+port = ssh
+filter = sshd
+logpath = /var/log/auth.log
+maxretry = 3
+bantime = 3600
+findtime = 600
+EOF
+
+systemctl enable fail2ban
+systemctl start fail2ban
+
+# Configure firewall
 ufw --force enable
 ufw default deny incoming
 ufw default allow outgoing
 ufw allow 22/tcp      # SSH
 ufw allow 80/tcp      # HTTP
 ufw allow 443/tcp     # HTTPS
-ufw allow 3000/tcp    # Backend (internal)
 
-echo -e "${GREEN}✓ Firewall configured${NC}"
+echo -e "${GREEN}✓ Firewall and SSH protection configured${NC}"
 
 # ============================================
 # 10. Create Swap (for systems with low RAM)
@@ -129,13 +145,15 @@ echo -e "${GREEN}================================${NC}"
 echo ""
 echo "Next Steps:"
 echo "1. Clone your repository: git clone https://github.com/yourusername/dookan.git /root/dookan"
-echo "2. Configure SSL: sudo certbot certonly --standalone -d zmadookan.com -d www.zmadookan.com"
-echo "3. Copy Nginx config: sudo cp hostinger-deployment/nginx.conf /etc/nginx/sites-available/zmadookan.com"
-echo "4. Enable Nginx site: sudo ln -s /etc/nginx/sites-available/zmadookan.com /etc/nginx/sites-enabled/"
-echo "5. Test Nginx: sudo nginx -t"
-echo "6. Reload Nginx: sudo systemctl reload nginx"
-echo "7. Set up backend environment: cd /root/dookan/backend-afghan-grocery && cp .env.example .env"
-echo "8. Build and start: npm install && npm run build && pm2 start pm2-ecosystem.config.js"
+echo "2. Verify DNS is pointing to this server: nslookup zmadookan.com && nslookup www.zmadookan.com"
+echo "3. Configure SSL for BOTH domains: sudo certbot certonly --standalone -d zmadookan.com -d www.zmadookan.com"
+echo "4. Verify certificate covers both domains: sudo certbot certificates"
+echo "5. Copy Nginx config: sudo cp hostinger-deployment/nginx.conf /etc/nginx/sites-available/zmadookan.com"
+echo "6. Enable Nginx site: sudo ln -s /etc/nginx/sites-available/zmadookan.com /etc/nginx/sites-enabled/"
+echo "7. Test Nginx: sudo nginx -t"
+echo "8. Reload Nginx: sudo systemctl reload nginx"
+echo "9. Set up backend environment: cd /root/dookan/backend-afghan-grocery && cp .env.example .env"
+echo "10. Build and start: npm install && npm run build && pm2 start pm2-ecosystem.config.js"
 echo ""
 echo "System Information:"
 echo "Node.js: $(node --version)"

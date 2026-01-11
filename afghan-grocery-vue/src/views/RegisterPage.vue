@@ -113,7 +113,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const formData = ref({
   firstName: '',
@@ -133,15 +133,27 @@ async function handleRegister() {
     name: `${formData.value.firstName} ${formData.value.lastName}`.trim(),
     email: formData.value.email,
     phone: formData.value.phone,
-    password: formData.value.password
+    password: formData.value.password,
+    language: locale.value // Add current language
   }
-  const success = await authStore.register(userData)
+  const result = await authStore.register(userData)
   loading.value = false
-  if (success) {
-    window.showToast(t('messages.accountCreated'), 'success')
-    router.push('/')
+  
+  if (result.success) {
+    if (result.requireEmailVerification) {
+      // Redirect to email verification page
+      window.showToast(t('messages.verificationCodeSent'), 'success')
+      router.push({ 
+        name: 'VerifyEmail', 
+        query: { email: formData.value.email } 
+      })
+    } else {
+      // Direct login (OAuth or other flows)
+      window.showToast(t('messages.accountCreated'), 'success')
+      router.push('/')
+    }
   } else {
-    error.value = authStore.error || t('messages.registrationFailed')
+    error.value = result.error || authStore.error || t('messages.registrationFailed')
   }
 }
 

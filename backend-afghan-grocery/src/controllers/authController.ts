@@ -5,6 +5,9 @@ import UserModel from '../models/User';
 import { hashPassword, comparePassword, generateAccessToken, generateRefreshToken } from '../utils/auth';
 import { sendSuccess } from '../utils/response';
 import { UnauthorizedError, ValidationError } from '../utils/errors';
+import { EmailValidator } from '../utils/emailValidator';
+import { OTPService } from '../services/otpService';
+import { EmailService } from '../services/emailService';
 import config from '../config/index';
 
 export const register = async (
@@ -13,62 +16,90 @@ export const register = async (
     next: NextFunction
 ): Promise<void> => {
     try {
-        const { email, password, name, phone } = req.body;
+        const { email, password, name, phone, language = 'en' } = req.body;
 
-        // Create user - pass plain password, Supabase handles hashing internally
-        const user = await UserModel.create({
+        console.log(`📝 Registration attempt for email: ${email} with language: ${language}`);
+
+        // Comprehensive email validation (e-commerce grade)
+        const emailValidation = await EmailValidator.validateEmail(email);
+        if (!emailValidation.isValid) {
+            console.log(`❌ Email validation failed: ${emailValidation.error} (Reason: ${emailValidation.reason})`);
+            throw new ValidationError(emailValidation.error || 'Please provide a valid email address');
+        }
+
+        console.log(`✅ Email validation passed for: ${email}`);
+
+        // Check if user already exists in Supabase Auth
+        const { data: existingUsers } = await supabase.auth.admin.listUsers();
+        const existingUser = existingUsers?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
+        
+        if (existingUser) {
+            // If email is already confirmed, user exists
+            if (existingUser.email_confirmed_at) {
+                throw new ValidationError('An account with this email already exists');
+            }
+            // If not confirmed, delete the old unverified account to allow re-registration
+            console.log(`🗑️ Removing unverified account for re-registration: ${email}`);
+            await supabase.auth.admin.deleteUser(existingUser.id);
+        }
+
+        // Create user in Supabase Auth (without email verification - we'll handle it ourselves)
+        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
             email,
-            password, // Don't hash - Supabase auth.admin.createUser expects plain text
-            name,
-            phone,
+            password,
+            email_confirm: false, // Don't auto-confirm - we'll verify via OTP
+            user_metadata: {
+                name,
+                phone,
+                preferred_language: language,
+            }
         });
 
-        // Generate tokens
-        const accessToken = generateAccessToken({
-            userId: user.id,
-            email: user.email,
-            role: user.role,
-        });
+        if (authError) {
+            console.error('❌ Supabase registration error:', authError);
+            if (authError.message?.includes('already registered') || authError.message?.includes('already been registered')) {
+                throw new ValidationError('An account with this email already exists');
+            }
+            throw new ValidationError(authError.message || 'Registration failed');
+        }
 
-        const refreshToken = generateRefreshToken({
-            userId: user.id,
-            email: user.email,
-            role: user.role,
-        });
+        if (!authData.user) {
+            throw new ValidationError('Failed to create user account');
+        }
 
-        // Set httpOnly cookies for tokens (secure auth)
-        const isProduction = config.env === 'production';
-        // Use 'lax' in development for cross-origin requests (frontend on 5173, backend on 3000)
-        const sameSiteValue = isProduction ? 'strict' : 'lax';
-        res.cookie('accessToken', accessToken, {
-            httpOnly: true,        // Prevents JS access (XSS protection)
-            secure: isProduction,  // HTTPS only in production
-            sameSite: sameSiteValue,
-            maxAge: 24 * 60 * 60 * 1000,  // 24 hours
-            path: '/',
-        });
+        console.log(`✅ Auth user created: ${authData.user.id} (OTP verification required)`);
 
-        res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: isProduction,
-            sameSite: sameSiteValue,
-            maxAge: 7 * 24 * 60 * 60 * 1000,  // 7 days
-            path: '/',
-        });
+        // Generate and send OTP code
+        const otpResult = await OTPService.createOTP(email, 'signup');
+        
+        if (!otpResult.canResend && otpResult.cooldownSeconds > 0) {
+            throw new ValidationError(`Please wait ${otpResult.cooldownSeconds} seconds before requesting a new code`);
+        }
 
-        // Remove password from response
-        const { password: _, ...userWithoutPassword } = user;
+        // Send OTP email
+        await EmailService.sendOTPEmail(email, otpResult.code, name, language);
+
+        console.log(`📧 OTP code sent to: ${email}`);
 
         sendSuccess(
             res,
             {
-                user: userWithoutPassword,
-                // Don't send tokens in body when using httpOnly cookies
+                user: {
+                    id: authData.user.id,
+                    email: authData.user.email,
+                    name: name,
+                    email_verified: false
+                },
+                requireEmailVerification: true,
+                verificationMethod: 'otp',
+                language: language,
+                message: 'Registration successful! Please enter the 6-digit code sent to your email.'
             },
-            'Registration successful',
+            'Registration successful. Please enter the verification code sent to your email.',
             201
         );
     } catch (error) {
+        console.error('❌ Registration error:', error);
         next(error);
     }
 };
@@ -104,13 +135,19 @@ export const login = async (
             throw new UnauthorizedError('Invalid email or password');
         }
 
+        // Check if email is verified in Supabase Auth
+        if (!authData.user.email_confirmed_at) {
+            console.warn(`⚠️ Login attempt with unverified email: ${email}`);
+            throw new UnauthorizedError('Please verify your email address before logging in. Check your inbox for the verification link.');
+        }
+
         console.log(`✅ Supabase auth successful for user: ${authData.user.id}`);
 
-        // Get user profile from profiles table
+        // Get user profile from profiles table (this will fail if email wasn't verified)
         const user = await UserModel.findById(authData.user.id);
         if (!user) {
-            console.error('❌ User profile not found for ID:', authData.user.id);
-            throw new UnauthorizedError('User profile not found');
+            console.error(`❌ User profile not found for ID: ${authData.user.id} - Email verification incomplete`);
+            throw new UnauthorizedError('Account setup incomplete. Please verify your email address first.');
         }
 
         console.log(`✅ User profile found: ${user.email}`);
@@ -744,4 +781,263 @@ export const resetPassword = async (
         console.error('❌ Reset password error:', error);
         next(error);
     }
+};
+
+/**
+ * Confirm Email - Handle email verification from Supabase with language support
+ * Creates user profile ONLY after email is verified
+ */
+export const confirmEmail = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { token_hash, type, lang } = req.query;
+
+        if (!token_hash || type !== 'signup') {
+            throw new ValidationError('Invalid confirmation link');
+        }
+
+        // Detect language from query parameter, user agent, or default
+        const language = (lang as string) || 
+                        req.headers['accept-language']?.split(',')[0]?.split('-')[0] || 
+                        'en';
+
+        console.log(`📧 Processing email confirmation with token: ${String(token_hash).substring(0, 20)}... (Language: ${language})`);
+
+        // Verify the email confirmation token with Supabase
+        const { data, error } = await supabase.auth.verifyOtp({
+            token_hash: String(token_hash),
+            type: 'signup'
+        });
+
+        if (error) {
+            console.error('❌ Email confirmation error:', error);
+            throw new ValidationError('Invalid or expired confirmation link');
+        }
+
+        if (!data.user) {
+            throw new ValidationError('Invalid confirmation link');
+        }
+
+        console.log(`✅ Email confirmed for user: ${data.user.id}`);
+
+        // NOW create the user profile after email verification
+        const userData = data.user.user_metadata || {};
+        const user = await UserModel.create({
+            id: data.user.id,
+            email: data.user.email || '',
+            name: userData.name || 'User',
+            phone: userData.phone || '',
+            email_verified: true, // Mark as verified
+            language: userData.preferred_language || language
+        });
+
+        console.log(`✅ User profile created after email verification: ${data.user.id}`);
+
+        // Language-specific success messages
+        const messages = {
+            en: 'Email verified successfully! You can now log in.',
+            ps: 'ستاسو بریښنالیک بریالیتوب سره تصدیق شو! اوس تاسو کولی شئ ننوتل وکړئ.',
+            fa: 'ایمیل شما با موفقیت تأیید شد! اکنون می‌توانید وارد شوید.',
+            de: 'E-Mail erfolgreich verifiziert! Sie können sich jetzt anmelden.',
+            fr: 'Email vérifié avec succès! Vous pouvez maintenant vous connecter.'
+        };
+
+        // Redirect to frontend with success message and language
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        const message = messages[language as keyof typeof messages] || messages.en;
+        const redirectUrl = `${frontendUrl}/${language}/login?emailVerified=true&message=${encodeURIComponent(message)}`;
+
+        res.redirect(redirectUrl);
+    } catch (error) {
+        console.error('❌ Email confirmation error:', error);
+        
+        // Language-specific error messages
+        const language = (req.query.lang as string) || 'en';
+        const errorMessages = {
+            en: 'Email verification failed. Please try again or contact support.',
+            ps: 'د بریښنالیک تصدیق ناکام شو. مهرباني وکړئ بیا هڅه وکړئ یا د مرستې سره اړیکه ونیسئ.',
+            fa: 'تأیید ایمیل ناموفق بود. لطفاً دوباره تلاش کنید یا با پشتیبانی تماس بگیرید.',
+            de: 'E-Mail-Verifizierung fehlgeschlagen. Bitte versuchen Sie es erneut oder wenden Sie sich an den Support.',
+            fr: 'La vérification de l\'email a échoué. Veuillez réessayer ou contacter le support.'
+        };
+        
+        // Redirect to frontend with error message
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        const message = errorMessages[language as keyof typeof errorMessages] || errorMessages.en;
+        const redirectUrl = `${frontendUrl}/${language}/login?emailVerified=false&message=${encodeURIComponent(message)}`;
+        
+        res.redirect(redirectUrl);
+    }
+};
+
+/**
+ * Verify OTP Code (6-digit code verification)
+ */
+export const verifyOTP = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { email, code, language = 'en' } = req.body;
+
+        if (!email || !code) {
+            throw new ValidationError('Email and verification code are required');
+        }
+
+        console.log(`🔐 OTP verification attempt for: ${email}`);
+
+        // Verify the OTP code
+        const verifyResult = OTPService.verifyOTP(email, code);
+
+        if (!verifyResult.valid) {
+            console.log(`❌ OTP verification failed for ${email}: ${verifyResult.error}`);
+            throw new ValidationError(verifyResult.error || 'Invalid verification code');
+        }
+
+        console.log(`✅ OTP verified successfully for: ${email}`);
+
+        // Find the user in Supabase Auth
+        const { data: usersData } = await supabase.auth.admin.listUsers();
+        const authUser = usersData?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
+
+        if (!authUser) {
+            throw new ValidationError('User not found. Please register again.');
+        }
+
+        // Update user email_confirmed_at in Supabase
+        const { error: updateError } = await supabase.auth.admin.updateUserById(authUser.id, {
+            email_confirm: true
+        });
+
+        if (updateError) {
+            console.error('❌ Failed to confirm email in Supabase:', updateError);
+            throw new ValidationError('Failed to verify email. Please try again.');
+        }
+
+        // NOW create the user profile after email verification
+        const userData = authUser.user_metadata || {};
+        const user = await UserModel.create({
+            id: authUser.id,
+            email: authUser.email || '',
+            name: userData.name || 'User',
+            phone: userData.phone || '',
+            email_verified: true,
+            language: userData.preferred_language || language
+        });
+
+        console.log(`✅ User profile created after OTP verification: ${authUser.id}`);
+
+        // Generate tokens for auto-login after verification
+        const accessToken = generateAccessToken({
+            userId: user.id,
+            email: user.email,
+            role: user.role || 'customer',
+        });
+
+        const refreshToken = generateRefreshToken({
+            userId: user.id,
+            email: user.email,
+            role: user.role || 'customer',
+        });
+
+        // Set httpOnly cookies
+        const isProduction = config.env === 'production';
+        const sameSiteValue = isProduction ? 'strict' : 'lax';
+        
+        res.cookie('accessToken', accessToken, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: sameSiteValue,
+            maxAge: 24 * 60 * 60 * 1000,
+            path: '/',
+        });
+
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: sameSiteValue,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            path: '/',
+        });
+
+        // Remove password from response
+        const { password: _, ...userWithoutPassword } = user;
+
+        sendSuccess(res, {
+            user: userWithoutPassword,
+            verified: true,
+            message: 'Email verified successfully! Welcome to Dookan!'
+        }, 'Email verified successfully');
+    } catch (error) {
+        console.error('❌ OTP verification error:', error);
+        next(error);
+    }
+};
+
+/**
+ * Resend OTP Code
+ */
+export const resendOTP = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    try {
+        const { email, language = 'en' } = req.body;
+
+        if (!email) {
+            throw new ValidationError('Email is required');
+        }
+
+        console.log(`📧 Resending OTP for: ${email}`);
+
+        // Check if user exists and is unverified
+        const { data: usersData } = await supabase.auth.admin.listUsers();
+        const authUser = usersData?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
+
+        if (!authUser) {
+            throw new ValidationError('No pending registration found for this email');
+        }
+
+        if (authUser.email_confirmed_at) {
+            throw new ValidationError('This email is already verified. Please login.');
+        }
+
+        // Check cooldown and generate new OTP
+        const otpResult = await OTPService.createOTP(email, 'signup');
+
+        if (!otpResult.canResend) {
+            throw new ValidationError(`Please wait ${otpResult.cooldownSeconds} seconds before requesting a new code`);
+        }
+
+        // Send OTP email
+        const name = authUser.user_metadata?.name || 'User';
+        await EmailService.sendOTPEmail(email, otpResult.code, name, language);
+
+        console.log(`✅ OTP resent to: ${email}`);
+
+        sendSuccess(res, {
+            sent: true,
+            cooldownSeconds: 60
+        }, 'Verification code has been sent to your email');
+    } catch (error) {
+        console.error('❌ Resend OTP error:', error);
+        next(error);
+    }
+};
+
+/**
+ * Resend Email Verification (Legacy - kept for backward compatibility)
+ */
+export const resendEmailVerification = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
+    // Redirect to new OTP resend
+    return resendOTP(req, res, next);
 };
