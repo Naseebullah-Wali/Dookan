@@ -31,7 +31,7 @@ export const register = async (
 
         // Check if user already exists in Supabase Auth
         const { data: existingUsers } = await supabase.auth.admin.listUsers();
-        const existingUser = existingUsers?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
+        const existingUser = existingUsers?.users?.find((u: { email?: string }) => u.email?.toLowerCase() === email.toLowerCase());
         
         if (existingUser) {
             // If email is already confirmed, user exists
@@ -902,7 +902,7 @@ export const verifyOTP = async (
 
         // Find the user in Supabase Auth
         const { data: usersData } = await supabase.auth.admin.listUsers();
-        const authUser = usersData?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
+        const authUser = usersData?.users?.find((u: { email?: string }) => u.email?.toLowerCase() === email.toLowerCase());
 
         if (!authUser) {
             throw new ValidationError('User not found. Please register again.');
@@ -997,7 +997,7 @@ export const resendOTP = async (
 
         // Check if user exists and is unverified
         const { data: usersData } = await supabase.auth.admin.listUsers();
-        const authUser = usersData?.users?.find(u => u.email?.toLowerCase() === email.toLowerCase());
+        const authUser = usersData?.users?.find((u: { email?: string }) => u.email?.toLowerCase() === email.toLowerCase());
 
         if (!authUser) {
             throw new ValidationError('No pending registration found for this email');

@@ -94,8 +94,7 @@ export const requireEmailVerification = async (
         }
 
         // Get user from database to check email verification status
-        const userModel = new UserModel();
-        const user = await userModel.findById(req.user.userId);
+        const user = await UserModel.findById(req.user.userId);
         
         if (!user) {
             throw new UnauthorizedError('User not found');
