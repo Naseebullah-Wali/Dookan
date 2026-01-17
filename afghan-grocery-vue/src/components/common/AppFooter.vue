@@ -60,7 +60,7 @@
         <div class="pt-2">
           <p class="text-white-50 small mb-0">
             Powered by 
-            <a href="https://NaseebWali.com" target="_blank" rel="noopener noreferrer" class="text-white-50 hover-text-white text-decoration-none">Dream Team Remote</a>
+            <router-link to="/inquiry" class="text-white-50 hover-text-white text-decoration-none">Aquila Digital</router-link>
           </p>
         </div>
       </div>

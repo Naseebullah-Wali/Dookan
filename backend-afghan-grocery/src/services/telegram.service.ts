@@ -50,24 +50,27 @@ interface TelegramResponse {
     };
 }
 
-class TelegramService {
+export class TelegramService {
     private botToken: string;
     private chatId: string;
     private threadId: string | null;
     private enabled: boolean;
     private baseUrl: string;
 
-    constructor() {
-        this.botToken = process.env.TELEGRAM_BOT_TOKEN || '';
-        this.chatId = process.env.TELEGRAM_CHAT_ID || '';
-        this.threadId = process.env.TELEGRAM_THREAD_ID || null;
+    /**
+     * Create a TelegramService instance. If botToken/chatId are not provided, falls back to env vars.
+     */
+    constructor(botToken?: string, chatId?: string, threadId?: string | null) {
+        this.botToken = botToken || process.env.TELEGRAM_BOT_TOKEN || '';
+        this.chatId = chatId || process.env.TELEGRAM_CHAT_ID || '';
+        this.threadId = threadId || process.env.TELEGRAM_THREAD_ID || null;
         this.enabled = !!(this.botToken && this.chatId);
         this.baseUrl = `https://api.telegram.org/bot${this.botToken}`;
         
         if (!this.enabled) {
-            console.warn('[Telegram] Bot token or chat ID not configured. Notifications disabled.');
+            console.warn('[Telegram] Bot token or chat ID not configured for this instance. Notifications disabled.');
         } else {
-            console.log('[Telegram] Notification service initialized' + (this.threadId ? ` (topic: ${this.threadId})` : ''));
+            console.log('[Telegram] Notification service initialized for chat', this.chatId + (this.threadId ? ` (topic: ${this.threadId})` : ''));
         }
     }
 

@@ -143,5 +143,29 @@ export async function sendPasswordResetEmail({ email, resetLink }: { email: stri
     }
 }
 
-export default { sendContactEmail, sendPasswordResetEmail }
+export async function sendAcknowledgementEmail({ toEmail, name }: { toEmail: string; name?: string }) {
+    try {
+        if (!transporter) {
+            console.warn('⚠️ Email service unavailable - cannot send acknowledgement email.')
+            return { success: false, message: 'Email service unavailable' }
+        }
+
+        const mailOptions = {
+            from: `Dookan Support <${SUPPORT_EMAIL}>`,
+            to: toEmail,
+            subject: 'Thank you for contacting Dookan',
+            text: `Hi ${name || ''},\n\nThanks for contacting Dookan. We received your message and will contact you soon.\n\n— Dookan Support`,
+            html: `<p>Hi ${name || ''},</p><p>Thanks for contacting Dookan. We received your message and will contact you soon.</p><p>— Dookan Support</p>`
+        }
+
+        const info = await transporter.sendMail(mailOptions)
+        console.info('📧 Acknowledgement email sent:', { messageId: info.messageId, to: toEmail })
+        return { success: true, messageId: info.messageId }
+    } catch (error: any) {
+        console.error('❌ Failed to send acknowledgement email:', { message: error.message, code: error.code })
+        return { success: false }
+    }
+}
+
+export default { sendContactEmail, sendPasswordResetEmail, sendAcknowledgementEmail }
 
