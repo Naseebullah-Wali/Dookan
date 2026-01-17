@@ -90,9 +90,9 @@
             </div>
 
             <div class="d-flex align-items-center gap-3 mb-4">
-              <span class="display-5 fw-bold text-primary">{{ formatPrice(product.price) }} {{ $t('common.afn') }}</span>
+              <span class="display-5 fw-bold text-primary">{{ currencyStore.formatPrice(product.price) }}</span>
               <span v-if="product.compareAtPrice" class="fs-5 text-muted text-decoration-line-through">
-                {{ formatPrice(product.compareAtPrice) }} {{ $t('common.afn') }}
+                {{ currencyStore.formatPrice(product.compareAtPrice) }}
               </span>
               <span v-if="product.compareAtPrice" class="badge bg-danger">
                 {{ $t('product.sale') }} {{ Math.round((1 - product.price / product.compareAtPrice) * 100) }}% {{ $t('product.off') }}
@@ -223,6 +223,7 @@ import StarRating from '@/components/common/StarRating.vue'
 import ReviewForm from '@/components/product/ReviewForm.vue'
 import RelatedProducts from '@/components/product/RelatedProducts.vue'
 import { useAnalytics } from '@/composables/useAnalytics'
+import { useCurrencyStore } from '@/stores/currency'
 
 const route = useRoute()
 const cartStore = useCartStore()
@@ -230,6 +231,7 @@ const productsStore = useProductsStore()
 const reviewsStore = useReviewsStore()
 const languageStore = useLanguageStore()
 const analytics = useAnalytics()
+const currencyStore = useCurrencyStore()
 const { t } = useI18n()
 
 const product = ref(null)
@@ -303,10 +305,6 @@ watch(() => route.params.id, async (newId, oldId) => {
     await loadProduct(newId)
   }
 })
-
-function formatPrice(price) {
-  return price?.toLocaleString() || '0'
-}
 
 function formatDate(date) {
   return new Date(date).toLocaleDateString()

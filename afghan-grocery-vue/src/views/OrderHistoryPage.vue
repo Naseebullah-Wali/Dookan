@@ -46,12 +46,12 @@
                     <div class="flex-grow-1">
                       <h6 class="mb-1 fw-semibold">{{ item.product_name }}</h6>
                       <small class="text-muted">
-                        <i class="bi bi-tag me-1"></i>{{ formatPrice(item.price) }} {{ $t('common.afn') }} × {{ item.quantity }}
+                        <i class="bi bi-tag me-1"></i>{{ currencyStore.formatPrice(item.price) }} × {{ item.quantity }}
                       </small>
                     </div>
                   </div>
                   <div class="text-end">
-                    <div class="fw-bold text-primary fs-5">{{ formatPrice(item.subtotal) }} <small class="text-muted">{{ $t('common.afn') }}</small></div>
+                    <div class="fw-bold text-primary fs-5">{{ currencyStore.formatPrice(item.subtotal) }} <small class="text-muted">{{ $t('common.afn') }}</small></div>
                   </div>
                 </div>
               </div>
@@ -63,7 +63,7 @@
                 <div class="col-md-6">
                   <div class="d-flex align-items-center gap-2">
                     <span class="text-muted">{{ $t('cart.total') }}:</span>
-                    <span class="fw-bold text-primary fs-4">{{ formatPrice(order.total) }} {{ $t('common.afn') }}</span>
+                    <span class="fw-bold text-primary fs-4">{{ currencyStore.formatPrice(order.total) }} {{ $t('common.afn') }}</span>
                   </div>
                 </div>
                 <div class="col-md-6 text-md-end mt-2 mt-md-0">
@@ -96,11 +96,13 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useOrdersStore } from '@/stores/orders'
+import { useCurrencyStore } from '@/stores/currency'
 import AppHeader from '@/components/common/AppHeader.vue'
 import AppFooter from '@/components/common/AppFooter.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 
 const ordersStore = useOrdersStore()
+const currencyStore = useCurrencyStore()
 const orders = ref([])
 const loading = ref(true)
 
@@ -109,10 +111,6 @@ onMounted(async () => {
   loading.value = false
 })
 
-
-function formatPrice(price) {
-  return price?.toLocaleString() || '0'
-}
 
 function formatDate(date) {
   return new Date(date).toLocaleDateString('en-US', { 

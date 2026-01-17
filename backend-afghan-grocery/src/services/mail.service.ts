@@ -19,15 +19,22 @@ const transporter = SMTP_HOST ? nodemailer.createTransport({
     auth: SMTP_USER && SMTP_PASS ? { user: SMTP_USER, pass: SMTP_PASS } : undefined,
 }) : null
 
-export async function sendContactEmail({ name, email, phone, subject, message }: { name?: string; email?: string; phone?: string; subject?: string; message?: string }) {
+export async function sendContactEmail({ name, email, phone, subject, message, isOrderStatus }: { name?: string; email?: string; phone?: string; subject?: string; message?: string; isOrderStatus?: boolean }) {
     try {
-        const mailOptions = {
+        const isOrder = !!isOrderStatus;
+        const mailOptions = isOrder ? {
+            from: `Dookan Support <${SUPPORT_EMAIL}>`,
+            to: email,
+            subject: subject || 'Order Status Update',
+            text: message || '',
+            html: (message || '').replace(/\n/g, '<br/>')
+        } : {
             from: `${name || 'Website Contact'} <${SUPPORT_EMAIL}>`,
             to: SUPPORT_EMAIL,
             subject: `[Contact] ${subject || 'New message from website'}`,
             text: `Name: ${name || 'N/A'}\nEmail: ${email || 'N/A'}\nPhone: ${phone || 'N/A'}\n\nMessage:\n${message || ''}`,
             html: `<p><strong>Name:</strong> ${name || 'N/A'}</p><p><strong>Email:</strong> ${email || 'N/A'}</p><p><strong>Phone:</strong> ${phone || 'N/A'}</p><hr/><p>${(message || '').replace(/\n/g, '<br/>')}</p>`
-        }
+        };
 
         // If no SMTP configured, log warning and return graceful failure
         if (!transporter) {

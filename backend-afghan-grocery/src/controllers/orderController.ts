@@ -1,8 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import OrderModel from '../models/Order';
+import UserModel from '../models/User';
 import { sendSuccess, sendPaginatedResponse } from '../utils/response';
 import { NotFoundError, UnauthorizedError } from '../utils/errors';
 import { telegramService } from '../services/telegram.service';
+import { getOrderStatusEmailTemplate } from '../utils/orderStatusEmailTemplates';
+import mailService from '../services/mail.service';
 
 export const createOrder = async (
     req: Request,
@@ -152,7 +155,7 @@ export const updateOrderStatus = async (
         
         const order = await OrderModel.update(id, req.body);
 
-        // Send Telegram notification for status updates (async, don't block response)
+        // Send Telegram and Email notification for status updates (async, don't block response)
         if (oldOrder && (req.body.status || req.body.payment_status)) {
             OrderModel.getOrderWithItemsAndAddress(order.id).then(async (fullOrder) => {
                 if (fullOrder) {
@@ -168,8 +171,29 @@ export const updateOrderStatus = async (
                                 paymentStatus: fullOrder.payment_status,
                                 trackingNumber: fullOrder.tracking_number,
                             });
+
+                            // Send email to user
+                            try {
+                                const user = await UserModel.findById(String(fullOrder.user_id));
+                                if (user && user.email) {
+                                    const lang = user.language || 'en';
+                                    const template = getOrderStatusEmailTemplate(lang, req.body.status, {
+                                        name: fullOrder.address?.full_name || user.name || 'Customer',
+                                        order_number: fullOrder.order_number,
+                                        tracking_number: fullOrder.tracking_number || ''
+                                    });
+                                    await mailService.sendContactEmail({
+                                        name: user.name || fullOrder.address?.full_name || 'Customer',
+                                        email: user.email,
+                                        subject: template.subject,
+                                        message: template.body,
+                                        isOrderStatus: true
+                                    });
+                                }
+                            } catch (emailError) {
+                                console.error('[Email] Failed to send order status email:', emailError);
+                            }
                         }
-                        
                         // Check if payment status changed
                         if (req.body.payment_status && req.body.payment_status !== oldPaymentStatus) {
                             await telegramService.sendPaymentStatusNotification(
