@@ -155,6 +155,14 @@
         "max": "Max",
         "minimumRating": "Minimum Rating",
         "stars": "Stars",
+        "starsSingular": "Star",
+        "rating": {
+          "poor": "Poor",
+          "fair": "Fair",
+          "good": "Good",
+          "veryGood": "Very Good",
+          "excellent": "Excellent"
+        },
         "allRatings": "All Ratings"
     },
     "product": {
@@ -241,7 +249,13 @@
         "deliveryInfo": "Delivery Information",
         "deliveryNotes": "Delivery Notes",
         "notesPlaceholder": "Any special instructions for the courier?",
-        "deliveryAddress": "Delivery Address"
+        "deliveryAddress": "Delivery Address",
+        "transactionHash": "Transaction Hash (TXID)",
+        "pasteHash": "Paste hash here",
+        "verify": "Verify",
+        "verifying": "Verifying...",
+        "verified": "Verified",
+        "paymentVerified": "Payment Verified!"
     },
     "profile": {
         "title": "My Profile",

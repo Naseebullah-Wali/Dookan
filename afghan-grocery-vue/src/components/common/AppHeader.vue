@@ -1,5 +1,5 @@
 <template>
-  <header class="sticky-top bg-white shadow-sm transition-all" :class="{ 'shadow-md': isScrolled }">
+  <header class="sticky-top bg-white shadow-sm transition-all" :class="{ 'shadow-md': isScrolled }" :dir="(typeof window !== 'undefined' && document.documentElement.getAttribute('dir')) || 'ltr'">
     <nav class="navbar navbar-expand-lg navbar-light py-3">
       <div class="container">
         <!-- Logo -->
@@ -320,4 +320,21 @@ onUnmounted(() => {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
 }
+
+/* Keep nav order logical on RTL: prevent Bootstrap RTL from reversing visual order */
+header[dir='rtl'] .navbar-nav {
+  flex-direction: row !important;
+}
+
+/* Ensure mobile offcanvas links remain in logical (top-to-bottom) order in RTL */
+header[dir='rtl'] .offcanvas-body .nav {
+  flex-direction: column !important;
+}
+
+/* Ensure dropdown menus align correctly in RTL */
+header[dir='rtl'] .dropdown-menu {
+  left: auto !important;
+  right: 0; /* keep dropdown aligned to the right edge */
+}
+
 </style>

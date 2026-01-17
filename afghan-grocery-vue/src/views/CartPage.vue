@@ -1,5 +1,5 @@
 <template>
-  <div class="cart-page">
+  <div class="cart-page" :dir="languageStore.isRTL ? 'rtl' : 'ltr'">
     <LoadingSpinner :isLoading="isRemoving" :fullScreen="false" size="sm" message="Updating cart..." />
     <AppHeader />
     
@@ -53,26 +53,41 @@
                   
                   <!-- Quantity & Actions (Desktop) -->
                   <div class="col-auto d-none d-md-flex flex-column align-items-center gap-2">
-                    <div class="btn-group" role="group">
-                      <button @click="cartStore.updateQuantity(item.id, item.quantity - 1)" class="btn btn-outline-secondary btn-sm">
-                        <i class="bi bi-dash"></i>
-                      </button>
-                      <input 
-                        :value="item.quantity" 
-                        @input="handleQuantityInput(item.id, $event.target.value, item.stock)"
-                        type="number" 
-                        min="1" 
-                        :max="item.stock"
-                        class="form-control form-control-sm text-center fw-semibold" 
-                        style="width: 60px;" 
-                      />
-                      <button 
-                        @click="cartStore.updateQuantity(item.id, item.quantity + 1)" 
-                        class="btn btn-outline-secondary btn-sm"
-                        :disabled="item.quantity >= item.stock"
-                      >
-                        <i class="bi bi-plus"></i>
-                      </button>
+                    <div class="quantity-controls">
+                      <div class="btn-group" role="group">
+                        <template v-if="languageStore.isRTL">
+                          <button @click="cartStore.updateQuantity(item.id, item.quantity + 1)" class="btn btn-outline-secondary btn-sm qty-increase" :disabled="item.quantity >= item.stock">
+                            <i class="bi bi-plus"></i>
+                          </button>
+                          <input 
+                            :value="item.quantity" 
+                            @input="handleQuantityInput(item.id, $event.target.value, item.stock)"
+                            type="number" 
+                            min="1" 
+                            :max="item.stock"
+                            class="form-control form-control-sm qty-input text-center fw-semibold" 
+                          />
+                          <button @click="cartStore.updateQuantity(item.id, item.quantity - 1)" class="btn btn-outline-secondary btn-sm qty-decrease" :disabled="item.quantity <= 1">
+                            <i class="bi bi-dash"></i>
+                          </button>
+                        </template>
+                        <template v-else>
+                          <button @click="cartStore.updateQuantity(item.id, item.quantity - 1)" class="btn btn-outline-secondary btn-sm qty-decrease" :disabled="item.quantity <= 1">
+                            <i class="bi bi-dash"></i>
+                          </button>
+                          <input 
+                            :value="item.quantity" 
+                            @input="handleQuantityInput(item.id, $event.target.value, item.stock)"
+                            type="number" 
+                            min="1" 
+                            :max="item.stock"
+                            class="form-control form-control-sm qty-input text-center fw-semibold" 
+                          />
+                          <button @click="cartStore.updateQuantity(item.id, item.quantity + 1)" class="btn btn-outline-secondary btn-sm qty-increase" :disabled="item.quantity >= item.stock">
+                            <i class="bi bi-plus"></i>
+                          </button>
+                        </template>
+                      </div>
                     </div>
                     <button class="btn btn-link btn-sm text-danger p-0" @click="removeItem(item)">
                       <i class="bi bi-trash me-1"></i>{{ $t('cart.remove') }}
@@ -87,26 +102,41 @@
                   <!-- Mobile Actions -->
                   <div class="col-12 d-md-none">
                     <div class="d-flex justify-content-between align-items-center">
-                      <div class="btn-group" role="group">
-                        <button @click="cartStore.updateQuantity(item.id, item.quantity - 1)" class="btn btn-outline-secondary">
-                          <i class="bi bi-dash"></i>
-                        </button>
-                        <input 
-                          :value="item.quantity" 
-                          @input="handleQuantityInput(item.id, $event.target.value, item.stock)"
-                          type="number" 
-                          min="1" 
-                          :max="item.stock"
-                          class="form-control text-center fw-semibold" 
-                          style="width: 60px;" 
-                        />
-                        <button 
-                          @click="cartStore.updateQuantity(item.id, item.quantity + 1)" 
-                          class="btn btn-outline-secondary"
-                          :disabled="item.quantity >= item.stock"
-                        >
-                          <i class="bi bi-plus"></i>
-                        </button>
+                      <div class="quantity-controls">
+                        <div class="btn-group" role="group">
+                          <template v-if="languageStore.isRTL">
+                            <button @click="cartStore.updateQuantity(item.id, item.quantity + 1)" class="btn btn-outline-secondary qty-increase" :disabled="item.quantity >= item.stock">
+                              <i class="bi bi-plus"></i>
+                            </button>
+                            <input 
+                              :value="item.quantity" 
+                              @input="handleQuantityInput(item.id, $event.target.value, item.stock)"
+                              type="number" 
+                              min="1" 
+                              :max="item.stock"
+                              class="form-control qty-input text-center fw-semibold" 
+                            />
+                            <button @click="cartStore.updateQuantity(item.id, item.quantity - 1)" class="btn btn-outline-secondary qty-decrease" :disabled="item.quantity <= 1">
+                              <i class="bi bi-dash"></i>
+                            </button>
+                          </template>
+                          <template v-else>
+                            <button @click="cartStore.updateQuantity(item.id, item.quantity - 1)" class="btn btn-outline-secondary qty-decrease" :disabled="item.quantity <= 1">
+                              <i class="bi bi-dash"></i>
+                            </button>
+                            <input 
+                              :value="item.quantity" 
+                              @input="handleQuantityInput(item.id, $event.target.value, item.stock)"
+                              type="number" 
+                              min="1" 
+                              :max="item.stock"
+                              class="form-control qty-input text-center fw-semibold" 
+                            />
+                            <button @click="cartStore.updateQuantity(item.id, item.quantity + 1)" class="btn btn-outline-secondary qty-increase" :disabled="item.quantity >= item.stock">
+                              <i class="bi bi-plus"></i>
+                            </button>
+                          </template>
+                        </div>
                       </div>
                       <button class="btn btn-link text-danger" @click="removeItem(item)">
                         <i class="bi bi-trash me-1"></i>{{ $t('cart.remove') }}
@@ -208,4 +238,74 @@ function handleQuantityInput(itemId, value, stock) {
 
 <style scoped>
 /* Bootstrap handles all responsive layout */
+
+/* Quantity controls styling */
+.quantity-controls .btn {
+  width: 56px;
+  height: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quantity-controls .qty-decrease {
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: 0;
+}
+
+.quantity-controls .qty-increase {
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-left: 0;
+}
+
+.quantity-controls .qty-input {
+  width: 60px;
+  height: 44px;
+  border-radius: 0;
+  border-left: 0;
+  border-right: 0;
+  padding: 0.375rem 0;
+}
+
+/* Ensure proper visual order in RTL: keep decrease on visual left and increase on visual right */
+.cart-page[dir='rtl'] .quantity-controls .qty-decrease {
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+}
+
+.cart-page[dir='rtl'] .quantity-controls .qty-increase {
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+/* Make controls explicit and responsive */
+.quantity-controls { display: inline-flex; align-items: center; }
+.quantity-controls .btn-group { display: inline-flex; }
+
+@media (max-width: 767.98px) {
+  .quantity-controls .btn {
+    width: 44px;
+    height: 36px;
+  }
+  .quantity-controls .qty-input {
+    width: 48px;
+    height: 36px;
+  }
+}
+
+</style>
+
+<style scoped>
+/* Rotate + and - icons for RTL (Pashto/Dari) */
+.cart-page[dir='rtl'] .bi-plus,
+.cart-page[dir='rtl'] .bi-dash {
+  transform: rotate(180deg);
+}
 </style>

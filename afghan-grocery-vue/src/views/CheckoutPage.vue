@@ -1,5 +1,5 @@
 <template>
-  <div class="checkout-page">
+  <div class="checkout-page" :dir="$i18n && $i18n.locale && ['ps','fa'].includes($i18n.locale) ? 'rtl' : 'ltr'">
     <LoadingSpinner :isLoading="isProcessing" :fullScreen="true" message="Processing your order..." />
     <AppHeader />
     
@@ -87,17 +87,31 @@
                         <div v-if="formData.paymentMethod === 'trc20'" class="mt-3 p-3 bg-light rounded" @click.stop>
                             <p class="mb-1 small">Send <strong>{{ currencyStore.formatPrice(cartStore.total) }}</strong> (approx {{ totalInUsd }} USDT) to:</p>
                             <div class="input-group mb-2">
-                                <input type="text" class="form-control form-control-sm" value="TW5gj7ZPJhVGWVE4qpfR9MQvrkryQjArV1" readonly ref="trc20AddressInput">
-                                <button class="btn btn-outline-secondary btn-sm" type="button" @click="copyAddress('TW5gj7ZPJhVGWVE4qpfR9MQvrkryQjArV1')">Copy</button>
+                              <template v-if="languageStore.isRTL">
+                                <button class="btn btn-outline-secondary btn-sm" type="button" @click="copyAddress('TW5gj7ZPJhVGWVE4qpfR9MQvrkryQjArV1')">{{ $t('copy') }}</button>
+                                <input type="text" class="form-control form-control-sm text-end" value="TW5gj7ZPJhVGWVE4qpfR9MQvrkryQjArV1" readonly ref="trc20AddressInput">
+                              </template>
+                              <template v-else>
+                                <input type="text" class="form-control form-control-sm" value="TW5gjZPJhVGWVE4qpfR9MQvrkryQjArV1" readonly ref="trc20AddressInput">
+                                <button class="btn btn-outline-secondary btn-sm" type="button" @click="copyAddress('TW5gj7ZPJhVGWVE4qpfR9MQvrkryQjArV1')">{{ $t('copy') }}</button>
+                              </template>
                             </div>
-                            <label class="form-label small">Transaction Hash (TXID)</label>
+                            <label class="form-label small">{{ $t('checkout.transactionHash') }}</label>
                             <div class="input-group">
-                                <input v-model="cryptoTxHash" type="text" class="form-control form-control-sm" placeholder="Paste hash here">
+                              <template v-if="languageStore.isRTL">
                                 <button @click="verifyCrypto('TRC20')" class="btn btn-primary btn-sm" type="button" :disabled="isVerifyingCrypto || cryptoVerified">
-                                    {{ cryptoVerified ? 'Verified' : (isVerifyingCrypto ? 'Verifying...' : 'Verify') }}
+                                  {{ cryptoVerified ? $t('checkout.verified') : (isVerifyingCrypto ? $t('checkout.verifying') : $t('checkout.verify')) }}
                                 </button>
+                                <input v-model="cryptoTxHash" type="text" class="form-control form-control-sm text-end" placeholder="{{ $t('checkout.pasteHash') }}">
+                              </template>
+                              <template v-else>
+                                <input v-model="cryptoTxHash" type="text" class="form-control form-control-sm" placeholder="{{ $t('checkout.pasteHash') }}">
+                                <button @click="verifyCrypto('TRC20')" class="btn btn-primary btn-sm" type="button" :disabled="isVerifyingCrypto || cryptoVerified">
+                                  {{ cryptoVerified ? $t('checkout.verified') : (isVerifyingCrypto ? $t('checkout.verifying') : $t('checkout.verify')) }}
+                                </button>
+                              </template>
                             </div>
-                            <small v-if="cryptoVerified" class="text-success d-block mt-1">Payment Verified!</small>
+                            <small v-if="cryptoVerified" class="text-success d-block mt-1">{{ $t('checkout.paymentVerified') }}</small>
                         </div>
                       </div>
                     </div>
@@ -113,18 +127,32 @@
                         <small class="text-muted">Arbitrum One Network</small>
                         <div v-if="formData.paymentMethod === 'arbitrum'" class="mt-3 p-3 bg-light rounded" @click.stop>
                              <p class="mb-1 small">Send <strong>{{ currencyStore.formatPrice(cartStore.total) }}</strong> (approx {{ totalInUsd }} USDT) to:</p>
-                             <div class="input-group mb-2">
+                            <div class="input-group mb-2">
+                              <template v-if="languageStore.isRTL">
+                                <button class="btn btn-outline-secondary btn-sm" type="button" @click="copyAddress('0x084Ae494Ff43Ef2d5ef8aff8f02c757AaE4CC1Ab')">{{ $t('copy') }}</button>
+                                <input type="text" class="form-control form-control-sm text-end" value="0x084Ae494Ff43Ef2d5ef8aff8f02c757AaE4CC1Ab" readonly>
+                              </template>
+                              <template v-else>
                                 <input type="text" class="form-control form-control-sm" value="0x084Ae494Ff43Ef2d5ef8aff8f02c757AaE4CC1Ab" readonly>
-                                <button class="btn btn-outline-secondary btn-sm" type="button" @click="copyAddress('0x084Ae494Ff43Ef2d5ef8aff8f02c757AaE4CC1Ab')">Copy</button>
+                                <button class="btn btn-outline-secondary btn-sm" type="button" @click="copyAddress('0x084Ae494Ff43Ef2d5ef8aff8f02c757AaE4CC1Ab')">{{ $t('copy') }}</button>
+                              </template>
                             </div>
-                            <label class="form-label small">Transaction Hash (TXID)</label>
+                            <label class="form-label small">{{ $t('checkout.transactionHash') }}</label>
                             <div class="input-group">
-                                <input v-model="cryptoTxHash" type="text" class="form-control form-control-sm" placeholder="Paste hash here">
+                              <template v-if="languageStore.isRTL">
                                 <button @click="verifyCrypto('ARBITRUM')" class="btn btn-primary btn-sm" type="button" :disabled="isVerifyingCrypto || cryptoVerified">
-                                    {{ cryptoVerified ? 'Verified' : (isVerifyingCrypto ? 'Verifying...' : 'Verify') }}
+                                  {{ cryptoVerified ? $t('checkout.verified') : (isVerifyingCrypto ? $t('checkout.verifying') : $t('checkout.verify')) }}
                                 </button>
+                                <input v-model="cryptoTxHash" type="text" class="form-control form-control-sm text-end" placeholder="{{ $t('checkout.pasteHash') }}">
+                              </template>
+                              <template v-else>
+                                <input v-model="cryptoTxHash" type="text" class="form-control form-control-sm" placeholder="{{ $t('checkout.pasteHash') }}">
+                                <button @click="verifyCrypto('ARBITRUM')" class="btn btn-primary btn-sm" type="button" :disabled="isVerifyingCrypto || cryptoVerified">
+                                  {{ cryptoVerified ? $t('checkout.verified') : (isVerifyingCrypto ? $t('checkout.verifying') : $t('checkout.verify')) }}
+                                </button>
+                              </template>
                             </div>
-                             <small v-if="cryptoVerified" class="text-success d-block mt-1">Payment Verified!</small>
+                             <small v-if="cryptoVerified" class="text-success d-block mt-1">{{ $t('checkout.paymentVerified') }}</small>
                         </div>
                       </div>
                     </div>

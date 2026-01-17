@@ -1,5 +1,5 @@
 <template>
-  <div class="login-page">
+  <div class="login-page" :dir="$i18n && $i18n.locale && ['ps','fa'].includes($i18n.locale) ? 'rtl' : 'ltr'">
     <LoadingSpinner :isLoading="loading" :fullScreen="true" message="Signing in..." />
     <AppHeader />
     
@@ -32,7 +32,7 @@
                     :placeholder="$t('login.passwordPlaceholder')"
                     required
                   />
-                  <div class="text-end mt-2">
+                  <div :class="$i18n && $i18n.locale && ['ps','fa'].includes($i18n.locale) ? 'text-start mt-2' : 'text-end mt-2'">
                     <router-link to="/forgot-password" class="small text-primary text-decoration-none">
                       {{ $t('login.forgotPassword') }}
                     </router-link>

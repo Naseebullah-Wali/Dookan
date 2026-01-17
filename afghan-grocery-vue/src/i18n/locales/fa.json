@@ -153,6 +153,14 @@
         "max": "حداکثر",
         "minimumRating": "حداقل امتیاز",
         "stars": "ستاره",
+        "starsSingular": "ستاره",
+        "rating": {
+          "poor": "ضعیف",
+          "fair": "معمولی",
+          "good": "خوب",
+          "veryGood": "بسیار خوب",
+          "excellent": "عالی"
+        },
         "allRatings": "همه امتیازها"
     },
     "product": {
@@ -239,7 +247,13 @@
         "deliveryInfo": "اطلاعات تحویل",
         "deliveryNotes": "یادداشت‌های تحویل",
         "notesPlaceholder": "دستورالعمل‌های خاص برای پیک؟",
-        "deliveryAddress": "آدرس تحویل"
+        "deliveryAddress": "آدرس تحویل",
+        "transactionHash": "هش تراکنش (TXID)",
+        "pasteHash": "اینجا هش را پیست کنید",
+        "verify": "تأیید",
+        "verifying": "در حال تأیید...",
+        "verified": "تأیید شد",
+        "paymentVerified": "پرداخت تأیید شد!"
     },
     "profile": {
         "title": "پروفایل من",

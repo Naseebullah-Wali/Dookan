@@ -154,6 +154,14 @@
         "max": "لوړ",
         "minimumRating": "لږترلږه نمرې",
         "stars": "ستوري",
+        "starsSingular": "ستوری",
+        "rating": {
+          "poor": "ټیټ",
+          "fair": "عادي",
+          "good": "ښه",
+          "veryGood": "ډېر ښه",
+          "excellent": "عالي"
+        },
         "allRatings": "ټولې نمرې"
     },
     "product": {
@@ -268,7 +276,13 @@
         "deliveryInfo": "د سپارلو معلومات",
         "deliveryNotes": "د سپارلو یادښتونه",
         "notesPlaceholder": "د لیږدونکي لپاره ځانګړي لارښوونې؟",
-        "deliveryAddress": "د رسولو پته"
+        "deliveryAddress": "د رسول پته",
+        "transactionHash": "د معامله هش (TXID)",
+        "pasteHash": "دلته هش پیسټ کړئ",
+        "verify": "تصدیق",
+        "verifying": "تصدیق کې...",
+        "verified": "تصدیق شو",
+        "paymentVerified": "تادیه تصدیق شوه!"
     },
     "profile": {
         "title": "زما پروفایل",

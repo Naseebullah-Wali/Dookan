@@ -1,5 +1,5 @@
 <template>
-  <div class="product-detail-page">
+  <div class="product-detail-page" :dir="$i18n && $i18n.locale && ['ps','fa'].includes($i18n.locale) ? 'rtl' : 'ltr'">
     <LoadingSpinner :isLoading="loading" :fullScreen="true" message="Loading product details..." />
     <AppHeader />
     

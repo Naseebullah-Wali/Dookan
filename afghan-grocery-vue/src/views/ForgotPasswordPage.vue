@@ -1,5 +1,5 @@
 <template>
-  <div class="forgot-password-page">
+  <div class="forgot-password-page" :dir="$i18n && $i18n.locale && ['ps','fa'].includes($i18n.locale) ? 'rtl' : 'ltr'">
     <LoadingSpinner :isLoading="loading" :fullScreen="true" message="Processing..." />
     <AppHeader />
     

@@ -1,5 +1,5 @@
 <template>
-  <div class="shop-page">
+  <div class="shop-page" :dir="languageStore.isRTL ? 'rtl' : 'ltr'">
     <LoadingSpinner :isLoading="loading" :fullScreen="true" message="Loading products..." />
     <AppHeader />
     
@@ -15,14 +15,26 @@
         <div class="row g-3">
           <div class="col-lg-8 col-md-7 col-12">
             <div class="input-group shadow-sm">
-              <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
-              <input
-                v-model="searchQuery"
-                type="text"
-                :placeholder="$t('common.search')"
-                class="form-control border-start-0"
-                @input="handleSearch"
-              />
+              <template v-if="languageStore.isRTL">
+                <input
+                  v-model="searchQuery"
+                  type="text"
+                  :placeholder="$t('common.search')"
+                  class="form-control border-end-0 rounded-start-0"
+                  @input="handleSearch"
+                />
+                <span class="input-group-text bg-white border-start-0 rounded-end-0"><i class="bi bi-search"></i></span>
+              </template>
+              <template v-else>
+                <span class="input-group-text bg-white border-end-0 rounded-start-0"><i class="bi bi-search"></i></span>
+                <input
+                  v-model="searchQuery"
+                  type="text"
+                  :placeholder="$t('common.search')"
+                  class="form-control border-start-0 rounded-end-0"
+                  @input="handleSearch"
+                />
+              </template>
             </div>
           </div>
           <div class="col-lg-3 col-md-4 col-sm-8 col-9">
