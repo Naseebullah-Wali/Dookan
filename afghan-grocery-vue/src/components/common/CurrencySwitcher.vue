@@ -46,7 +46,7 @@ const currencyStore = useCurrencyStore()
   opacity: 0.7;
 }
 
-@media (max-width: 991px) {
+/* @media (max-width: 991px) {
   .dropdown-menu {
     position: static !important;
     float: none;
@@ -61,5 +61,5 @@ const currencyStore = useCurrencyStore()
     text-align: center;
     padding: 0.75rem;
   }
-}
+} */
 </style>

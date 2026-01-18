@@ -1,7 +1,6 @@
 <template>
   <div class="home-page">
-    <LoadingSpinner :isLoading="loading" :fullScreen="true" size="lg" message="Loading featured products..." />
-    <AppHeader />
+  <LoadingSpinner :isLoading="loading" :fullScreen="true" size="lg" :message="$t('common.loadingFeatured')" />    <AppHeader />
     
     <!-- Hero Section -->
     <section class="hero py-5 position-relative overflow-hidden">

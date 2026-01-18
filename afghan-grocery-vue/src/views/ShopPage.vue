@@ -1,7 +1,6 @@
 <template>
   <div class="shop-page" :dir="languageStore.isRTL ? 'rtl' : 'ltr'">
-    <LoadingSpinner :isLoading="loading" :fullScreen="true" message="Loading products..." />
-    <AppHeader />
+<LoadingSpinner :isLoading="loading" :fullScreen="true" :message="$t('common.loadingProducts')" />    <AppHeader />
     
     <!-- Page Header -->
     <section class="page-header py-4 bg-light border-bottom">

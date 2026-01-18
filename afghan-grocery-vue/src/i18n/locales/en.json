@@ -1,5 +1,11 @@
 {
     "common": {
+        "settings": "Settings",
+        "loadingProducts": "Loading products...",
+        "loadingFeatured": "Loading featured products...",
+        "loadingWishlist": "Loading wishlist...",
+        "loadingOrders": "Loading your orders...",
+        "signingIn": "Signing in...",
         "search": "Search products...",
         "cart": "Cart",
         "wishlist": "Wishlist",
@@ -60,6 +66,7 @@
         "review": "Your Review",
         "selectRating": "Select a rating from 1 to 5 stars",
         "viewAll": "View All"
+        
     },
     "header": {
         "searchPlaceholder": "Search for Afghan groceries...",
@@ -583,6 +590,12 @@
         "error": "Verification failed. Please try again.",
         "resendError": "Failed to resend code. Please try again.",
         "backToRegister": "Back to Registration"
+    },
+    "cities": {
+        "kandahar": "Kandahar"
+    },
+    "orders": {
+        "trackOrder": "Track Your Order"
     },
     "testimonials": {
         "customer1": {

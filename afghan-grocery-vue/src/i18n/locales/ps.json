@@ -1,5 +1,11 @@
 {
     "common": {
+        "settings": "ترتیبات",
+        "loadingProducts": "محصولات بارول...",
+        "loadingFeatured": "ځانګړي محصولات بارول...",
+        "loadingWishlist": "د خوښې لیست بارول...",
+        "loadingOrders": "ستاسو فرمایشونه بارول کیږي...",
+        "signingIn": "په ننه وتلو کې...",
         "search": "محصولات ولټوئ...",
         "cart": "د پیرودلو کڅوړه",
         "wishlist": "د خوښې لیست",
@@ -556,6 +562,12 @@
         "error": "تصدیق ناکام شو. مهرباني وکړئ بیا هڅه وکړئ.",
         "resendError": "کوډ بیا لیږل ناکام شو. مهرباني وکړئ بیا هڅه وکړئ.",
         "backToRegister": "نوم لیکنې ته بیرته ولاړشئ"
+    },
+    "cities": {
+        "kandahar": "قندهار"
+    },
+    "orders": {
+        "trackOrder": "د فرمایش تعقیب"
     },
     "testimonials": {
         "customer1": {

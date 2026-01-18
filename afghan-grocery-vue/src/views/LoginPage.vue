@@ -1,6 +1,6 @@
 <template>
   <div class="login-page" :dir="$i18n && $i18n.locale && ['ps','fa'].includes($i18n.locale) ? 'rtl' : 'ltr'">
-    <LoadingSpinner :isLoading="loading" :fullScreen="true" message="Signing in..." />
+    <LoadingSpinner :isLoading="loading" :fullScreen="true" :message="$t('common.signingIn')" />
     <AppHeader />
     
     <div class="container py-3 py-md-5">
@@ -34,7 +34,7 @@
                   />
                   <div :class="$i18n && $i18n.locale && ['ps','fa'].includes($i18n.locale) ? 'text-start mt-2' : 'text-end mt-2'">
                     <router-link to="/forgot-password" class="small text-primary text-decoration-none">
-                      {{ $t('login.forgotPassword') }}
+                      {{ $t('auth.forgotPassword') }}
                     </router-link>
                   </div>
                 </div>

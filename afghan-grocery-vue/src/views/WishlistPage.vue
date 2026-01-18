@@ -1,7 +1,6 @@
 <template>
   <div class="wishlist-page">
-    <LoadingSpinner :isLoading="loading" :fullScreen="true" message="Loading wishlist..." />
-    <AppHeader />
+<LoadingSpinner :isLoading="loading" :fullScreen="true" :message="$t('common.loadingWishlist')" />    <AppHeader />
     
     <div class="container py-4 py-md-5">
       <h1 class="text-center mb-4 mb-md-5">{{ $t('common.wishlist') }}</h1>

@@ -1,5 +1,11 @@
 {
     "common": {
+        "settings": "Paramètres",
+        "loadingProducts": "Chargement des produits...",
+        "loadingFeatured": "Chargement des produits vedettes...",
+        "loadingWishlist": "Chargement de la liste de souhaits...",
+        "loadingOrders": "Chargement de vos commandes...",
+        "signingIn": "Connexion en cours...",
         "search": "Rechercher des produits...",
         "cart": "Panier",
         "wishlist": "Liste de souhaits",
@@ -481,6 +487,12 @@
         "error": "La vérification a échoué. Veuillez réessayer.",
         "resendError": "Échec de l'envoi du code. Veuillez réessayer.",
         "backToRegister": "Retour à l'inscription"
+    },
+    "cities": {
+        "kandahar": "Kandahar"
+    },
+    "orders": {
+        "trackOrder": "Suivre votre commande"
     },
     "testimonials": {
         "customer1": {

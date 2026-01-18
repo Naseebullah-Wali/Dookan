@@ -1,6 +1,6 @@
 <template>
   <div class="orders-page bg-light min-vh-100">
-    <LoadingSpinner :isLoading="loading" :fullScreen="true" message="Loading your orders..." />
+   <LoadingSpinner :isLoading="loading" :fullScreen="true" :message="$t('common.loadingOrders')" />
     <AppHeader />
     
     <div class="container py-5">

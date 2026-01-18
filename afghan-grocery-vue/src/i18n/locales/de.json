@@ -1,5 +1,11 @@
 {
     "common": {
+        "settings": "Einstellungen",
+        "loadingProducts": "Produkte werden geladen...",
+        "loadingFeatured": "Ausgewählte Produkte werden geladen...",
+        "loadingWishlist": "Wunschliste wird geladen...",
+        "loadingOrders": "Bestellungen werden geladen...",
+        "signingIn": "Anmeldung läuft...",
         "search": "Produkte suchen...",
         "cart": "Warenkorb",
         "wishlist": "Wunschliste",
@@ -481,6 +487,12 @@
         "error": "Bestätigung fehlgeschlagen. Bitte versuchen Sie es erneut.",
         "resendError": "Code konnte nicht erneut gesendet werden. Bitte versuchen Sie es erneut.",
         "backToRegister": "Zurück zur Registrierung"
+    },
+    "cities": {
+        "kandahar": "Kandahar"
+    },
+    "orders": {
+        "trackOrder": "Bestellung verfolgen"
     },
     "testimonials": {
         "customer1": {
